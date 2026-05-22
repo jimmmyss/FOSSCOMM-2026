@@ -1,0 +1,337 @@
+/* `scroll-behavior` is `auto` until the page has finished loading; the
+   `.fc-scroll-smooth` class is added by assets/section-nav.js after the load
+   event. Reason: with smooth set during load, the browser's scroll-restoration
+   (or a hash-jump like `#hero` left in the URL by section-nav.js's
+   `history.replaceState`) animates over the user's own scroll input, which
+   feels like being pulled back up to home if you scroll down quickly. After
+   load it switches to smooth so anchor-link clicks animate as before. */
+html.fc-scroll-smooth {
+    scroll-behavior: smooth;
+}
+
+/* Body must be TRANSPARENT so the global wave-canvas (assets/wave-bg.js,
+   appended to body with z-index: -1) is visible. In CSS painting order
+   the root html background paints first → negative-z descendants (our
+   canvas) paint second → body's own background paints third (covering the
+   canvas if non-transparent). The paper colour stays on <html> (set in
+   assets/dist/fc.css) so transparent sections still read as "on paper". */
+html body { background-color: transparent; }
+
+/* Hero background: faint dotted grid that drifts diagonally down-right.
+   Pure CSS — no canvas, no JS. The pseudo-element is oversized by one tile
+   on the top + left so a translate(tile, tile) lands seamlessly back on the
+   pattern's original phase, giving a continuous loop. transform animation
+   so the browser composites it on the GPU instead of repainting every frame.
+   Cost is independent of viewport size.
+
+   Note: this class is applied alongside Tailwind's `absolute inset-0` on the
+   hero mount, so we don't set our own position — the element already has a
+   positioned containing block from `absolute`, which is what the ::before
+   needs. We only own `overflow` and the pseudo-element. */
+.fc-hero-dots {
+    overflow: hidden;
+}
+.fc-hero-dots::before {
+    content: "";
+    position: absolute;
+    /* Extend one tile past the top + left so a translate(tile, tile) loop
+       always covers the parent (the trailing edge fills as the leading edge
+       exits). */
+    top: -32px;
+    right: 0;
+    bottom: 0;
+    left: -32px;
+    background-image: radial-gradient(circle, var(--color-ink-faint, #C9C7BF) 2.5px, transparent 2.5px);
+    background-size: 32px 32px;
+    /* Constant pixel-space speed (32px / 5s ≈ 6.4 px/s) so motion looks the
+       same at every viewport width — the animation operates on CSS pixels,
+       not viewport-relative units. */
+    animation: fc-hero-dots-drift 5s linear infinite;
+    will-change: transform;
+}
+@keyframes fc-hero-dots-drift {
+    from { transform: translate(0, 0); }
+    to   { transform: translate(32px, 32px); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .fc-hero-dots::before { animation: none; }
+}
+
+/* ── Shared CTA text underline ──────────────────────────────────────────────
+   Used by fc_cta_link() and the hero CTA renderer. The link wraps its
+   visible text in <span class="fc-cta-text">…</span> and lets the trailing
+   arrow live outside that wrapper, so the underline sizes to the text only
+   and the arrow trails after a clean gap. Matches the hero hero CTA style. */
+.fc-cta-text {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 6px;
+    text-decoration-skip-ink: auto;
+}
+
+/* ── Section "show the global wave background through me" marker ────────────
+ * The dot pattern is no longer painted in CSS — it has been replaced by an
+ * animated dot-wave canvas (assets/wave-bg.js), a single fixed full-viewport
+ * <canvas> appended to <body> at z-index: -1.
+ *
+ * .fc-section-dots is now just a marker. fc_section_open() skips its default
+ * bg-paper class when this marker is present, leaving the section transparent
+ * so the wave canvas underneath shows through. Tweak the wave look / colour
+ * / speed in assets/wave-bg.js — the knobs are at the top of the file.
+ *
+ * The class is applied via fc_section_open(['class' => 'fc-section-dots']) in:
+ *   - template-parts/sections/speakers.php
+ *   - template-parts/sections/news.php
+ *   - template-parts/sections/sponsors.php
+ *   - template-parts/sections/hero.php  (the right panel, inline)
+ *
+ * Keeping the rule (empty) so the selector is easy to find via grep. */
+.fc-section-dots { background: transparent; }
+
+/* No horizontal scrollbar ever. `clip` (not `hidden`) doesn't create a new
+   scroll container, so it does not interfere with position:sticky in the
+   sidebar or filter bars. */
+html, body {
+    overflow-x: clip;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.fc-scroll-smooth { scroll-behavior: auto; }
+}
+
+/* Global *asterisk* highlight applied by fc_format(). Editors wrap any segment
+   in *…* in any admin field and it renders in the theme accent colour on the
+   front-end. Inherits font-weight/size so it never breaks line metrics. */
+.fc-accent {
+    color: var(--color-accent, #0033FF);
+}
+
+.fc-nav-no-scrollbar::-webkit-scrollbar { display: none; }
+.fc-nav-no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+
+.fc-nav-link {
+    color: inherit;
+    transition: color 200ms ease;
+}
+.fc-nav-link.is-active {
+    color: #0033FF;
+}
+
+/* ── Selectable bar items: shared hover effect ───────────────────────────── */
+/* Every "bar with selectable text" — schedule filter, venue editions, section
+   nav, status-bar brand — uses the same hover: text fades to accent in ~80ms.
+   The schedule filter's <select> rule lives next to its own template (its
+   appearance reset has to stay there); these target the other variants.
+   Doubled class selectors bump specificity above Tailwind's `transition-colors`
+   utility (150ms duration), which would otherwise win as Tailwind v4 browser
+   injects its compiled CSS after the regular stylesheets. */
+.fc-year-btn.fc-year-btn,
+.fc-nav-link.fc-nav-link,
+.fc-topbar-brand.fc-topbar-brand {
+    transition: color 80ms ease;
+}
+/* Section-nav link hover: explicit rule (instead of relying on Tailwind's
+   hover:text-accent utility, which gets compiled at runtime by the v4 browser
+   build and isn't guaranteed to land before paint on first load). Doubled
+   class for specificity over Tailwind's matching rule. */
+.fc-nav-link.fc-nav-link:hover,
+.fc-nav-link.fc-nav-link:focus-visible { color: var(--accent); outline: none; }
+.fc-topbar-brand { cursor: pointer; }
+.fc-topbar-brand:hover,
+.fc-topbar-brand:focus-visible { color: var(--accent); outline: none; }
+
+/* ── Sponsors: centered balanced rows, per-tier sizing, logo hover swap ──── */
+/* Sizes use clamp(min, vw, max) so every tier rescales together, fluidly,   */
+/* as the viewport changes — no breakpoint jumps. Higher tier = larger box.  */
+/* Each row is ONE non-wrapping centered line. Cells flex to share the row    */
+/* width equally (basis 0 + grow), capped per tier — so the PHP-computed      */
+/* count always lands on a single line and never wraps.                       */
+.fc-sponsor-row > .fc-sponsor-cell {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(0.75rem, 1.5vw, 1.75rem);
+}
+/* Per-tier ideal width cap; clamp(min, vw, max) → all tiers rescale together.
+   Mobile gets larger minimums so the logos read at thumb-zoom distance — the
+   `min` values dominate when vw is small. */
+.fc-sponsor-row > .fc-tier-platinum  { max-width: clamp(260px, 24vw, 420px); }
+.fc-sponsor-row > .fc-tier-gold      { max-width: clamp(220px, 18vw, 330px); }
+.fc-sponsor-row > .fc-tier-silver    { max-width: clamp(190px, 15vw, 280px); }
+.fc-sponsor-row > .fc-tier-community { max-width: clamp(170px, 12vw, 230px); }
+
+.fc-sponsor-box {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 5 / 2;
+    overflow: hidden;
+}
+
+.fc-sponsor-logo,
+.fc-sponsor-name {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.fc-sponsor-logo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;     /* real colours — no grayscale / contrast filter */
+    transition: opacity 250ms ease;
+}
+/* Default logo present + hover logo present: cross-fade on hover.
+   Gated to lg+ viewports with hover-capable pointers: on mobile a tap would
+   "stick" the hover state on iOS Safari (no touchend = no un-hover) and Android
+   Chrome treats the first tap as hover + ignores the click. So mobile = static. */
+.fc-sponsor-logo-alt { opacity: 0; }
+@media (hover: hover) and (min-width: 1024px) {
+    .fc-sponsor-cell.is-swap:hover .fc-sponsor-logo:not(.fc-sponsor-logo-alt) { opacity: 0; }
+    .fc-sponsor-cell.is-swap:hover .fc-sponsor-logo-alt { opacity: 1; }
+}
+
+.fc-sponsor-name {
+    color: var(--color-ink-muted, #6B6B66);
+    font-size: 0.95rem;
+    text-align: center;
+    line-height: 1.2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .fc-sponsor-logo { transition: none; }
+}
+
+/* ── Sponsor "shine" sweep ──────────────────────────────────────────────────
+   When the admin has set a shine colour, each cell with a logo gets a
+   translucent highlight that sweeps left-to-right every 3 seconds. The
+   shine is MASKED by the logo image itself, so transparent PNG pixels stay
+   transparent — the gradient is painted only on the actual logo shape,
+   not the surrounding rectangle.
+
+   Hierarchy inside each .fc-sponsor-box:
+     <img.fc-sponsor-logo />            (the logo itself, painted normally)
+     <span.fc-shine-mask>
+       <span.fc-shine-sweep />          (gradient, translates left → right)
+     </span>
+
+   The mask-image (the logo URL) is set inline per cell in the template.
+   The gradient (colour) is injected in a <style> block at the bottom of
+   the sponsors template — so this stylesheet only owns layout + keyframes. */
+.fc-sponsor-cell.fc-shine .fc-sponsor-box {
+    position: relative;
+    overflow: hidden;
+}
+.fc-sponsor-cell.fc-shine .fc-shine-mask {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    -webkit-mask-position: center;
+            mask-position: center;
+    -webkit-mask-size: contain;
+            mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+}
+.fc-sponsor-cell.fc-shine .fc-shine-sweep {
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    animation: fc-sponsor-shine 3s ease-in-out infinite;
+    will-change: transform;
+}
+@keyframes fc-sponsor-shine {
+    /* Slow lead-in, fast sweep, long off-screen pause before the next sweep —
+       reads as "every 3s a quick highlight passes", not a perpetual wash. */
+    0%   { transform: translateX(-100%); }
+    35%  { transform: translateX(-100%); }
+    70%  { transform: translateX(100%); }
+    100% { transform: translateX(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .fc-sponsor-cell.fc-shine .fc-shine-sweep { animation: none; opacity: 0; }
+}
+
+/* ── Get Involved: funding progress bar ─────────────────────────────────── */
+.fc-progress {
+    position: relative;
+    height: 0.6rem;
+    background: var(--color-border, rgba(10, 10, 10, 0.12));
+}
+/* Under/at goal: clip the fill to the track. */
+.fc-progress:not(.is-over) { overflow: hidden; }
+.fc-progress-fill {
+    position: absolute;
+    inset: 0 auto 0 0;          /* pin left, full height */
+    height: 100%;
+    background: var(--color-accent, #0033FF);
+    transition: width 600ms ease;
+}
+/* Over goal: the accent fill stays full inside the track; a separate stub
+   pinned at the track's right edge sticks out with a RED gradient, and its
+   width is trembled by assets/cfp.js (left edge never moves). */
+.fc-progress.is-over { overflow: visible; }
+.fc-progress.is-over .fc-progress-fill { width: 100%; }
+.fc-progress-over {
+    position: absolute;
+    left: 100%;                 /* exactly the track's right edge = 100% */
+    top: 0;
+    bottom: 0;
+    z-index: 2;                 /* above the erased-border gap, below shards */
+    width: 48px;                /* base length; assets/cfp.js trembles 36–60px */
+    /* Gradient is locked to the MAX width (60px) via background-size, so it
+       does NOT rescale as the width shakes — it stays static and the current
+       width simply reveals more/less of it (redder the further it reaches). */
+    background-color: #FF1E1E;
+    background-image: linear-gradient(
+        to right,
+        var(--color-accent, #0033FF) 0%,
+        #FF3B30 55%,
+        #FF1E1E 100%
+    );
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: 60px 100%;
+    transition: width 60ms cubic-bezier(0.22, 0.9, 0.28, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+    .fc-progress-fill { transition: none; }
+    .fc-progress-over { transition: none; width: 48px; }
+}
+/* Over goal: the funding container's straight right border is replaced by
+   two angled stubs — one from the top-right corner sloping down-right, one
+   from the bottom-right corner sloping up-right, each 45% of the card's
+   actual height, with a 10% gap in the middle for the red overflow stub. */
+.fc-fund { position: relative; }
+.fc-fund.is-broken {
+    border-right-color: transparent; /* the angled stubs replace the right border */
+    overflow: visible;               /* let red stub + stubs spill out */
+}
+.fc-fund-break {
+    position: absolute;
+    top: -1px;                       /* meet the top/bottom container borders cleanly */
+    right: -18px;                    /* local x=2 lands on the box's right edge */
+    width: 20px;
+    /* SVG elements with width + viewBox use the viewBox aspect ratio for
+       `height: auto`, which would clamp this to 100px regardless of the
+       parent's height. Explicit calc forces the SVG to actually span the
+       full funding card (+1px top and +1px bottom to meet the borders). */
+    height: calc(100% + 2px);
+    color: var(--color-border, color-mix(in oklab, #0A0A0A 12%, transparent));
+    pointer-events: none;
+    overflow: visible;
+}
+.fc-fund-break path {
+    fill: none;
+    stroke: currentColor;       /* same colour as the container outline */
+    stroke-width: 1;            /* same width as the 1px container border */
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+    vector-effect: non-scaling-stroke;
+}
+

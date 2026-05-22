@@ -1,0 +1,71 @@
+/*
+ * FOSSCOMM 2026 theme styles.
+ * Tailwind utilities come from the @tailwindcss/browser script wired up in inc/bootstrap.php.
+ * This file holds: font loading, design tokens fallback, custom utilities (.ascii, .underline-link, .accent-link),
+ * and the few component styles that don't map cleanly to utilities.
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&display=swap");
+
+:root {
+    --paper: #FAFAF7;
+    --ink: #0A0A0A;
+    --ink-muted: #6B6B66;
+    --ink-faint: #C9C7BF;
+    --accent: #0033FF;
+    --paper-shadow: rgba(10,10,10,0.04);
+}
+
+html { background: var(--paper); color: var(--ink); }
+body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+}
+::selection { background: var(--accent); color: var(--paper); }
+a { color: inherit; }
+
+.font-display {
+    font-family: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: -0.04em;
+    font-weight: 500;
+}
+.font-mono {
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+}
+.ascii {
+    font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    white-space: pre;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0;
+}
+.underline-link {
+    position: relative;
+    display: inline-block;
+}
+.underline-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 1px;
+    background: currentColor;
+    transform-origin: right;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.underline-link:hover::after {
+    transform-origin: left;
+}
+.accent-link:hover { color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        transition-duration: 0.001ms !important;
+    }
+}
