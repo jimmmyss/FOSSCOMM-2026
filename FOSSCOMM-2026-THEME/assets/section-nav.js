@@ -2,23 +2,41 @@
 // item sits at the left edge. Uses the same threshold the pet uses (0.35 viewport).
 
 // ---------- Page-load scroll hygiene ----------
-// Symptom we're killing: "I scroll down quickly on load and the page pulls me
-// back up to home." Root cause is a stale URL hash (e.g. `#hero`) left over
-// from a previous section-nav click — the browser keeps anchor-jumping to it
-// during layout shifts as Tailwind CDN, images, and the ASCII pet mount.
+// Two competing requirements:
+//   a. Hero/footer/sponsor CTAs with hrefs like `#sponsors` (and external links
+//      to https://…/#sponsors) MUST actually land the user at that section.
+//   b. The browser keeps re-anchor-jumping to the URL hash as Tailwind CDN,
+//      images, and the ASCII pet mount cause layout shifts. If we leave the
+//      hash in the URL, the user gets "pulled back" each time content above
+//      the target reflows.
 //
-// Three things:
-//   1. Tell the browser not to scroll-restore. We control scroll explicitly.
-//   2. Strip any existing hash from the URL as early as we can run (before
-//      images finish loading would trigger another anchor-jump).
-//   3. Don't re-write a hash on subsequent section-nav clicks (see init()).
+// Resolution: if there's a hash on load, scroll to the target ourselves
+// (initially, on each rAF tick until layout settles, and once more after
+// `load` so the final image-loaded Y is correct), THEN strip the hash so
+// later reflows can't re-anchor. Hash that points to no element is just
+// stripped — same as before.
+//   We also don't re-write the hash on section-nav clicks (see init()),
+// so the stale-hash-on-reload scenario the old code defended against can't
+// arise from in-page navigation any more.
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
 if (window.location.hash) {
+  const targetId = decodeURIComponent(window.location.hash.slice(1))
+  const target = targetId ? document.getElementById(targetId) : null
+  // Strip the hash up front so layout shifts during load can't re-anchor.
   history.replaceState(
     null,
     '',
     window.location.pathname + window.location.search
   )
+  if (target) {
+    const scrollToTarget = () => {
+      const top = target.getBoundingClientRect().top + window.scrollY
+      window.scrollTo({ top, behavior: 'auto' })
+    }
+    scrollToTarget()
+    requestAnimationFrame(scrollToTarget)
+    window.addEventListener('load', scrollToTarget, { once: true })
+  }
 }
 
 // Re-enable CSS smooth-scroll only after the page has finished loading. During

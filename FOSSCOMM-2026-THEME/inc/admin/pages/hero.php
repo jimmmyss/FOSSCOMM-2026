@@ -69,13 +69,14 @@ function fc_admin_page_hero() {
             ?>
             <h2 style="margin-top:2rem;">CTAs</h2>
             <p class="description">The optional <strong>hover label</strong> on each CTA scrambles in with the global "hack" effect on mouseover (desktop only). Leave it empty to keep the standard accent-color hover. Each CTA renders on its own line in the right panel.</p>
+            <p class="description">URLs accept a full address (<code>https://…</code>) or an on-page anchor. Valid anchors: <code>#hero</code>, <code>#manifesto</code>, <code>#speakers</code>, <code>#schedule</code>, <code>#news</code>, <code>#venue</code>, <code>#sponsors</code>, <code>#volunteer</code>, <code>#faq</code>, <code>#footer</code>.</p>
             <?php
             fc_bilingual_field('cta_primary',       $values, ['label' => 'Primary CTA label']);
             fc_bilingual_field('cta_primary_hover', $values, ['label' => 'Primary CTA hover label (optional)']);
             ?>
             <div class="fc-field">
                 <label>Primary CTA URL</label>
-                <input type="url" name="fc_field[cta_primary_url]" value="<?php echo esc_attr((string) ($values['cta_primary_url'] ?? '#schedule')); ?>">
+                <input type="text" name="fc_field[cta_primary_url]" value="<?php echo esc_attr((string) ($values['cta_primary_url'] ?? '#schedule')); ?>" placeholder="#schedule or https://…">
             </div>
             <?php
             fc_bilingual_field('cta_secondary',       $values, ['label' => 'Secondary CTA label']);
@@ -83,7 +84,7 @@ function fc_admin_page_hero() {
             ?>
             <div class="fc-field">
                 <label>Secondary CTA URL</label>
-                <input type="url" name="fc_field[cta_secondary_url]" value="<?php echo esc_attr((string) ($values['cta_secondary_url'] ?? '#volunteer')); ?>">
+                <input type="text" name="fc_field[cta_secondary_url]" value="<?php echo esc_attr((string) ($values['cta_secondary_url'] ?? '#volunteer')); ?>" placeholder="#volunteer or https://…">
             </div>
             <?php
             fc_bilingual_field('cta_tertiary',       $values, ['label' => 'Tertiary CTA label']);
@@ -91,7 +92,7 @@ function fc_admin_page_hero() {
             ?>
             <div class="fc-field">
                 <label>Tertiary CTA URL</label>
-                <input type="url" name="fc_field[cta_tertiary_url]" value="<?php echo esc_attr((string) ($values['cta_tertiary_url'] ?? '#sponsors')); ?>">
+                <input type="text" name="fc_field[cta_tertiary_url]" value="<?php echo esc_attr((string) ($values['cta_tertiary_url'] ?? '#sponsors')); ?>" placeholder="#sponsors or https://…">
             </div>
             <?php
         },

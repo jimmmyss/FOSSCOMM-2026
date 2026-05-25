@@ -171,15 +171,27 @@ function fc_repeater_field_input(string $name_prefix, string $fkey, string $type
             $field_name = $name_prefix . '[' . $fkey . ']';
             printf('<input type="number" step="any" name="%s" value="%s">', esc_attr($field_name), esc_attr($val));
             break;
+        case 'decimal':
+            // Like number but the sanitizer preserves the fractional part up to
+            // `precision` digits (the 'number' case truncates to int). Use for
+            // coordinates and any field where decimals must survive a round-trip.
+            $val = (string) ($values[$fkey] ?? '');
+            $field_name = $name_prefix . '[' . $fkey . ']';
+            $precision = isset($fdef['precision']) ? (int) $fdef['precision'] : 10;
+            $step = $precision > 0 ? ('0.' . str_repeat('0', max(0, $precision - 1)) . '1') : '1';
+            printf('<input type="number" step="%s" name="%s" value="%s">', esc_attr($step), esc_attr($field_name), esc_attr($val));
+            break;
         case 'date':
             $val = (string) ($values[$fkey] ?? '');
             $field_name = $name_prefix . '[' . $fkey . ']';
             printf('<input type="date" name="%s" value="%s">', esc_attr($field_name), esc_attr($val));
             break;
         case 'url':
+            // type="text" (not type="url") so editors can enter on-page anchors
+            // like #sponsors alongside full URLs — esc_url_raw on save accepts both.
             $val = (string) ($values[$fkey] ?? '');
             $field_name = $name_prefix . '[' . $fkey . ']';
-            printf('<input type="url" name="%s" value="%s" placeholder="https://...">', esc_attr($field_name), esc_attr($val));
+            printf('<input type="text" name="%s" value="%s" placeholder="https://… or #section">', esc_attr($field_name), esc_attr($val));
             break;
         case 'media':
             $val = (string) ($values[$fkey] ?? '');
@@ -249,6 +261,19 @@ function fc_sanitize_repeater(array $raw_rows, array $fields): array {
                     break;
                 case 'number':
                     $clean[$fkey] = is_numeric($row[$fkey] ?? '') ? (int) $row[$fkey] : 0;
+                    break;
+                case 'decimal':
+                    // Preserve as a numeric STRING so floats with long fractional
+                    // parts (e.g. 37.9838000000) survive without binary-float drift.
+                    $raw_val = trim((string) ($row[$fkey] ?? ''));
+                    $precision = isset($fdef['precision']) ? (int) $fdef['precision'] : 10;
+                    if ($raw_val !== '' && preg_match('/^(-?\d+)(?:\.(\d+))?$/', $raw_val, $m)) {
+                        $int_part = $m[1];
+                        $frac     = isset($m[2]) ? substr($m[2], 0, max(0, $precision)) : '';
+                        $clean[$fkey] = ($precision > 0 && $frac !== '') ? ($int_part . '.' . $frac) : $int_part;
+                    } else {
+                        $clean[$fkey] = '';
+                    }
                     break;
                 case 'date':
                     $raw_val = trim((string) ($row[$fkey] ?? ''));

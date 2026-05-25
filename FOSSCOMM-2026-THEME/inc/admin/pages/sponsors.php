@@ -109,7 +109,7 @@ function fc_admin_page_sponsors() {
             </div>
             <div class="fc-field">
                 <label>Fallback URL (used if no PDF is uploaded)</label>
-                <input type="url" name="fc_sponsor_cta[url]" value="<?php echo esc_attr($url); ?>" placeholder="https://…">
+                <input type="text" name="fc_sponsor_cta[url]" value="<?php echo esc_attr($url); ?>" placeholder="https://… or #section">
             </div>
             <hr style="margin:2rem 0;">
             <h2>Sponsors list</h2>

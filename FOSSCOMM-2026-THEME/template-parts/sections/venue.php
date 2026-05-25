@@ -14,11 +14,9 @@ $section = $args['section'] ?? [];
 $data    = fc_section_data($section);
 
 $title       = fc_bi($data, 'title');
-$city        = (string) ($data['city']  ?? 'ATHENS');
-$lat         = (string) ($data['lat']   ?? '37.98°N');
-$lon         = (string) ($data['lon']   ?? '23.73°E');
 $uni_title   = fc_bi($data, 'university_title');
-$coords_lbl  = (string) ($data['coords_label']    ?? '');
+$coords_lat  = (string) ($data['coords_lat']      ?? '');
+$coords_lon  = (string) ($data['coords_lon']      ?? '');
 $maps_url    = (string) ($data['google_maps_url'] ?? '');
 $address     = fc_bi($data, 'address');
 $info_rows   = (array)  ($data['info_rows']       ?? []);
@@ -150,24 +148,33 @@ if ($eyebrow_en === '') $eyebrow_en = (string) ($section['eyebrow_el'] ?? '');
             <!-- Left: venue card — big hover-scramble title + Google Maps link + address + info rows -->
             <div class="space-y-6 pb-6 md:pb-20">
                 <?php if ($uni_title['en'] !== '' || $uni_title['el'] !== '') :
-                    $has_maps   = $maps_url !== '';
-                    $has_coords = $coords_lbl !== '';
-                    $link_tag   = $has_maps ? 'a' : 'div';
-                    $link_attrs = 'class="fc-venue-title-link block no-underline text-inherit"';
+                    $has_maps     = $maps_url !== '';
+                    $has_lat      = $coords_lat !== '';
+                    $has_lon      = $coords_lon !== '';
+                    $has_el_title = ($uni_title['el'] !== '' && $uni_title['el'] !== $uni_title['en']);
+                    $link_tag     = $has_maps ? 'a' : 'div';
+                    $link_attrs   = 'class="fc-venue-title-link block no-underline text-inherit"';
                     if ($has_maps) {
                         $link_attrs .= ' href="' . esc_url($maps_url) . '" target="_blank" rel="noreferrer"';
                     }
+                    // Second line: defaults to the Greek title; on hover scrambles
+                    // to the longitude. Rendered if EITHER exists so hover-lon
+                    // can show even when no Greek title is set.
+                    $show_subline = ($has_el_title || $has_lon);
+                    $sub_default  = $has_el_title ? $uni_title['el'] : '';
+                    $sub_hover    = $has_lon ? $coords_lon : $sub_default;
                     ?>
                     <<?php echo $link_tag; ?> <?php echo $link_attrs; ?>>
                         <?php if ($uni_title['en'] !== '') : ?>
                             <h3 class="fc-venue-title-en font-display text-3xl md:text-5xl leading-[1.05] tracking-tight text-ink m-0"
                                 lang="en"
                                 data-fc-default="<?php echo esc_attr($uni_title['en']); ?>"
-                                data-fc-hover="<?php echo esc_attr($has_coords ? $coords_lbl : $uni_title['en']); ?>"><?php echo esc_html($uni_title['en']); ?></h3>
+                                data-fc-hover="<?php echo esc_attr($has_lat ? $coords_lat : $uni_title['en']); ?>"><?php echo esc_html($uni_title['en']); ?></h3>
                         <?php endif; ?>
-                        <?php if ($uni_title['el'] !== '' && $uni_title['el'] !== $uni_title['en']) : ?>
-                            <p class="fc-venue-title-el font-display text-xl md:text-2xl text-ink-muted leading-tight m-0 mt-1"
-                               data-fc-default="<?php echo esc_attr($uni_title['el']); ?>"><?php echo esc_html($uni_title['el']); ?></p>
+                        <?php if ($show_subline) : ?>
+                            <p class="fc-venue-title-el font-display text-xl md:text-2xl text-ink-muted leading-tight m-0 mt-1<?php echo $sub_default === '' ? ' fc-venue-title-el-hover-only' : ''; ?>"
+                               data-fc-default="<?php echo esc_attr($sub_default); ?>"
+                               data-fc-hover="<?php echo esc_attr($sub_hover); ?>"><?php echo esc_html($sub_default); ?></p>
                         <?php endif; ?>
                     </<?php echo $link_tag; ?>>
                 <?php endif; ?>
@@ -210,7 +217,7 @@ if ($eyebrow_en === '') $eyebrow_en = (string) ($section['eyebrow_el'] ?? '');
             <div class="relative flex flex-col justify-end h-full">
                 <div class="w-full" data-fc-island="ascii-globe" data-fc-cluster-label="<?php echo esc_attr($cluster_label); ?>" data-fc-editions="<?php echo esc_attr($editions_json); ?>">
                     <noscript>
-                        <div class="ascii text-xs text-ink-faint border border-border p-6 text-center">[ JavaScript-rendered globe — <?php echo esc_html($lat . ' ' . $lon); ?> ]</div>
+                        <div class="ascii text-xs text-ink-faint border border-border p-6 text-center">[ JavaScript-rendered globe — <?php echo esc_html(trim($coords_lat . ' ' . $coords_lon)); ?> ]</div>
                     </noscript>
                 </div>
             </div>
@@ -291,20 +298,23 @@ if ($eyebrow_en === '') $eyebrow_en = (string) ($section['eyebrow_el'] ?? '');
    hybrid laptops and DevTools mobile mode that still report `(hover: hover)`
    — never trigger the scramble or colour change. Tap stays click-only. */
 .fc-venue-title-link { cursor: pointer; }
+/* Subline that only exists to show the longitude on hover (no Greek title set).
+   Reserve the visual space so the title doesn't shift when hover content appears,
+   but keep it invisible until hover. */
+.fc-venue-title-el-hover-only { visibility: hidden; }
+.fc-venue-title-link.is-hovering .fc-venue-title-el-hover-only { visibility: visible; }
 @media (min-width: 1024px) {
     a.fc-venue-title-link { transition: color 200ms ease; }
     a.fc-venue-title-link:hover .fc-venue-title-en { color: var(--color-accent, #0033FF); }
-    .fc-venue-title-link.is-hovering .fc-venue-title-el { visibility: hidden; }
 }
 </style>
 <?php /* Hover-scramble swap.
-   On hover: EN scrambles into the coordinates label; EL is hidden instantly
-   via the .is-hovering class (visibility:hidden in <style> above).
-   On un-hover: EN scrambles back to its default; EL also gets the same hack
-   effect — we pre-set its textContent to random glyphs BEFORE removing
-   the hidden class (so the original text doesn't flash for one frame),
-   then call window.fcScramble to animate the glyphs into the original
-   Greek title. Pointer-only — touch devices never get a sticky hover. */ ?>
+   Desktop pointer hover (and keyboard focus): EN scrambles into the latitude;
+   the subline scrambles into the longitude. On un-hover both scramble back.
+   Mobile tap: first tap scrambles to lat/lon (no CSS :hover effect — those
+   styles are gated behind the lg media query above). Second tap navigates
+   to Google Maps if a URL is set, otherwise swaps back to defaults. A tap
+   outside the title resets the state. */ ?>
 <script>
 (function () {
     // Live check — viewport-width-based, matching fc.js's lg breakpoint. Using
@@ -325,47 +335,94 @@ if ($eyebrow_en === '') $eyebrow_en = (string) ($section['eyebrow_el'] ?? '');
         }
         return out;
     }
+    function scrambleTo(elm, text) {
+        if (!elm || text === null) return;
+        if (typeof window.fcScramble === 'function') {
+            window.fcScramble(elm, text);
+        } else {
+            elm.textContent = text;
+        }
+    }
+    function isDeadHref(link) {
+        if (link.tagName !== 'A') return true;
+        var href = link.getAttribute('href');
+        if (href === null) return true;
+        var t = href.trim();
+        return t === '' || t === '#';
+    }
     var links = document.querySelectorAll('.fc-venue-title-link');
     links.forEach(function (link) {
         var en = link.querySelector('.fc-venue-title-en');
         var el = link.querySelector('.fc-venue-title-el');
-        if (!en) return;
+        if (!en && !el) return;
         var state = false;
         function swap(toHover) {
-            // Mobile: never engage the scramble. Tap behaviour is link-only.
-            if (isMobile()) return;
             if (toHover === state) return;
             state = toHover;
             if (toHover) {
-                // Hover IN: EN scrambles into coordinates, EL hides via CSS.
+                // EN scrambles to lat, subline scrambles to lon. If the subline
+                // is empty by default (no Greek title set), glyphify first so
+                // the user sees characters land instead of an empty string.
                 link.classList.add('is-hovering');
-                var hoverText = en.getAttribute('data-fc-hover');
-                if (hoverText !== null && typeof window.fcScramble === 'function') {
-                    window.fcScramble(en, hoverText);
+                if (en) scrambleTo(en, en.getAttribute('data-fc-hover'));
+                if (el) {
+                    var elHover = el.getAttribute('data-fc-hover');
+                    var elDefault = el.getAttribute('data-fc-default') || '';
+                    if (elDefault === '' && elHover) {
+                        el.textContent = glyphify(elHover);
+                    }
+                    scrambleTo(el, elHover);
                 }
             } else {
-                // Hover OUT: EN scrambles back, EL also scrambles back in.
-                var enDefault = en.getAttribute('data-fc-default');
-                if (enDefault !== null && typeof window.fcScramble === 'function') {
-                    window.fcScramble(en, enDefault);
-                }
+                if (en) scrambleTo(en, en.getAttribute('data-fc-default'));
                 if (el) {
-                    var elDefault = el.getAttribute('data-fc-default') || el.textContent;
-                    // Pre-fill with glyphs BEFORE un-hiding so the original
-                    // Greek doesn't flash for one frame before fcScramble runs.
-                    el.textContent = glyphify(elDefault);
-                }
-                link.classList.remove('is-hovering');
-                if (el && typeof window.fcScramble === 'function') {
-                    var target = el.getAttribute('data-fc-default');
-                    if (target !== null) window.fcScramble(el, target);
+                    var elDefault2 = el.getAttribute('data-fc-default') || '';
+                    el.textContent = glyphify(elDefault2);
+                    link.classList.remove('is-hovering');
+                    scrambleTo(el, elDefault2);
+                } else {
+                    link.classList.remove('is-hovering');
                 }
             }
         }
-        link.addEventListener('mouseenter', function () { swap(true); });
-        link.addEventListener('mouseleave', function () { swap(false); });
-        link.addEventListener('focus',      function () { swap(true); }, true);
-        link.addEventListener('blur',       function () { swap(false); }, true);
+        // Desktop: pointer-only hover (+ keyboard focus parity).
+        link.addEventListener('mouseenter', function () {
+            if (isMobile()) return;
+            swap(true);
+        });
+        link.addEventListener('mouseleave', function () {
+            if (isMobile()) return;
+            swap(false);
+        });
+        link.addEventListener('focus', function () {
+            if (isMobile()) return;
+            swap(true);
+        }, true);
+        link.addEventListener('blur', function () {
+            if (isMobile()) return;
+            swap(false);
+        }, true);
+        // Mobile: first tap reveals lat/lon; second tap navigates (real link)
+        // or swaps back (dead link / non-anchor).
+        link.addEventListener('click', function (e) {
+            if (!isMobile()) return;
+            if (!state) {
+                e.preventDefault();
+                swap(true);
+                return;
+            }
+            if (isDeadHref(link)) {
+                e.preventDefault();
+                swap(false);
+            }
+            // Real <a href>: let the click navigate.
+        });
+        // Reset when the user taps anywhere else.
+        document.addEventListener('click', function (e) {
+            if (!isMobile() || !state) return;
+            if (link.contains(e.target)) return;
+            swap(false);
+        }, true);
     });
 })();
 </script>

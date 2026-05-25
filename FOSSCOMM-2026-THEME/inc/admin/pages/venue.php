@@ -12,12 +12,12 @@ function fc_admin_page_venue() {
         'body'  => ['type' => 'bilingual_textarea', 'label' => 'Card body', 'rows' => 3],
     ];
     $edition_fields = [
-        'year'    => ['type' => 'number', 'label' => 'Year'],
-        'city'    => ['type' => 'text',   'label' => 'City'],
-        'lat'     => ['type' => 'number', 'label' => 'Latitude (decimal, optional — auto-detected from city name)'],
-        'lon'     => ['type' => 'number', 'label' => 'Longitude (decimal, optional — auto-detected from city name)'],
-        'url'     => ['type' => 'url',    'label' => 'Archive URL (e.g. https://2024.fosscomm.gr)'],
-        'current' => ['type' => 'bool',   'label' => 'Current edition (pin renders in accent color)'],
+        'year'    => ['type' => 'number',  'label' => 'Year'],
+        'city'    => ['type' => 'text',    'label' => 'City'],
+        'lat'     => ['type' => 'decimal', 'precision' => 10, 'label' => 'Latitude (decimal, up to 10 places — required for the globe pin)'],
+        'lon'     => ['type' => 'decimal', 'precision' => 10, 'label' => 'Longitude (decimal, up to 10 places — required for the globe pin)'],
+        'url'     => ['type' => 'url',     'label' => 'Archive URL (e.g. https://2024.fosscomm.gr)'],
+        'current' => ['type' => 'bool',    'label' => 'Current edition (pin renders in accent color)'],
     ];
     $info_fields = [
         'label' => ['type' => 'bilingual', 'label' => 'Row label (e.g. "Capacity")'],
@@ -29,11 +29,9 @@ function fc_admin_page_venue() {
         'option_key' => 'fc_section_venue',
         'schema'     => [
             'title'            => 'bilingual',
-            'city'             => 'text',
-            'lat'              => 'text',
-            'lon'              => 'text',
             'university_title' => 'bilingual',
-            'coords_label'     => 'text',
+            'coords_lat'       => 'text',
+            'coords_lon'       => 'text',
             'google_maps_url'  => 'url',
             'address'          => 'bilingual_textarea',
             'cluster_label'    => 'text',
@@ -41,23 +39,8 @@ function fc_admin_page_venue() {
         'render_form' => function ($values) use ($card_fields, $edition_fields, $info_fields) {
             fc_bilingual_field('title', $values, ['label' => 'Section title']);
             ?>
-            <div class="fc-grid-2">
-                <div class="fc-field">
-                    <label>City (block label, e.g. "ATHENS")</label>
-                    <input type="text" name="fc_field[city]" value="<?php echo esc_attr((string) ($values['city'] ?? 'ATHENS')); ?>">
-                </div>
-                <div class="fc-field">
-                    <label>Latitude (display only — globe meta)</label>
-                    <input type="text" name="fc_field[lat]" value="<?php echo esc_attr((string) ($values['lat'] ?? '37.98°N')); ?>">
-                </div>
-                <div class="fc-field">
-                    <label>Longitude (display only — globe meta)</label>
-                    <input type="text" name="fc_field[lon]" value="<?php echo esc_attr((string) ($values['lon'] ?? '23.73°E')); ?>">
-                </div>
-            </div>
-
             <h2 style="margin-top:2rem;">Venue card (left of the globe)</h2>
-            <p class="description">The big title is the venue/university name. On hover it scrambles into the coordinates label below. Click the title to open the venue in Google Maps.</p>
+            <p class="description">The big title is the venue/university name. On hover it scrambles into the latitude / longitude shown on two lines. Click the title to open the venue in Google Maps.</p>
             <?php
             fc_bilingual_field('university_title', $values, [
                 'label' => 'Venue / University title (shown big, display font)',
@@ -67,13 +50,17 @@ function fc_admin_page_venue() {
             ?>
             <div class="fc-grid-2">
                 <div class="fc-field">
-                    <label>Coordinates label (shown on hover instead of the title)</label>
-                    <input type="text" name="fc_field[coords_label]" value="<?php echo esc_attr((string) ($values['coords_label'] ?? '')); ?>" placeholder="37.98°N · 23.73°E">
+                    <label>Latitude (shown on hover, first line)</label>
+                    <input type="text" name="fc_field[coords_lat]" value="<?php echo esc_attr((string) ($values['coords_lat'] ?? '')); ?>" placeholder="37.9838°N">
                 </div>
                 <div class="fc-field">
-                    <label>Google Maps URL (opened on click)</label>
-                    <input type="url" name="fc_field[google_maps_url]" value="<?php echo esc_attr((string) ($values['google_maps_url'] ?? '')); ?>" placeholder="https://maps.google.com/?q=...">
+                    <label>Longitude (shown on hover, second line)</label>
+                    <input type="text" name="fc_field[coords_lon]" value="<?php echo esc_attr((string) ($values['coords_lon'] ?? '')); ?>" placeholder="23.7275°E">
                 </div>
+            </div>
+            <div class="fc-field">
+                <label>Google Maps URL (opened on click)</label>
+                <input type="url" name="fc_field[google_maps_url]" value="<?php echo esc_attr((string) ($values['google_maps_url'] ?? '')); ?>" placeholder="https://maps.google.com/?q=...">
             </div>
             <?php
             fc_bilingual_field('address', $values, [
@@ -97,7 +84,7 @@ function fc_admin_page_venue() {
             ?>
 
             <h2 style="margin-top:2rem;">Editions (globe pins + editions list)</h2>
-            <p class="description">Each edition appears as a pin on the globe AND in the "Editions" list (opened from the globe's ED button on desktop, or the sticky editions bar on mobile). Selecting a year pans the globe to its coordinates. The year marked "current" is always highlighted in accent color. If lat/lon are left empty, coordinates are auto-detected from the city name.</p>
+            <p class="description">Each edition appears as a pin on the globe AND in the "Editions" list (opened from the globe's ED button on desktop, or the sticky editions bar on mobile). Selecting a year pans the globe to its coordinates. The year marked "current" is always highlighted in accent color. Editions without explicit lat/lon are listed in the editions bar but don't get a pin on the globe.</p>
             <div class="fc-field">
                 <label>Cluster label (shown on the single pin when zoomed out)</label>
                 <input type="text" name="fc_field[cluster_label]" value="<?php echo esc_attr((string) ($values['cluster_label'] ?? 'FOSSCOMM')); ?>" placeholder="FOSSCOMM">

@@ -31,8 +31,14 @@ document.addEventListener('click', function (e) {
 <header class="fixed top-0 inset-x-0 z-50 h-10 border-b border-border bg-paper font-mono text-[11px] uppercase tracking-wider" <?php echo fc_island_attrs('status-bar', ['eventStart' => fc_get_event_start_iso()]); ?>>
     <!-- Left padding matches the section-nav (px-4 until lg, lg:pl-5) so the
          "FOSSCOMM…" brand starts at the exact same horizontal offset as the
-         "00 / HOME" link in the nav strip below it on every breakpoint. -->
-    <div class="h-full px-4 lg:pl-5 lg:pr-8 flex items-center gap-4 text-ink-muted">
+         "00 / HOME" link in the nav strip below it on every breakpoint.
+         `whitespace-nowrap overflow-x-auto fc-nav-no-scrollbar` mirrors the
+         mobile section bar's behaviour: when the chrome (brand / location /
+         countdown) is wider than the viewport, the bar scrolls horizontally
+         instead of letting the spans shrink and stack their text vertically.
+         `shrink-0` on each item locks their natural width so the layout
+         doesn't break before the overflow kicks in. -->
+    <div class="h-full px-4 lg:pl-5 lg:pr-8 flex items-center gap-4 text-ink-muted whitespace-nowrap overflow-x-auto fc-nav-no-scrollbar">
         <?php
         // Landing page → "#top" anchor + smooth-scroll JS upgrade.
         // Other pages (/news/<slug>/, /coc/) → absolute URL back to home, no JS.
@@ -41,12 +47,12 @@ document.addEventListener('click', function (e) {
         ?>
         <a href="<?php echo esc_url($brand_href); ?>"
            <?php if ($brand_is_landing) : ?>data-fc-scroll-top<?php endif; ?>
-           class="fc-topbar-brand text-ink font-medium no-underline focus:outline-none">
+           class="fc-topbar-brand text-ink font-medium no-underline focus:outline-none shrink-0">
             <?php echo esc_html($brand_text); ?>
         </a>
-        <span class="opacity-50">//</span>
-        <span><?php echo fc_bi_inline($location_el, $location_en); ?></span>
-        <span class="opacity-50">//</span>
-        <span data-fc-countdown-clock>…</span>
+        <span class="opacity-50 shrink-0">//</span>
+        <span class="shrink-0"><?php echo fc_bi_inline($location_el, $location_en); ?></span>
+        <span class="opacity-50 shrink-0">//</span>
+        <span data-fc-countdown-clock class="shrink-0">…</span>
     </div>
 </header>

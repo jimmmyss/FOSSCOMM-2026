@@ -39,10 +39,12 @@ function fc_section_anchor_url(string $section_key): string {
  * desktop sidebar list in template-parts/partials/section-nav.php).
  *
  * Reads the Venue section's `editions` repeater, falling back to the legacy
- * fc_past_editions option. Each row resolves lat/lon from explicit values or a
- * known-city lookup, defaulting to Athens. Sorted oldest → newest by year.
+ * fc_past_editions option. lat/lon must be set explicitly per row; rows whose
+ * coordinates are missing or non-numeric come through with empty-string lat/lon
+ * and get filtered out of the globe pins by the front-end (assets/dist/fc.js).
+ * Sorted oldest → newest by year.
  *
- * @return array<int,array{year:int,city:string,lat:float,lon:float,url:string,current:bool}>
+ * @return array<int,array{year:int,city:string,lat:float|string,lon:float|string,url:string,current:bool}>
  */
 function fc_venue_editions(): array {
     $venue    = get_option('fc_section_venue', []);
@@ -60,37 +62,16 @@ function fc_venue_editions(): array {
         return ((int) ($a['year'] ?? 0)) <=> ((int) ($b['year'] ?? 0));
     });
 
-    $city_coords = [
-        'athens'       => ['lat' => 37.9838, 'lon' => 23.7275],
-        'thessaloniki' => ['lat' => 40.6401, 'lon' => 22.9444],
-        'larissa'      => ['lat' => 39.6390, 'lon' => 22.4191],
-        'patras'       => ['lat' => 38.2466, 'lon' => 21.7346],
-        'heraklion'    => ['lat' => 35.3387, 'lon' => 25.1442],
-        'lamia'        => ['lat' => 38.8991, 'lon' => 22.4340],
-        'syros'        => ['lat' => 37.4438, 'lon' => 24.9211],
-        'piraeus'      => ['lat' => 37.9475, 'lon' => 23.6469],
-        'online'       => ['lat' => 37.9838, 'lon' => 23.7275],
-    ];
-
     $out = [];
     foreach ($editions as $ed) {
         if (empty($ed['year'])) continue;
-        $edCity = strtolower(trim((string) ($ed['city'] ?? '')));
-        $edLat  = isset($ed['lat']) && $ed['lat'] !== '' ? (float) $ed['lat'] : null;
-        $edLon  = isset($ed['lon']) && $ed['lon'] !== '' ? (float) $ed['lon'] : null;
-        if (($edLat === null || $edLon === null || ($edLat == 0 && $edLon == 0)) && isset($city_coords[$edCity])) {
-            $edLat = $city_coords[$edCity]['lat'];
-            $edLon = $city_coords[$edCity]['lon'];
-        }
-        if ($edLat === null || $edLon === null) {
-            $edLat = 37.9838;
-            $edLon = 23.7275;
-        }
+        $rawLat = isset($ed['lat']) ? trim((string) $ed['lat']) : '';
+        $rawLon = isset($ed['lon']) ? trim((string) $ed['lon']) : '';
         $out[] = [
             'year'    => (int)    ($ed['year'] ?? 0),
             'city'    => (string) ($ed['city'] ?? ''),
-            'lat'     => (float)  $edLat,
-            'lon'     => (float)  $edLon,
+            'lat'     => is_numeric($rawLat) ? (float) $rawLat : '',
+            'lon'     => is_numeric($rawLon) ? (float) $rawLon : '',
             'url'     => (string) ($ed['url']  ?? ''),
             'current' => !empty($ed['current']),
         ];

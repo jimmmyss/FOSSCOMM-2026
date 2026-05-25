@@ -185,6 +185,10 @@
         var POLY_XYZ = new Array(COASTLINES.length);
         var POLY_CENTROID = new Float32Array(COASTLINES.length * 3); // cx, cy, cz per poly
         var POLY_COSR = new Float32Array(COASTLINES.length);          // cos(geodesic radius)
+        // Precomputed `-sin(radius)` per polygon — the actual back-cull threshold.
+        // Storing it saves a Math.sqrt per polygon per frame in render() (~hundreds
+        // of square roots per render → zero). Done once here.
+        var POLY_BACKCULL = new Float32Array(COASTLINES.length);
         (function precomputeCartesian() {
             for (var pi = 0; pi < COASTLINES.length; pi++) {
                 var src = COASTLINES[pi];
@@ -216,6 +220,7 @@
                     if (d < minDot) minDot = d;
                 }
                 POLY_COSR[pi] = minDot;
+                POLY_BACKCULL[pi] = -Math.sqrt(1 - minDot * minDot);
             }
         })();
 
@@ -255,6 +260,37 @@
                     url:        String(ed.url || '')
                 };
             });
+
+            // Co-located editions (same lat/lon — e.g. multiple Athens years)
+            // would otherwise paint a single dot with one label on top, hiding
+            // the rest. Group by rounded lat/lon and assign each pin an index
+            // inside its group so drawPin() can fan the leader+label out at
+            // an angle (see stackAngle()).
+            var stackByYear = {};
+            (function () {
+                var stacks = {};
+                pins.forEach(function (p) {
+                    var k = p.lat.toFixed(6) + ',' + p.lon.toFixed(6);
+                    (stacks[k] = stacks[k] || []).push(p);
+                });
+                Object.keys(stacks).forEach(function (k) {
+                    var grp = stacks[k];
+                    grp.sort(function (a, b) { return a.year - b.year; });
+                    grp.forEach(function (p, idx) {
+                        p.stackIndex = idx;
+                        p.stackTotal = grp.length;
+                        stackByYear[p.year] = { idx: idx, total: grp.length };
+                    });
+                });
+            })();
+            // Fan-out angle in degrees for pin `idx` of `total` co-located pins.
+            // 45° per slot, capped at 160° total so the outermost leader doesn't
+            // dip below horizontal. Single pin → 0° (straight up, unchanged).
+            function stackAngle(idx, total) {
+                if (!total || total <= 1) return 0;
+                var spread = Math.min(160, 45 * (total - 1));
+                return -spread / 2 + spread * (idx / (total - 1));
+            }
             var clusterLabel = mount.getAttribute('data-fc-cluster-label') || '';
 
             // Cluster (zoomed-out) pin position = centroid of pins.
@@ -277,10 +313,29 @@
             var defaultLat = primaryPin ? primaryPin.lat : 20;
             var defaultLon = primaryPin ? primaryPin.lon : 0;
 
+            // The disc is drawn with its centre at y = SURFACE_H × 5/7 ≈ 71% of
+            // the box height (cyPx in render()), so the bottom ~30% of the disc
+            // extends past the section's bottom border and is clipped. That puts
+            // the visible centre of the disc at y = SURFACE_H / 2, not at cyPx.
+            // Without a pitch offset, looking at `defaultLat` head-on projects
+            // the pin to the disc's geometric centre (cyPx) — which on screen
+            // looks "below the middle of the visible globe". This offset rotates
+            // the view down by enough to push the pin up to the visible centre.
+            //
+            //   0.3 = (cyPx − SURFACE_H/2) / rPx-at-zoom-1
+            //       = (325 − 227.5) / 325
+            //
+            // Divided by zoom so the pixel shift stays constant at every zoom
+            // level: ry·rPx = sin(asin(0.3/z))·(cxPx·z) = 0.3·cxPx ≈ 97.5 px.
+            var PIN_CENTER_PITCH_NORM = 0.3;
+            function pitchOffsetForZoom(z) {
+                return Math.asin(Math.min(1, PIN_CENTER_PITCH_NORM / z));
+            }
+
             // Render state vs animation targets. Easing brings the rendered values
             // toward the targets each frame, giving smooth zoom/reset/rotation transitions.
             var yaw   = defaultLon * Math.PI / 180;
-            var pitch = defaultLat * Math.PI / 180;
+            var pitch = defaultLat * Math.PI / 180 - pitchOffsetForZoom(1);
             var zoom  = 1;
             var targetYaw   = yaw;
             var targetPitch = pitch;
@@ -477,7 +532,7 @@
             flipBtn.addEventListener('click', function () {
                 if (!primaryPin) return;
                 targetYaw   = primaryPin.lon * Math.PI / 180;
-                targetPitch = primaryPin.lat * Math.PI / 180;
+                targetPitch = primaryPin.lat * Math.PI / 180 - pitchOffsetForZoom(targetZoom);
                 poke();
             });
             box.appendChild(flipBtn);
@@ -497,7 +552,7 @@
                 vyaw = 0; vpitch = 0;
                 targetZoom  = 1;
                 targetYaw   = defaultLon * Math.PI / 180;
-                targetPitch = defaultLat * Math.PI / 180;
+                targetPitch = defaultLat * Math.PI / 180 - pitchOffsetForZoom(1);
                 selectedEdition = null;
                 hoveredEdition = null;
                 resetYearButtons();   // clear bar selection + "(click me again)" labels
@@ -505,22 +560,68 @@
             }
             controls.querySelector('[data-zrst]').addEventListener('click', resetView);
 
-            // Drag — direct (1:1) for responsiveness. We also track velocity so we can
-            // apply momentum after the user lets go (drag inertia, decays 0.92/frame).
+            // Drag + pinch — direct (1:1) for responsiveness. Drag tracks one
+            // pointer, accumulating velocity for inertia after release. Pinch
+            // takes over the moment a second pointer goes down: drag is paused
+            // (so we don't accumulate the cross-finger delta into yaw/pitch —
+            // that was the "spins wildly when you pinch" bug) and the zoom is
+            // driven directly off the inter-finger distance ratio so the
+            // gesture feels glued to the fingers without easing lag.
+            var activePointers = {};
+            var pinchActive = false;
+            var pinchStartDist = 0, pinchStartZoom = 1;
             var dragging = false, lastX = 0, lastY = 0, lastMoveT = 0;
             var vyaw = 0, vpitch = 0;
+
             box.addEventListener('pointerdown', function (e) {
                 if (e.target.tagName === 'BUTTON') return;
-                // Don't start a drag when tapping a pin — let its click through.
+                // Don't start a drag/pinch when tapping a pin — let its click through.
                 if (e.target.closest && e.target.closest('[data-fc-pin]')) return;
-                dragging = true; lastX = e.clientX; lastY = e.clientY;
-                lastMoveT = performance.now();
-                vyaw = 0; vpitch = 0;
-                box.setPointerCapture(e.pointerId);
-                box.style.cursor = 'grabbing';
+
+                activePointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+                var ids = Object.keys(activePointers);
+
+                if (ids.length === 1) {
+                    // Single pointer down → start drag.
+                    dragging = true; pinchActive = false;
+                    lastX = e.clientX; lastY = e.clientY;
+                    lastMoveT = performance.now();
+                    vyaw = 0; vpitch = 0;
+                    try { box.setPointerCapture(e.pointerId); } catch (_) {}
+                    box.style.cursor = 'grabbing';
+                } else if (ids.length === 2) {
+                    // Second pointer down → switch into pinch mode. Kill drag
+                    // state immediately so the next pointermove can't tack the
+                    // inter-finger jump onto yaw/pitch.
+                    dragging = false;
+                    pinchActive = true;
+                    vyaw = 0; vpitch = 0;
+                    var a = activePointers[ids[0]], b = activePointers[ids[1]];
+                    pinchStartDist = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+                    pinchStartZoom = targetZoom;
+                }
                 poke();
             });
+
             box.addEventListener('pointermove', function (e) {
+                if (!activePointers[e.pointerId]) return;
+                activePointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+
+                if (pinchActive) {
+                    var ids = Object.keys(activePointers);
+                    if (ids.length >= 2) {
+                        var a = activePointers[ids[0]], b = activePointers[ids[1]];
+                        var d = Math.hypot(a.x - b.x, a.y - b.y);
+                        var z = Math.max(0.5, Math.min(32, pinchStartZoom * d / pinchStartDist));
+                        // Direct-set BOTH zoom and targetZoom so the gesture is
+                        // glued to the fingers (no easing lag during pinch).
+                        targetZoom = z;
+                        zoom = z;
+                        poke();
+                    }
+                    return;
+                }
+
                 if (!dragging) return;
                 var now = performance.now();
                 var dt = Math.max(1, now - lastMoveT);
@@ -539,16 +640,33 @@
                 lastX = e.clientX; lastY = e.clientY; lastMoveT = now;
                 poke();
             });
-            function endDrag(e) {
-                if (!dragging) return;
-                dragging = false;
-                try { box.releasePointerCapture(e.pointerId); } catch (_) {}
-                box.style.cursor = 'grab';
+
+            function endPointer(e) {
+                // Untracked pointer (e.g. a pin tap that bailed at pointerdown)
+                // — don't disturb the active drag/pinch.
+                if (!activePointers[e.pointerId]) return;
+                delete activePointers[e.pointerId];
+                var n = Object.keys(activePointers).length;
+                if (n === 0) {
+                    if (dragging) {
+                        dragging = false;
+                        try { box.releasePointerCapture(e.pointerId); } catch (_) {}
+                        box.style.cursor = 'grab';
+                    }
+                    pinchActive = false;
+                    pinchStartDist = 0;
+                } else if (n === 1 && pinchActive) {
+                    // Lifted one finger of a pinch — end the pinch but don't
+                    // auto-resume drag from the cached delta (would feel like
+                    // the globe yanks the moment the second finger leaves).
+                    pinchActive = false;
+                    pinchStartDist = 0;
+                }
                 poke();
             }
-            box.addEventListener('pointerup', endDrag);
-            box.addEventListener('pointercancel', endDrag);
-            box.addEventListener('pointerleave', endDrag);
+            box.addEventListener('pointerup', endPointer);
+            box.addEventListener('pointercancel', endPointer);
+            box.addEventListener('pointerleave', endPointer);
 
             // Track whether the mouse is inside the globe container.
             box.addEventListener('mouseenter', function () {
@@ -598,7 +716,7 @@
                 else if (e.key === '-' || e.key === '_') { targetZoom = Math.max(0.5, targetZoom / 1.3); }
                 else if (e.key === '0' || e.key === 'Home') {
                     targetYaw = defaultLon * Math.PI / 180;
-                    targetPitch = defaultLat * Math.PI / 180;
+                    targetPitch = defaultLat * Math.PI / 180 - pitchOffsetForZoom(1);
                     targetZoom = 1;
                     selectedEdition = null;
                     hoveredEdition = null;
@@ -616,28 +734,8 @@
                 poke();
             }, { passive: false });
 
-            // Pinch zoom (two pointers)
-            var activePointers = {};
-            var pinchStartDist = 0, pinchStartZoom = 1;
-            box.addEventListener('pointerdown', function (e) { activePointers[e.pointerId] = { x: e.clientX, y: e.clientY }; });
-            box.addEventListener('pointermove', function (e) {
-                if (!activePointers[e.pointerId]) return;
-                activePointers[e.pointerId] = { x: e.clientX, y: e.clientY };
-                var ids = Object.keys(activePointers);
-                if (ids.length === 2) {
-                    var a = activePointers[ids[0]], b = activePointers[ids[1]];
-                    var d = Math.hypot(a.x - b.x, a.y - b.y);
-                    if (!pinchStartDist) { pinchStartDist = d; pinchStartZoom = targetZoom; dragging = false; }
-                    targetZoom = Math.max(0.5, Math.min(32, pinchStartZoom * d / pinchStartDist));
-                    poke();
-                }
-            });
-            function dropPointer(e) {
-                delete activePointers[e.pointerId];
-                if (Object.keys(activePointers).length < 2) { pinchStartDist = 0; }
-            }
-            box.addEventListener('pointerup', dropPointer);
-            box.addEventListener('pointercancel', dropPointer);
+            // (Pinch is unified into the drag handler above — see the
+            // `activePointers` / `pinchActive` block.)
 
             // ---- Render ----
             var dirty = true;
@@ -660,17 +758,32 @@
             var pYBuf = new Float32Array(_maxV);
             var pZBuf = new Float32Array(_maxV);
 
+            // Last-applied SVG attribute values — used to skip redundant
+            // setAttribute calls when nothing changed (mostly during pure drag).
+            var _lastCxStr = '', _lastCyStr = '', _lastRStr = '';
 
-            // Generates an SVG path for the front-side arc of a great circle on the unit sphere.
-            // kindEq: true for equator (y=0), false for prime meridian (x=0).
+
+            // Generates an SVG path for the front-side arc of a great circle on the
+            // unit sphere. Each frame previously did 121 iterations × 2 trig calls
+            // for both equator and meridian. Now: the unit-sphere base coordinates
+            // are precomputed once (no trig per frame), the step is 5° instead of
+            // 3° (still smooth at 650px wide), and pts is an array + join.
+            var GC_STEPS = 73;   // 360/5 + 1
+            var GC_SIN = new Float32Array(GC_STEPS);
+            var GC_COS = new Float32Array(GC_STEPS);
+            for (var _gci = 0; _gci < GC_STEPS; _gci++) {
+                var _a = (_gci * 360 / (GC_STEPS - 1)) * Math.PI / 180;
+                GC_SIN[_gci] = Math.sin(_a);
+                GC_COS[_gci] = Math.cos(_a);
+            }
+            var _gcBuf = [];
             function greatCirclePath(kindEq, cxPx, cyPx, rPx, cosY, sinY, cosP, sinP) {
-                var pts = '';
+                _gcBuf.length = 0;
                 var inSeg = false;
-                for (var i = 0; i <= 360; i += 3) {
-                    var a = i * Math.PI / 180;
+                for (var i = 0; i < GC_STEPS; i++) {
                     var x, y, z;
-                    if (kindEq) { x = Math.sin(a); y = 0; z = Math.cos(a); }
-                    else        { x = 0; y = Math.sin(a); z = Math.cos(a); }
+                    if (kindEq) { x = GC_SIN[i]; y = 0;          z = GC_COS[i]; }
+                    else        { x = 0;          y = GC_SIN[i]; z = GC_COS[i]; }
                     var rx = x * cosY - z * sinY;
                     var rz = x * sinY + z * cosY;
                     var ry = y * cosP - rz * sinP;
@@ -678,13 +791,13 @@
                     if (rz2 > 0.04) {
                         var px = cxPx + rx * rPx;
                         var py = cyPx - ry * rPx;
-                        pts += (inSeg ? 'L' : 'M') + px.toFixed(1) + ' ' + py.toFixed(1) + ' ';
+                        _gcBuf.push(inSeg ? 'L' : 'M', px.toFixed(1), ' ', py.toFixed(1), ' ');
                         inSeg = true;
                     } else {
                         inSeg = false;
                     }
                 }
-                return pts;
+                return _gcBuf.join('');
             }
 
             function render() {
@@ -708,22 +821,40 @@
                 // closed subpath made of straight edges between visible vertices, plus
                 // SVG arc commands along the disc rim wherever the polygon crosses the
                 // horizon. clip-path catches any stray sliver from numerical drift.
-                var pathBuf = '';
+                //
+                // Hot path: hoist rimSegments out of the polygon loop so it isn't
+                // re-allocated per-polygon each frame. It closes over cxPx/cyPx/rPx
+                // from the render() scope. Also build the path as a String[] and
+                // join at the end — repeated `+=` on a growing string forces
+                // engines into the slow path on long buffers.
+                function rimSegments(a1, a2) {
+                    var diff = a2 - a1;
+                    while (diff > Math.PI) diff -= 2 * Math.PI;
+                    while (diff < -Math.PI) diff += 2 * Math.PI;
+                    var steps = Math.max(2, Math.ceil(Math.abs(diff) / 0.15));
+                    var seg = '';
+                    for (var s = 1; s <= steps; s++) {
+                        var t = a1 + diff * (s / steps);
+                        var sx = (cxPx + Math.cos(t) * rPx) | 0;
+                        var sy = (cyPx + Math.sin(t) * rPx) | 0;
+                        seg += 'L' + sx + ',' + sy;
+                    }
+                    return seg;
+                }
+                var pathParts = [];
                 var nPolys = POLY_XYZ.length;
 
                 for (var pi = 0; pi < nPolys; pi++) {
                     // Quick cull: if the polygon's centroid dotted with view direction (rotated)
                     // is less than -sin(geodesic_radius), every vertex is on the back side.
+                    // The threshold (`-sin(r)`) is precomputed in POLY_BACKCULL — saves a
+                    // Math.sqrt per polygon per frame.
                     var cX = POLY_CENTROID[pi * 3];
                     var cY = POLY_CENTROID[pi * 3 + 1];
                     var cZ = POLY_CENTROID[pi * 3 + 2];
-                    // Rotated centroid z-component:
                     var crx_z = cX * sinY + cZ * cosY;
                     var crz   = cY * sinP + crx_z * cosP;
-                    var cosR = POLY_COSR[pi];
-                    // sin(r)^2 = 1 - cos(r)^2  →  back-cull threshold = -sqrt(1 - cosR^2)
-                    var threshold = -Math.sqrt(1 - cosR * cosR);
-                    if (crz < threshold) continue;
+                    if (crz < POLY_BACKCULL[pi]) continue;
 
                     var xyz = POLY_XYZ[pi];
                     var nV = xyz.length / 3;
@@ -747,28 +878,11 @@
                     if (!anyVisible) continue;
 
                     // Walk edges. Build subpaths with horizon-clip points.
-                    var subpath = '';
+                    var subStart = pathParts.length;   // for rollback if subpath ends empty
                     var inSub = false;
                     var firstSX = 0, firstSY = 0;
                     var hasPendingExit = false;
                     var lastExitAngle = 0;
-
-                    // Emit line segments along the rim from angle a1 to a2 (shortest path).
-                    function rimSegments(a1, a2) {
-                        var diff = a2 - a1;
-                        // Normalize to [-π, π] to take the shortest path.
-                        while (diff > Math.PI) diff -= 2 * Math.PI;
-                        while (diff < -Math.PI) diff += 2 * Math.PI;
-                        var steps = Math.max(2, Math.ceil(Math.abs(diff) / 0.15));
-                        var seg = '';
-                        for (var s = 1; s <= steps; s++) {
-                            var t = a1 + diff * (s / steps);
-                            var sx = (cxPx + Math.cos(t) * rPx) | 0;
-                            var sy = (cyPx + Math.sin(t) * rPx) | 0;
-                            seg += 'L' + sx + ',' + sy;
-                        }
-                        return seg;
-                    }
 
                     for (var k = 0; k < nV; k++) {
                         var a = k;
@@ -780,13 +894,13 @@
                             if (!inSub) {
                                 var asx = (cxPx + pXBuf[a] * rPx) | 0;
                                 var asy = (cyPx - pYBuf[a] * rPx) | 0;
-                                subpath += 'M' + asx + ',' + asy;
+                                pathParts.push('M', asx, ',', asy);
                                 firstSX = asx; firstSY = asy;
                                 inSub = true;
                             }
                             var bsx = (cxPx + pXBuf[b] * rPx) | 0;
                             var bsy = (cyPx - pYBuf[b] * rPx) | 0;
-                            subpath += 'L' + bsx + ',' + bsy;
+                            pathParts.push('L', bsx, ',', bsy);
                         } else if (aVis && !bVis) {
                             // Exit horizon at z=0 interpolation.
                             var tE = pZBuf[a] / (pZBuf[a] - pZBuf[b]);
@@ -799,11 +913,11 @@
                             if (!inSub) {
                                 var ax2 = (cxPx + pXBuf[a] * rPx) | 0;
                                 var ay2 = (cyPx - pYBuf[a] * rPx) | 0;
-                                subpath += 'M' + ax2 + ',' + ay2;
+                                pathParts.push('M', ax2, ',', ay2);
                                 firstSX = ax2; firstSY = ay2;
                                 inSub = true;
                             }
-                            subpath += 'L' + esx + ',' + esy;
+                            pathParts.push('L', esx, ',', esy);
                             hasPendingExit = true;
                             // Store exit angle on the rim (atan2 using screen coords relative to center).
                             lastExitAngle = Math.atan2(esy - cyPx, esx - cxPx);
@@ -820,16 +934,16 @@
 
                             if (hasPendingExit) {
                                 // Walk along the rim from exit to entry with line segments.
-                                subpath += rimSegments(lastExitAngle, entryAngle);
+                                pathParts.push(rimSegments(lastExitAngle, entryAngle));
                                 hasPendingExit = false;
                             } else {
-                                subpath += 'M' + nsx + ',' + nsy;
+                                pathParts.push('M', nsx, ',', nsy);
                                 firstSX = nsx; firstSY = nsy;
                                 inSub = true;
                             }
                             var bsx2 = (cxPx + pXBuf[b] * rPx) | 0;
                             var bsy2 = (cyPx - pYBuf[b] * rPx) | 0;
-                            subpath += 'L' + bsx2 + ',' + bsy2;
+                            pathParts.push('L', bsx2, ',', bsy2);
                         }
                         // both invisible → skip
                     }
@@ -837,39 +951,47 @@
                     if (inSub) {
                         if (hasPendingExit) {
                             var closingAngle = Math.atan2(firstSY - cyPx, firstSX - cxPx);
-                            subpath += rimSegments(lastExitAngle, closingAngle);
+                            pathParts.push(rimSegments(lastExitAngle, closingAngle));
                         }
-                        subpath += 'Z';
-                        pathBuf += subpath;
+                        pathParts.push('Z');
+                    } else if (pathParts.length !== subStart) {
+                        // We pushed parts but never closed a subpath — defensive trim.
+                        pathParts.length = subStart;
                     }
                 }
 
-                landPath.setAttribute('d', pathBuf);
+                landPath.setAttribute('d', pathParts.join(''));
 
-                // Ocean disc + clip circle (kept in sync each frame).
-                oceanCircle.setAttribute('cx', cxPx.toFixed(1));
-                oceanCircle.setAttribute('cy', cyPx.toFixed(1));
-                oceanCircle.setAttribute('r',  rPx.toFixed(1));
-                clipCircle.setAttribute('cx', cxPx.toFixed(1));
-                clipCircle.setAttribute('cy', cyPx.toFixed(1));
-                clipCircle.setAttribute('r',  rPx.toFixed(1));
-
-                // SVG overlays — full disc outline + equator + prime meridian. The box's
-                // overflow:hidden clips anything past the box edge (including the bottom
-                // 30% of the disc and the part of the outline that sweeps below the box).
-                outlineCircle.setAttribute('cx', cxPx.toFixed(1));
-                outlineCircle.setAttribute('cy', cyPx.toFixed(1));
-                outlineCircle.setAttribute('r',  rPx.toFixed(1));
+                // Ocean / clip / outline circle attrs only change when cxPx, cyPx,
+                // or rPx change. cx/cy are derived from SURFACE_W/H (constants);
+                // r changes only with zoom. So during pure drag (zoom unchanged)
+                // these 9 setAttribute calls per frame are no-ops. Cache the last
+                // applied value and skip the round-trip into SVG-attribute parsing.
+                var cxStr = cxPx.toFixed(1), cyStr = cyPx.toFixed(1), rStr = rPx.toFixed(1);
+                if (cxStr !== _lastCxStr || cyStr !== _lastCyStr || rStr !== _lastRStr) {
+                    oceanCircle.setAttribute('cx', cxStr);
+                    oceanCircle.setAttribute('cy', cyStr);
+                    oceanCircle.setAttribute('r',  rStr);
+                    clipCircle.setAttribute('cx', cxStr);
+                    clipCircle.setAttribute('cy', cyStr);
+                    clipCircle.setAttribute('r',  rStr);
+                    outlineCircle.setAttribute('cx', cxStr);
+                    outlineCircle.setAttribute('cy', cyStr);
+                    outlineCircle.setAttribute('r',  rStr);
+                    _lastCxStr = cxStr; _lastCyStr = cyStr; _lastRStr = rStr;
+                }
                 equatorPath.setAttribute('d', greatCirclePath(true,  cxPx, cyPx, rPx, cosY, sinY, cosP, sinP));
                 meridianPath.setAttribute('d', greatCirclePath(false, cxPx, cyPx, rPx, cosY, sinY, cosP, sinP));
 
                 // Pin overlay. Binary cluster/individual switch based on zoom threshold.
-                pinLayer.innerHTML = '';
+                // Build all pins into a DocumentFragment first, then swap into pinLayer
+                // in one go — N appendChild calls into the live DOM become 1.
+                var pinFragment = document.createDocumentFragment();
                 var clusterAlpha = zoom <= CLUSTER_ZOOM_THRESHOLD ? 1 : 0;
                 var indivAlpha   = zoom > CLUSTER_ZOOM_THRESHOLD ? 1 : 0;
                 var primaryVisible = false;
 
-                function drawPin(lat, lon, label, color, alpha, bigDot, isPrimary, edYear) {
+                function drawPin(lat, lon, label, color, alpha, bigDot, isPrimary, edYear, stackIdx, stackTotal) {
                     if (alpha <= 0.01) return;
                     var pLat = lat * Math.PI / 180, pLon = lon * Math.PI / 180;
                     var pX = Math.cos(pLat) * Math.sin(pLon);
@@ -884,21 +1006,35 @@
 
                     var leftPx = cxPx + rx * rPx;
                     var topPx  = cyPx - ry * rPx;
-                    // Bigger hit-target + dot on touch viewports so pins are easy to tap.
-                    var dotSize = isTouchDevice ? (bigDot ? 20 : 14) : (bigDot ? 12 : 8);
+                    // On touch viewports the WHOLE pin (dot + leader + label) is
+                    // uniformly scaled up — original mobile dot was a hair too small
+                    // for thumb taps and the leader/label felt thin against it. All
+                    // distances and font sizes inherit `pinScale` so the pin keeps
+                    // its proportions.
+                    var pinScale = isTouchDevice ? 1.75 : 1;
+                    var dotSize = isTouchDevice ? (bigDot ? 20 : 14) * pinScale : (bigDot ? 12 : 8);
+                    var leaderH = 18 * pinScale;
+                    var leaderW = 1 * pinScale;
+                    var labelTopOffset = 30 * pinScale;
+                    var labelFontPx = (bigDot ? 11 : 10) * pinScale;
+                    var labelPadV = 2 * pinScale;
+                    var labelPadH = 6 * pinScale;
 
                     // Group = single hit-target for the WHOLE pin (dot + line + label).
                     // Hovering or clicking any visible part triggers the same handler,
                     // and mouseenter/mouseleave on the group only fire at the outer
                     // boundary — moving the cursor between dot↔line↔label stays "inside"
                     // the group, so the hover state doesn't flicker.
+                    // Appended to `pinFragment` instead of straight into pinLayer so all
+                    // pins land in one DOM swap at the end of render() — N invalidations
+                    // collapse to one.
                     var group = document.createElement('div');
                     group.style.position = 'absolute';
                     group.style.left = '0';
                     group.style.top  = '0';
                     group.style.width  = '0';
                     group.style.height = '0';
-                    pinLayer.appendChild(group);
+                    pinFragment.appendChild(group);
 
                     var dot = document.createElement('div');
                     dot.style.position = 'absolute';
@@ -913,31 +1049,51 @@
                     group.appendChild(dot);
 
                     if (label) {
+                        // Leader + label live inside a "stalk" anchored at the dot's
+                        // top-center. For stacked (co-located) pins, the stalk is
+                        // rotated around that anchor so each pin's label fans out in
+                        // its own direction — preventing all labels from rendering on
+                        // top of each other. Single pins use rotation 0 (straight up,
+                        // identical to the pre-stack layout). All distances scaled
+                        // by `pinScale` so mobile gets a uniformly larger pin.
+                        var angleDeg = stackAngle(stackIdx || 0, stackTotal || 1);
+                        var stalk = document.createElement('div');
+                        stalk.style.position = 'absolute';
+                        stalk.style.left = leftPx + 'px';
+                        stalk.style.top  = (topPx - dotSize / 2) + 'px';
+                        stalk.style.width  = '0';
+                        stalk.style.height = '0';
+                        if (angleDeg !== 0) {
+                            stalk.style.transform = 'rotate(' + angleDeg + 'deg)';
+                            stalk.style.transformOrigin = '0 0';
+                        }
+                        group.appendChild(stalk);
+
                         var leader = document.createElement('div');
                         leader.style.position = 'absolute';
-                        leader.style.left = (leftPx - 0.5) + 'px';
-                        leader.style.top  = (topPx - dotSize / 2 - 18) + 'px';
-                        leader.style.width  = '1px';
-                        leader.style.height = '18px';
+                        leader.style.left = (-leaderW / 2) + 'px';
+                        leader.style.top  = (-leaderH) + 'px';
+                        leader.style.width  = leaderW + 'px';
+                        leader.style.height = leaderH + 'px';
                         leader.style.background = color;
                         leader.style.opacity = alpha;
-                        group.appendChild(leader);
+                        stalk.appendChild(leader);
 
                         var lbl = document.createElement('div');
                         lbl.textContent = label;
                         lbl.style.position = 'absolute';
-                        lbl.style.left = leftPx + 'px';
-                        lbl.style.top  = (topPx - dotSize / 2 - 30) + 'px';
+                        lbl.style.left = '0';
+                        lbl.style.top  = (-labelTopOffset) + 'px';
                         lbl.style.transform = 'translateX(-50%)';
-                        lbl.style.fontSize = bigDot ? '11px' : '10px';
+                        lbl.style.fontSize = labelFontPx + 'px';
                         lbl.style.textTransform = 'uppercase';
                         lbl.style.letterSpacing = '0.06em';
                         lbl.style.background = color;
                         lbl.style.color = 'var(--paper)';
-                        lbl.style.padding = '2px 6px';
+                        lbl.style.padding = labelPadV + 'px ' + labelPadH + 'px';
                         lbl.style.whiteSpace = 'nowrap';
                         lbl.style.opacity = alpha;
-                        group.appendChild(lbl);
+                        stalk.appendChild(lbl);
                     }
 
                     // Cluster pin (no year) is decorative — no click/hover, and it
@@ -1006,7 +1162,7 @@
                     var displayLabel = (hoveredEdition && clusterAlpha > 0.5)
                         ? String(hoveredEdition.year)
                         : clusterLabel;
-                    drawPin(clusterLat, clusterLon, displayLabel, 'var(--accent)', clusterAlpha, true, false, null);
+                    drawPin(clusterLat, clusterLon, displayLabel, 'var(--accent)', clusterAlpha, true, false, null, 0, 1);
                 }
                 // Individual pins. Layered: normal pins first, hovered on top,
                 // selected on top of everything (with the "CLICK ME AGAIN" label so
@@ -1019,19 +1175,37 @@
                         if (selectedEdition && p.year === selectedEdition.year) { selectedPin = p; continue; }
                         if (hoveredEdition  && p.year === hoveredEdition.year)  { hoveredPin  = p; continue; }
                         var col = p.isCurrent ? 'var(--accent)' : 'var(--ink-muted)';
-                        drawPin(p.lat, p.lon, p.label, col, indivAlpha, false, p === primaryPin, p.year);
+                        drawPin(p.lat, p.lon, p.label, col, indivAlpha, false, p === primaryPin, p.year, p.stackIndex, p.stackTotal);
                     }
                     if (hoveredPin) {
-                        drawPin(hoveredPin.lat, hoveredPin.lon, hoveredPin.label, 'var(--accent)', indivAlpha, true, hoveredPin === primaryPin, hoveredPin.year);
+                        drawPin(hoveredPin.lat, hoveredPin.lon, hoveredPin.label, 'var(--accent)', indivAlpha, true, hoveredPin === primaryPin, hoveredPin.year, hoveredPin.stackIndex, hoveredPin.stackTotal);
                     }
                     if (selectedPin) {
                         var selLbl = (selectedEdition && selectedEdition.sass) || 'CLICK ME AGAIN';
-                        drawPin(selectedPin.lat, selectedPin.lon, selLbl, 'var(--accent)', indivAlpha, true, selectedPin === primaryPin, selectedPin.year);
+                        drawPin(selectedPin.lat, selectedPin.lon, selLbl, 'var(--accent)', indivAlpha, true, selectedPin === primaryPin, selectedPin.year, selectedPin.stackIndex, selectedPin.stackTotal);
                     }
-                } else if (selectedEdition) {
+                } else if (selectedEdition
+                           && typeof selectedEdition.lat === 'number'
+                           && typeof selectedEdition.lon === 'number') {
                     // Zoomed-out: still keep the selected pin visible with its prompt.
+                    // Look up stack info from the matching pin so the selected label
+                    // fans out at the same angle as the underlying co-located pin.
+                    // Skipped when the selected edition has no coords (e.g. "Online"
+                    // years) — those rows live in the sidebar only, no globe pin.
                     var selLbl2 = selectedEdition.sass || 'CLICK ME AGAIN';
-                    drawPin(selectedEdition.lat, selectedEdition.lon, selLbl2, 'var(--accent)', 1, true, false, selectedEdition.year);
+                    var selStack = stackByYear[selectedEdition.year] || { idx: 0, total: 1 };
+                    drawPin(selectedEdition.lat, selectedEdition.lon, selLbl2, 'var(--accent)', 1, true, false, selectedEdition.year, selStack.idx, selStack.total);
+                }
+
+                // Single DOM swap for the entire pin layer. replaceChildren
+                // accepts a DocumentFragment, so the old pin nodes are dropped
+                // and the new set is inserted in one operation — much cheaper
+                // than `innerHTML = ''` followed by N appendChild calls.
+                if (pinLayer.replaceChildren) {
+                    pinLayer.replaceChildren(pinFragment);
+                } else {
+                    pinLayer.innerHTML = '';
+                    pinLayer.appendChild(pinFragment);
                 }
 
                 // Flip-to-primary button: shown when the primary pin is hidden (back of
@@ -1093,6 +1267,7 @@
                 else if (zoom !== targetZoom) { zoom  = targetZoom; }
 
                 if (dirty && t - lastTick > 33) {
+                    watchZoomThreshold();
                     dirty = false;
                     lastTick = t;
                     render();
@@ -1145,6 +1320,11 @@
             // editions state — both selection and hover. Detect the downward crossing
             // (was above the cluster threshold last frame, at-or-below this frame) so
             // we only fire it once per zoom-out, not every frame at low zoom.
+            //
+            // Called from the rAF tick instead of a setInterval — that timer ran
+            // forever even when the section was off-screen, burning a tick every
+            // 80ms for nothing. Now it piggybacks the loop and naturally pauses
+            // with the rest of the globe when `visible` is false.
             var prevAboveCluster = zoom > CLUSTER_ZOOM_THRESHOLD;
             function watchZoomThreshold() {
                 var nowAbove = zoom > CLUSTER_ZOOM_THRESHOLD;
@@ -1158,9 +1338,6 @@
                 }
                 prevAboveCluster = nowAbove;
             }
-            // Hook into the rAF loop by wrapping markDirty's existing tick path: cheap
-            // to just check from a setInterval since it only flips state on crossing.
-            setInterval(watchZoomThreshold, 80);
 
             // Clicking anything that is NOT a pin and NOT a sidebar edition button
             // while in the "click me again" state drops the selection. Sidebar/pin
@@ -1241,19 +1418,22 @@
 
                 // Kill drag momentum so the pan lands immediately (see home button).
                 vyaw = 0; vpitch = 0;
-                // Pan globe to that city and zoom to max. Offset pitch so the pin sits
-                // in the visible box area (top 70% of disc; bottom 30% is clipped).
+                // Pan globe to that city and zoom to max. Same pitch offset as the
+                // default/reset view so the pin lands in the visible centre of the
+                // box regardless of the disc's clipped bottom (see pitchOffsetForZoom).
                 targetYaw   = edLon * Math.PI / 180;
                 targetZoom  = 20;
-                var pitchOffset = Math.asin(Math.min(1, 0.3 / targetZoom));
-                targetPitch = edLat * Math.PI / 180 - pitchOffset;
+                targetPitch = edLat * Math.PI / 180 - pitchOffsetForZoom(targetZoom);
                 poke();
             }
 
             // Click-select an edition. Sets selectedEdition (so the pin draws with
             // "CLICK ME AGAIN") and flags BOTH matching bar buttons (mobile + desktop)
             // so each shows "(click me again)" via the CSS rule keyed off
-            // [data-fc-edition-selected]. Then pans/zooms to it.
+            // [data-fc-edition-selected]. Pans/zooms only when the row has coords —
+            // coordless editions (e.g. the "Online" years) still get the selected
+            // state and the second-click-opens-URL behaviour, but the globe stays
+            // put because there's nothing to pan to.
             function selectEditionButton(btn) {
                 if (!btn) return;
                 var edLat  = parseFloat(btn.getAttribute('data-fc-edition-lat'));
@@ -1261,22 +1441,35 @@
                 var edCity = btn.getAttribute('data-fc-edition-city') || '';
                 var edYear = parseInt(btn.getAttribute('data-fc-edition-year'), 10);
                 var edUrl  = btn.getAttribute('data-fc-edition-url') || '';
-                if (isNaN(edLat) || isNaN(edLon)) return;
+                if (!edYear) return;   // year is the only truly required field
+                var hasCoords = !isNaN(edLat) && !isNaN(edLon);
                 resetYearButtons();
                 document.querySelectorAll('[data-fc-edition-year="' + edYear + '"]').forEach(function (b) {
                     b.classList.add('text-accent');
                     b.classList.remove('text-ink-muted');
                     b.setAttribute('data-fc-edition-selected', '');
                 });
-                selectedEdition = { year: edYear, city: edCity, lat: edLat, lon: edLon, url: edUrl };
-                focusGlobeOnEdition(btn);
+                selectedEdition = {
+                    year: edYear, city: edCity,
+                    lat: hasCoords ? edLat : null,
+                    lon: hasCoords ? edLon : null,
+                    url: edUrl
+                };
+                if (hasCoords) {
+                    focusGlobeOnEdition(btn);
+                } else {
+                    // No globe pan possible — just trigger a redraw so any
+                    // previously-selected pin clears off the globe.
+                    markDirty();
+                }
             }
 
             document.querySelectorAll('[data-fc-edition-year]').forEach(function (btn) {
                 btn.addEventListener('click', function () {
-                    var edLat = parseFloat(btn.getAttribute('data-fc-edition-lat'));
-                    var edLon = parseFloat(btn.getAttribute('data-fc-edition-lon'));
-                    if (isNaN(edLat) || isNaN(edLon)) return;
+                    // Coords are NOT required to interact with the sidebar — an
+                    // edition with only a URL (the "Online" years) should still
+                    // toggle into the selected state on first click and follow
+                    // its URL on the second.
 
                     // Second click on an already-selected year: open its archive URL,
                     // or — if no URL is set — cycle through the SASS_MESSAGES pool so
