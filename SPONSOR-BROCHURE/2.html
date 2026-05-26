@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FOSSCOMM 2026 — Page 02 / Why sponsor (Variant A)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    margin: 0;
+    background: #0a0a0a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  .fc {
+    --paper: #FAFAF7;
+    --paper-2: #F2F0E9;
+    --ink: #0A0A0A;
+    --ink-muted: #6B6B66;
+    --ink-faint: #C9C7BF;
+    --accent: #0033FF;
+    --red: #FF1E1E;
+    --border: color-mix(in oklab, #0A0A0A 12%, transparent);
+    --border-on-blue: color-mix(in oklab, white 22%, transparent);
+    --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: var(--font-sans);
+    color: var(--ink);
+    background: var(--paper);
+    -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
+    width: 1920px; height: 1080px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    overflow: hidden;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.4);
+  }
+  .fc * { box-sizing: border-box; }
+
+  /* ─── LEFT — Blue panel ─────────────────────────────────────── */
+  /* Padding matches 1.html's blue half (40 top/bottom, 48 left/right) so the
+     "2 of 6" eyebrow sits in exactly the same spot as 1.html's "1 of 6". */
+  .left {
+    background: var(--accent);
+    color: #fff;
+    padding: 40px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .left .eyebrow {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: rgba(255,255,255,.72);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .left .eyebrow .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: #fff;
+  }
+  .left .h1-outline {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 132px;
+    line-height: 0.84;
+    letter-spacing: -0.045em;
+    color: transparent;
+    -webkit-text-stroke: 2px #fff;
+    margin: 0;
+    /* Auto margins on h1 (top) and lead (bottom) split the leftover space,
+       so the title + paragraph block sits centred between the top eyebrow
+       and the bottom pillars strip. */
+    margin-top: auto;
+  }
+  .left .h1-outline .fill { color: #fff; -webkit-text-stroke: 0; }
+  .left .lead {
+    margin-top: 8px;
+    margin-bottom: auto;
+  }
+  .left .lead .lang {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: rgba(255,255,255,.78);
+    margin-bottom: 12px;
+  }
+  .left .lead p {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.6;
+    color: #fff;
+    max-width: 460px;
+  }
+  .left .lead.el p { color: rgba(255,255,255,.78); font-size: 16px; }
+  .left .lead em { font-style: normal; color: #fff; font-weight: 600; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+
+  /* Pillars block — structured to mirror 1.html's right-bottom strip:
+     1px top rule + 1px vertical dividers between cells, no gap, mono label
+     on top and big display value below. */
+  .left .pillars {
+    padding-top: 22px;
+    border-top: 1px solid rgba(255,255,255,.32);
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+  .left .pillars > div {
+    padding-right: 28px;
+    border-right: 1px solid rgba(255,255,255,.32);
+  }
+  .left .pillars > div:nth-child(2) { padding-left: 28px; }
+  .left .pillars > div:last-child { padding-left: 28px; border-right: 0; }
+  .left .pillars .k {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: rgba(255,255,255,.72);
+    margin-bottom: 8px;
+  }
+  .left .pillars .v {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.012em;
+    color: #fff;
+    line-height: 1.1;
+  }
+
+  /* ─── RIGHT — Paper Content ────────────────────────────────── */
+  /* Vertically centered so the four items sit in the middle of the panel
+     once the top eyebrow strip is gone — matches 1.html's centred body.
+     Same static dot grid as 1.html's right side. */
+  .right {
+    background-color: var(--paper);
+    background-image: radial-gradient(circle, var(--border) 1.25px, transparent 1.25px);
+    background-size: 16px 16px;
+    padding: 56px 64px 56px 64px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 0;
+  }
+
+  /* Variant A Specific Styles */
+  /* Hairline rules at the top AND bottom of the points list — first item
+     keeps its own border-top, last item gets a border-bottom, and the
+     stacked border-top on every other item handles the in-between lines. */
+  .va .item {
+    border-top: 1px solid var(--border);
+    padding: 18px 0;
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    column-gap: 22px;
+    row-gap: 10px;
+  }
+  .va .item:last-of-type { border-bottom: 1px solid var(--border); }
+  .va .item .num {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: 0.22em;
+    color: var(--ink-muted);
+    padding-top: 4px;
+  }
+  .va .item .title-row {
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 18px;
+    grid-column: 2 / 3;
+  }
+  /* Title is now a font-display EN/EL stack — matches 1.html's title pattern
+     (big English, smaller muted Greek directly underneath). */
+  .va .item .title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .va .item .title .title-en {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 30px;
+    line-height: 1.0;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+  }
+  .va .item .title .title-el {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+    color: var(--ink-muted);
+  }
+  .va .item .split {
+    grid-column: 2 / 3;
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 36px;
+    align-items: start;
+  }
+  .va .item .para {
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink);
+    margin: 0;
+  }
+  .va .item .para.el {
+    color: var(--ink-muted);
+    margin-top: 4px;
+  }
+  .va .item .bullets {
+    list-style: none; margin: 0; padding: 0;
+    font-family: var(--font-sans);
+    font-size: 13.5px;
+    line-height: 1.4;
+    color: var(--ink);
+  }
+  .va .item .bullets li {
+    padding: 4px 0 4px 22px;
+    position: relative;
+  }
+  .va .item .bullets li::before {
+    content: "+";
+    position: absolute; left: 0; top: 4px;
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .va .item .bullets li .bullet-en { display: block; }
+  .va .item .bullets li .bullet-el {
+    display: block;
+    color: var(--ink-muted);
+    font-size: 12.5px;
+    margin-top: 1px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="fc">
+    
+    <div class="left">
+      <div class="eyebrow"><span class="dot"></span>2 of 6</div>
+
+      <h1 class="h1-outline">
+        Why<br/>
+        sponsor<br/>
+        <span class="fill">us<span style="color:#fff">?</span></span>
+      </h1>
+
+      <div class="lead">
+        <p>
+          FOSSCOMM is the only event in Greece where ~800 free-software practitioners — from senior maintainers to first-year students — sit in the same room for two days. <em>Sponsoring is the inverse of buying ad placement.</em>
+        </p>
+      </div>
+
+      <div class="pillars">
+        <div>
+          <div class="k">Editions</div>
+          <div class="v">19</div>
+        </div>
+        <div>
+          <div class="k">Expected attendees</div>
+          <div class="v">~800</div>
+        </div>
+        <div>
+          <div class="k">Participants</div>
+          <div class="v">60+</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right va">
+
+      <div class="item">
+        <div class="num">/01</div>
+        <div class="title-row">
+          <div class="title">
+            <span class="title-en">Community reach</span>
+          </div>
+        </div>
+        <div class="split">
+          <div>
+            <p class="para">Two days, ~800 people in one building — engineers, students, researchers, public-sector IT and curious teenagers. The mix is the point.</p>
+          </div>
+          <ul class="bullets">
+            <li>38% engineers · 26% students · 14% academia · 9% gov IT</li>
+            <li>63% returning attendees, 18 yrs unbroken</li>
+            <li>Live stream + archive in 5+ countries</li>
+            <li>~ 40k unique site visitors, May → Nov</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="item">
+        <div class="num">/02</div>
+        <div class="title-row">
+          <div class="title">
+            <span class="title-en">Brand placement</span>
+          </div>
+        </div>
+        <div class="split">
+          <div>
+            <p class="para">Your logo travels with the event — across screens, paper, fabric and the live broadcast. Real colours, no monochrome washing.</p>
+          </div>
+          <ul class="bullets">
+            <li>Logo on every section of the live site & the permanent archive</li>
+            <li>Printed signage, programme, badges</li>
+            <li>Front or back of the conference t-shirt (~ 800 prints)</li>
+            <li>Opening / closing mention on the live stream</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="item">
+        <div class="num">/03</div>
+        <div class="title-row">
+          <div class="title">
+            <span class="title-en">Hire FOSS talent</span>
+          </div>
+        </div>
+        <div class="split">
+          <div>
+            <p class="para">Your booth sits two metres from people who actually maintain the packages you ship. Quietly, no lanyards required.</p>
+          </div>
+          <ul class="bullets">
+            <li>Post-event jobs page · live for 6 months</li>
+            <li>Unlimited (Platinum) / 3 (Gold) / 1 (Silver) listings</li>
+            <li>26% are students or recent grads, seeking a first FOSS role</li>
+            <li>Hallway-track recruiting > any career fair</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="item">
+        <div class="num">/04</div>
+        <div class="title-row">
+          <div class="title">
+            <span class="title-en">Direct engagement</span>
+          </div>
+        </div>
+        <div class="split">
+          <div>
+            <p class="para">A booth, a real talk slot, a named contact on the committee — and your name read out on stage in the Day-2 closing panel.</p>
+          </div>
+          <ul class="bullets">
+            <li>Booth: 3 × 2 m (Plat.) · 2 × 2 m (Gold) · shared (Silver)</li>
+            <li>Sponsor talk: 25 min (Plat.) or 10 min (Gold) — streamed</li>
+            <li>Direct line to the organising committee · pre-event check-ins</li>
+            <li>Named on stage in the Day-2 closing panel</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

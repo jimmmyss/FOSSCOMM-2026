@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FOSSCOMM 2026 — Cover (Bilingual)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    margin: 0;
+    background: #0a0a0a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  /* FOSSCOMM theme tokens */
+  .fc {
+    --paper: #FAFAF7;
+    --paper-2: #F2F0E9;
+    --ink: #0A0A0A;
+    --ink-muted: #6B6B66;
+    --ink-faint: #C9C7BF;
+    --accent: #0033FF;
+    --red: #FF1E1E;
+    --border: color-mix(in oklab, #0A0A0A 12%, transparent);
+    --border-strong: color-mix(in oklab, #0A0A0A 24%, transparent);
+    --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: var(--font-sans);
+    color: var(--ink);
+    background: var(--paper);
+    -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
+  }
+  .fc * { box-sizing: border-box; }
+
+  /* ── Cover layout — 1/3 blue, 2/3 paper ───────────────────────── */
+  .cover {
+    width: 1920px; 
+    height: 1080px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.4);
+  }
+
+  /* Blue wordmark panel */
+  .cover .blue {
+    background: var(--accent);
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+  }
+  .cover .blue .top-stamp {
+    padding: 40px 48px 0;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: rgba(255,255,255,.72);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .cover .blue .top-stamp .blip {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: #fff;
+  }
+  .cover .blue .mark {
+    padding: 0 40px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 180px;
+    line-height: 0.84;
+    letter-spacing: -0.05em;
+    color: #fff;
+  }
+  .cover .blue .mark .slash {
+    color: var(--paper);
+    -webkit-text-stroke: 3px #fff;
+    color: transparent;
+    font-weight: 700;
+  }
+  .cover .blue .foot {
+    padding: 0 48px 40px;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: rgba(255,255,255,.72);
+    line-height: 1.7;
+  }
+
+  /* Paper side — static dot grid. Dot colour matches --border (ink at 12%
+     opacity) so the dots read at the same weight as the hairline rules. */
+  .cover .paper {
+    background-color: var(--paper);
+    background-image: radial-gradient(circle, var(--border) 1.25px, transparent 1.25px);
+    background-size: 16px 16px;
+    color: var(--ink);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Helpers */
+  .micro {
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--ink-muted);
+  }
+  .micro .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--accent);
+    margin-right: 12px;
+    vertical-align: middle;
+  }
+
+  /* ─── B · BILINGUAL TWO-UP ────────────────────────────────────── */
+  .layout-b {
+    padding: 72px 88px 64px 88px;
+    display: flex; flex-direction: column;
+    height: 100%;
+  }
+  .layout-b .head {
+    display: flex; flex-direction: column; gap: 16px;
+    padding-bottom: 32px;
+    /* Vertical centering: auto margins above .head and below .cols split the
+       leftover space equally, so title + paragraphs sit in the middle of the
+       paper panel while .strip stays pinned to the bottom. */
+    margin-top: auto;
+  }
+  .layout-b .what-is {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 60px;
+    line-height: 1.0;
+    letter-spacing: -0.025em;
+    margin: 0;
+  }
+  .layout-b .what-is .el {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 30px;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+    color: var(--ink-muted);
+    margin-left: 0;
+    display: block;
+    margin-top: 12px;
+  }
+  .layout-b .cols {
+    margin-top: 36px;
+    margin-bottom: auto;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 56px;
+    flex: 0 0 auto;
+  }
+  .layout-b .cols .col-head {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--ink-muted);
+    margin-bottom: 14px;
+  }
+  .layout-b .cols p {
+    font-family: var(--font-sans);
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--ink);
+    margin: 0 0 14px;
+  }
+  .layout-b .cols .el p { color: var(--ink-muted); }
+  .layout-b .strip {
+    margin-top: 16px;
+    border-top: 1px solid var(--border);
+    padding-top: 22px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+  }
+  .layout-b .strip > div {
+    padding-right: 28px;
+    border-right: 1px solid var(--border);
+    padding-left: 0;
+  }
+  .layout-b .strip > div:first-child { padding-left: 0; }
+  .layout-b .strip > div:nth-child(2) { padding-left: 28px; }
+  .layout-b .strip > div:last-child { padding-left: 28px; border-right: 0; }
+  .layout-b .strip .k {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--ink-muted);
+    margin-bottom: 8px;
+  }
+  .layout-b .strip .v {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.012em;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+  .layout-b .strip .v small {
+    display: block;
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 14px;
+    color: var(--ink-muted);
+    margin-top: 4px;
+    letter-spacing: 0;
+  }
+</style>
+</head>
+<body>
+
+  <div class="fc">
+    <div class="cover">
+      
+      <div class="blue">
+        <div class="top-stamp">
+          <span class="blip"></span>
+          <span>1 of 6</span>
+        </div>
+        <div class="mark">
+          FOSS<br/>
+          COMM<br/>
+          <span><span class="slash">/</span>26</span>
+        </div>
+        <div class="foot">
+          Sponsorship prospectus
+        </div>
+      </div>
+
+      <div class="paper">
+        <div class="layout-b">
+          <div class="head">
+            <h1 class="what-is">
+              Greece's annual free-software<br/>
+              <span style="color: var(--accent);">communities meeting.</span>
+            </h1>
+          </div>
+
+          <div class="cols">
+            <div>
+              <p>FOSSCOMM is a volunteer-run, free-to-attend gathering of Greece's free and open-source software communities. It has been running every year since 2008.</p>
+              <p>For two days we meet, talk, run workshops, demo what we are building, argue about licences over coffee, and recruit each other into unpaid projects. The conference is free because the volunteers want it to be, and because sponsors make it possible.</p>
+            </div>
+          </div>
+
+          <div class="strip">
+            <div>
+              <div class="k">Dates</div>
+              <div class="v">31 OCT — 01 NOV 2026<small>Saturday & Sunday</small></div>
+            </div>
+            <div>
+              <div class="k">Venue</div>
+              <div class="v">UniWA — Athens<small>University of West Attica · Egaleo campus</small></div>
+            </div>
+            <div>
+              <div class="k">Cost</div>
+              <div class="v" style="color: var(--accent);">Free, as in freedom</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+</body>
+</html>
