@@ -117,8 +117,19 @@
     position: relative;
     min-height: 0;
   }
-  .tcard.ink { background: var(--ink); color: #fff; border-color: var(--ink); }
-  .tcard.blue { background: var(--accent); border-color: var(--accent); }
+  .tcard.ink {
+    background-color: var(--ink);
+    background-image: radial-gradient(circle, rgba(255,255,255,.14) 1.25px, transparent 1.25px);
+    background-size: 16px 16px;
+    color: #fff;
+    border-color: var(--ink);
+  }
+  .tcard.blue {
+    background-color: var(--accent);
+    background-image: radial-gradient(circle, rgba(255,255,255,.18) 1.25px, transparent 1.25px);
+    background-size: 16px 16px;
+    border-color: var(--accent);
+  }
   .tcard.faint { background: var(--paper-2); }
 
   .tcard .top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }

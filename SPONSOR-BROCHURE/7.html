@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>FOSSCOMM 2026 — Page 06 / Thank you (What Happens Next Checklist)</title>
+<title>FOSSCOMM 2026 — Page 06 / Thank you (Mockup B · Split Postcard)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,247 +20,156 @@
 
   .fc {
     --paper: #FAFAF7;
-    --paper-2: #F2F0E9;
     --ink: #0A0A0A;
-    --ink-muted: #6B6B66;
-    --ink-faint: #C9C7BF;
     --accent: #0033FF;
-    --accent-deep: #0023BB;
-    --border: color-mix(in oklab, #0A0A0A 12%, transparent);
-    --border-strong: color-mix(in oklab, #0A0A0A 24%, transparent);
     --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
     --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    width: 1920px; height: 1080px;
+    background-color: var(--accent);
+    background-image: radial-gradient(circle, rgba(255,255,255,.18) 1.25px, transparent 1.25px);
+    background-size: 16px 16px;
+    color: #fff;
     font-family: var(--font-sans);
-    color: var(--ink);
-    background: var(--paper);
     -webkit-font-smoothing: antialiased;
     font-variant-numeric: tabular-nums;
-    width: 1920px; height: 1080px;
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 40px 48px;
     position: relative;
+    overflow: hidden;
   }
   .fc * { box-sizing: border-box; }
-  .fc.split { display: grid; grid-template-columns: 1fr 2fr; grid-template-rows: 1080px; }
 
-  /* Status bar */
-  .fc .status-bar {
-    position: absolute; top: 0; left: 0; right: 0;
-    height: 44px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(250,250,247,.94);
-    padding: 0 56px;
-    display: flex; align-items: center; gap: 24px;
+  /* Eyebrow on the left, postcard stamp on the right */
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .eyebrow {
     font-family: var(--font-mono);
+    font-weight: 500;
     font-size: 13px;
     text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: var(--ink-muted);
-    z-index: 4;
-  }
-  .fc .status-bar .brand { color: var(--ink); font-weight: 500; }
-  .fc .status-bar .blip { width: 8px; height: 8px; background: var(--accent); display: inline-block; }
-  .fc .status-bar .spacer { flex: 1; }
-
-  /* Left blue panel */
-  .fc .left-blue {
-    background: var(--accent);
-    color: #fff;
-    padding: 80px 56px 56px 56px;
-    display: flex; flex-direction: column; gap: 28px;
-    position: relative; overflow: hidden;
-  }
-  .fc .left-blue .eyebrow {
-    font-family: var(--font-mono);
-    font-size: 14px;
-    text-transform: uppercase;
     letter-spacing: 0.22em;
-    color: rgba(255,255,255,.78);
+    color: rgba(255,255,255,.72);
     display: flex; align-items: center; gap: 12px;
   }
-  .fc .left-blue .eyebrow .dot { display: inline-block; width: 8px; height: 8px; background: #fff; }
-  .fc .left-blue .h1-outline {
+  .eyebrow .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: #fff;
+  }
+  /* Split body — title on the left (centered), contact stack on the right */
+  .split {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 72px;
+    align-items: center;
+    padding: 32px 0;
+    min-height: 0;
+  }
+  .left { text-align: center; }
+  .left h1 {
     font-family: var(--font-display);
     font-weight: 700;
+    font-size: 300px;
     line-height: 0.84;
     letter-spacing: -0.045em;
-    margin: 0;
     color: transparent;
-    -webkit-text-stroke: 2px #fff;
+    -webkit-text-stroke: 3px #fff;
+    margin: 0;
   }
-  .fc .left-blue .h1-outline .fill { color: #fff; -webkit-text-stroke: 0; }
-  .fc .left-blue .lang {
-    display: inline-block;
+  .left h1 .fill { color: #fff; -webkit-text-stroke: 0; }
+
+  /* Right — vertical stack of contact cards with a hairline between */
+  .right {
+    border-left: 1px solid rgba(255,255,255,.32);
+    padding-left: 56px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  .card .k {
     font-family: var(--font-mono);
     font-size: 11px;
-    text-transform: uppercase;
     letter-spacing: 0.22em;
-    color: rgba(255,255,255,.78);
-    border: 1px solid rgba(255,255,255,.42);
-    padding: 3px 10px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.7);
     margin-bottom: 10px;
   }
-  .fc .left-blue .lead p {
-    margin: 0;
-    font-family: var(--font-sans);
-    font-size: 16px;
-    line-height: 1.55;
+  .card .v {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 26px;
+    line-height: 1.1;
+    letter-spacing: -0.018em;
     color: #fff;
-    max-width: 480px;
   }
-  .fc .left-blue .lead.el p { color: rgba(255,255,255,.78); font-size: 15px; }
-  .fc .left-blue .summary {
-    margin-top: auto;
-    padding-top: 18px;
-    border-top: 1px solid rgba(255,255,255,.32);
+  .card .meta {
+    margin-top: 10px;
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: rgba(255,255,255,.82);
+  }
+  .card .meta + .meta { margin-top: 4px; }
+  .card + .card { padding-top: 32px; border-top: 1px solid rgba(255,255,255,.22); }
+
+  /* Footer 'made with love' line — matches the size and colour of the
+     removed "See you on..." sub-line (mono, 17px, .78 white, 0.22em). */
+  .madewith {
+    text-align: center;
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 17px;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    letter-spacing: 0.18em;
     color: rgba(255,255,255,.78);
     line-height: 1.7;
   }
-  .fc .left-blue .summary b { color: #fff; font-weight: 500; margin-right: 6px; }
-
-  /* Right pane bits */
-  .fc .right {
-    position: relative;
-    overflow: hidden;
-  }
-  .fc .frame-head {
-    border-bottom: 1.5px solid var(--ink);
-    padding-bottom: 12px;
-    display: flex; justify-content: space-between; align-items: end; gap: 24px;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--ink);
-  }
-  .fc .frame-head .micro { color: var(--ink-muted); font-size: 12px; }
+  .madewith .heart { color: #fff; font-weight: 500; }
 </style>
 
 </head>
 <body>
 
-  <div class="fc split">
-    
-    <div class="left-blue">
-      <div class="eyebrow"><span class="dot"></span>§ 06 · Thank you · Ευχαριστούμε</div>
+  <div class="fc">
 
-      <h1 class="h1-outline" style="font-size: 96px;">
-        Thank<br/>
-        <span class="fill">you<span style="color: #fff; -webkit-text-stroke: 2px #fff">.</span></span>
-      </h1>
-
-      <div class="lead">
-        <span class="lang">EN / English</span>
-        <p>For reading the prospectus. For considering FOSSCOMM 2026. Whatever you decide, the existence of this email in your inbox means we're already in better shape than last year.</p>
-      </div>
-      <div class="lead el">
-        <span class="lang">EL / Ελληνικά</span>
-        <p>Που διάβασες ως εδώ. Που σκέφτηκες το FOSSCOMM 2026. Ό,τι κι αν αποφασίσεις, η ύπαρξη αυτού του email στα εισερχόμενά σου σημαίνει ότι είμαστε ήδη ένα βήμα μπροστά.</p>
+    <div class="split">
+      <div class="left">
+        <h1>Thank<br/><span class="fill">you!</span></h1>
       </div>
 
-      <div class="summary">
-        <div><b>31 OCT — 01 NOV ·</b>UniWA · Egaleo, Athens</div>
-        <div><b>reply ·</b>within 3 working days</div>
-        <div><b>sponsors@</b>fosscomm.gr</div>
+      <div class="right">
+        <div class="card">
+          <div class="k">Sponsorship · next step</div>
+          <div class="v">sponsors@fosscomm.gr</div>
+          <div class="meta">Sign the one-page agreement to confirm.</div>
+          <div class="meta">Pre-event check-in scheduled September 2026.</div>
+        </div>
+
+        <div class="card">
+          <div class="k">Fiscal host · GFOSS</div>
+          <div class="v">Open Technologies Alliance</div>
+          <div class="meta">64A Skoufa Str · 10680 Athens · Greece</div>
+          <div class="meta">VAT EL 997 955 830</div>
+          <div class="meta">+30 210 809 4862 · info@gfoss.eu</div>
+        </div>
+
+        <div class="card">
+          <div class="k">Community channels</div>
+          <div class="v">@fosscomm@fosstodon.org</div>
+          <div class="meta">github.com/FOSSCOMM</div>
+          <div class="meta">#fosscomm on libera.chat</div>
+        </div>
       </div>
     </div>
 
-    <div class="right">
-      <div class="status-bar">
-        <span class="brand">FOSSCOMM 2026</span>
-        <span>· Sponsorship · 31 OCT — 01 NOV · UniWA · Athens</span>
-        <span class="spacer"></span>
-        <span class="blip"></span>
-        <span>06 / 13 · Thank you · What happens next</span>
-      </div>
-
-      <div style="padding: 80px 64px 56px 64px; height: 100%; display: flex; flex-direction: column; gap: 18px; overflow: hidden;">
-        
-        <div class="frame-head">
-          <span>Thank you · what happens next</span>
-          <span class="micro">FCC-SPN-2026 § 06 — B · checklist</span>
-        </div>
-
-        <div style="flex: 0 0 auto;">
-          <h2 style="font-family: var(--font-display); font-weight: 700; font-size: 140px; line-height: 0.86; letter-spacing: -0.045em; margin: 14px 0 0; color: var(--ink);">
-            Thank you <span style="color: var(--accent);">·</span><br/>
-            now go pick a tier.
-          </h2>
-          <p style="font-family: var(--font-display); font-weight: 500; font-size: 24px; color: var(--ink-muted); letter-spacing: -0.012em; margin: 10px 0 0;">
-            Ευχαριστούμε — από εδώ και πέρα, τέσσερα βήματα.
-          </p>
-        </div>
-
-        <ol style="list-style: none; margin: 0; padding: 0; flex: 1; display: flex; flex-direction: column; min-height: 0;">
-          
-          <li style="display: grid; grid-template-columns: 70px 28px 1fr 280px; gap: 22px; align-items: baseline; padding: 14px 0; border-top: 1px solid var(--border); flex: 1; min-height: 0;">
-            <div style="font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.22em; color: var(--ink-muted); text-transform: uppercase;">
-              /&nbsp;01
-            </div>
-            <div style="width: 22px; height: 22px; border: 1.5px solid var(--ink); display: flex; align-items: center; justify-content: center; align-self: center;">
-              <span style="color: var(--accent); font-family: var(--font-mono); font-weight: 700; font-size: 14px;">✓</span>
-            </div>
-            <div>
-              <div style="font-family: var(--font-mono); font-weight: 600; font-size: 22px; letter-spacing: 0.02em; text-transform: uppercase; color: var(--accent); line-height: 1.0;">
-                Reply with a tier
-              </div>
-            </div>
-            <div style="font-family: var(--font-sans); font-size: 14px; line-height: 1.5; color: var(--ink-muted);">
-              Email sponsors@fosscomm.gr with your chosen tier and a vector logo. Two-line emails are encouraged.
-            </div>
-          </li>
-
-          <li style="display: grid; grid-template-columns: 70px 28px 1fr 280px; gap: 22px; align-items: baseline; padding: 14px 0; border-top: 1px solid var(--border); flex: 1; min-height: 0;">
-            <div style="font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.22em; color: var(--ink-muted); text-transform: uppercase;">
-              /&nbsp;02
-            </div>
-            <div style="width: 22px; height: 22px; border: 1.5px solid var(--ink); display: flex; align-items: center; justify-content: center; align-self: center;"></div>
-            <div>
-              <div style="font-family: var(--font-mono); font-weight: 600; font-size: 22px; letter-spacing: 0.02em; text-transform: uppercase; color: var(--ink); line-height: 1.0;">
-                We send the agreement
-              </div>
-            </div>
-            <div style="font-family: var(--font-sans); font-size: 14px; line-height: 1.5; color: var(--ink-muted);">
-              A one-page sponsorship agreement listing what you get and what we promise. Greek ΤΠΥ issued by GFOSS.
-            </div>
-          </li>
-
-          <li style="display: grid; grid-template-columns: 70px 28px 1fr 280px; gap: 22px; align-items: baseline; padding: 14px 0; border-top: 1px solid var(--border); flex: 1; min-height: 0;">
-            <div style="font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.22em; color: var(--ink-muted); text-transform: uppercase;">
-              /&nbsp;03
-            </div>
-            <div style="width: 22px; height: 22px; border: 1.5px solid var(--ink); display: flex; align-items: center; justify-content: center; align-self: center;"></div>
-            <div>
-              <div style="font-family: var(--font-mono); font-weight: 600; font-size: 22px; letter-spacing: 0.02em; text-transform: uppercase; color: var(--ink); line-height: 1.0;">
-                You pay, we publish
-              </div>
-            </div>
-            <div style="font-family: var(--font-sans); font-size: 14px; line-height: 1.5; color: var(--ink-muted);">
-              The day the bank transfer clears, your logo goes on 2026.fosscomm.gr.
-            </div>
-          </li>
-
-          <li style="display: grid; grid-template-columns: 70px 28px 1fr 280px; gap: 22px; align-items: baseline; padding: 14px 0; border-top: 1px solid var(--border); flex: 1; min-height: 0;">
-            <div style="font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.22em; color: var(--ink-muted); text-transform: uppercase;">
-              /&nbsp;04
-            </div>
-            <div style="width: 22px; height: 22px; border: 1.5px solid var(--ink); display: flex; align-items: center; justify-content: center; align-self: center;"></div>
-            <div>
-              <div style="font-family: var(--font-mono); font-weight: 600; font-size: 22px; letter-spacing: 0.02em; text-transform: uppercase; color: var(--ink); line-height: 1.0;">
-                See you in October
-              </div>
-            </div>
-            <div style="font-family: var(--font-sans); font-size: 14px; line-height: 1.5; color: var(--ink-muted);">
-              Doors at UniWA open Saturday 31 October, 09:00. Booth assignments at the volunteer desk.
-            </div>
-          </li>
-
-        </ol>
-      </div>
+    <div class="madewith">
+      Made with love by FOSSCOMM /26 team <span class="heart">&lt;3</span>
     </div>
 
   </div>

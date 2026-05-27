@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>FOSSCOMM 2026 — Page 04 / Past Sponsors (Layout B)</title>
+<title>FOSSCOMM 2026 — Page 04 / Past Sponsors</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -43,42 +43,33 @@
   .fc * { box-sizing: border-box; }
   .fc.split { display: grid; grid-template-columns: 1fr 2fr; grid-template-rows: 1080px; }
 
-  /* Status bar */
-  .fc .status-bar {
-    position: absolute; top: 0; left: 0; right: 0;
-    height: 44px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(250,250,247,.94);
-    padding: 0 56px;
-    display: flex; align-items: center; gap: 24px;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: var(--ink-muted);
-    z-index: 4;
-  }
-  .fc .status-bar .brand { color: var(--ink); font-weight: 500; }
-  .fc .status-bar .blip { width: 8px; height: 8px; background: var(--accent); display: inline-block; }
-  .fc .status-bar .spacer { flex: 1; }
-
-  /* Left blue panel */
+  /* ─── LEFT — Blue panel ─────────────────────────────────────── */
+  /* Padding + sizing match 3.html so the eyebrow / title / paragraph
+     sit at the same positions and scale across pages. */
   .fc .left-blue {
     background: var(--accent);
     color: #fff;
-    padding: 80px 56px 56px 56px;
-    display: flex; flex-direction: column; gap: 26px;
-    position: relative; overflow: hidden;
+    padding: 40px 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    position: relative;
+    overflow: hidden;
   }
   .fc .left-blue .eyebrow {
     font-family: var(--font-mono);
-    font-size: 14px;
+    font-weight: 500;
+    font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 0.22em;
-    color: rgba(255,255,255,.78);
+    color: rgba(255,255,255,.72);
     display: flex; align-items: center; gap: 12px;
   }
-  .fc .left-blue .eyebrow .dot { width: 8px; height: 8px; background: #fff; display: inline-block; }
+  .fc .left-blue .eyebrow .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: #fff;
+  }
   .fc .left-blue .h1-outline {
     font-family: var(--font-display);
     font-weight: 700;
@@ -87,40 +78,73 @@
     margin: 0;
     color: transparent;
     -webkit-text-stroke: 2px #fff;
+    /* Auto margins on h1 (top) and lead (bottom) split the leftover space,
+       so title + paragraph block sits centred between the top eyebrow
+       and the bottom summary strip. */
+    margin-top: auto;
   }
   .fc .left-blue .h1-outline .fill { color: #fff; -webkit-text-stroke: 0; }
-  .fc .left-blue .lang {
-    display: inline-block;
+  .fc .left-blue .lead { margin-top: 4px; margin-bottom: auto; }
+  .fc .left-blue .lead p {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.6;
+    color: #fff;
+    max-width: 460px;
+  }
+
+  /* Bottom summary strip — mirrors 2.html's pillars block but with 2
+     sections instead of 3 (border-top + a 1px vertical divider between). */
+  .fc .left-blue .summary {
+    padding-top: 22px;
+    border-top: 1px solid rgba(255,255,255,.32);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  .fc .left-blue .summary > div {
+    padding-right: 28px;
+    border-right: 1px solid rgba(255,255,255,.32);
+  }
+  .fc .left-blue .summary > div:last-child {
+    padding-left: 28px;
+    padding-right: 0;
+    border-right: 0;
+  }
+  .fc .left-blue .summary .k {
     font-family: var(--font-mono);
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.22em;
-    color: rgba(255,255,255,.78);
-    border: 1px solid rgba(255,255,255,.42);
-    padding: 3px 10px;
-    margin-bottom: 10px;
+    color: rgba(255,255,255,.72);
+    margin-bottom: 8px;
   }
-  .fc .left-blue .lead p {
-    margin: 0;
-    font-family: var(--font-sans);
-    font-size: 16px;
-    line-height: 1.55;
+  .fc .left-blue .summary .v {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.012em;
     color: #fff;
-    max-width: 480px;
+    line-height: 1.1;
   }
-  .fc .left-blue .lead.el p { color: rgba(255,255,255,.78); font-size: 15px; }
-  .fc .left-blue .summary {
-    margin-top: auto;
-    padding-top: 18px;
-    border-top: 1px solid rgba(255,255,255,.32);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: rgba(255,255,255,.78);
-    line-height: 1.7;
+
+  /* ─── RIGHT — Paper Content ────────────────────────────────── */
+  .fc .right-paper {
+    position: relative;
+    background-color: var(--paper);
+    background-image: radial-gradient(circle, var(--border) 1.25px, transparent 1.25px);
+    background-size: 16px 16px;
   }
-  .fc .left-blue .summary b { color: #fff; font-weight: 500; margin-right: 6px; }
+  .fc .right-paper .body {
+    padding: 56px 56px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 32px;
+    overflow: hidden;
+  }
 
   /* Generic Logo Container styles */
   .logo-ph {
@@ -163,16 +187,40 @@
     text-transform: uppercase;
     color: var(--ink-faint);
   }
+  .logo-ph.sm .ph-label { font-size: 16px; padding: 4px 8px; }
+  .logo-ph.lg .ph-label { font-size: 32px; padding: 8px 14px; }
 
-  .logo-ph.sm .ph-label { font-size: 18px; padding: 4px 8px; }
-  .logo-ph.lg .ph-label { font-size: 36px; padding: 8px 14px; }
-
-  /* Card layouts */
-  .logo-card {
-    display: flex; flex-direction: column;
-    gap: 12px;
-    min-width: 0;
+  /* Filled colour variants — full container in accent/ink with white text.
+     The inner ::before mat is recoloured to match so the hatched stripe
+     only shows along the 6px border. */
+  .logo-ph.blue {
+    background-color: var(--accent);
+    background-image: linear-gradient(135deg, rgba(255,255,255,.28) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.28) 50%, rgba(255,255,255,.28) 75%, transparent 75%, transparent);
+    border-color: var(--accent);
   }
+  .logo-ph.blue::before {
+    background-color: var(--accent);
+    background-image: radial-gradient(circle, rgba(255,255,255,.22) 1.25px, transparent 1.25px);
+    background-size: 16px 16px;
+  }
+  .logo-ph.blue .ph-label { color: #fff; }
+  .logo-ph.blue .ph-tag { color: rgba(255,255,255,.55); }
+
+  .logo-ph.dark {
+    background-color: var(--ink);
+    background-image: linear-gradient(135deg, rgba(255,255,255,.28) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.28) 50%, rgba(255,255,255,.28) 75%, transparent 75%, transparent);
+    border-color: var(--ink);
+  }
+  .logo-ph.dark::before {
+    background-color: var(--ink);
+    background-image: radial-gradient(circle, rgba(255,255,255,.18) 1.25px, transparent 1.25px);
+    background-size: 16px 16px;
+  }
+  .logo-ph.dark .ph-label { color: #fff; }
+  .logo-ph.dark .ph-tag { color: rgba(255,255,255,.55); }
+
+  /* Logo card — shared between feature row and year sections. */
+  .logo-card { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
   .logo-card .date {
     font-family: var(--font-mono);
     font-size: 11px;
@@ -191,6 +239,31 @@
     display: block;
     margin-bottom: 2px;
   }
+
+  /* Large feature row */
+  .feature-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  /* Year sections — separated by hairline rules in the 2.html style:
+     1px var(--border) border-top on every section, plus border-bottom on
+     the last one to close the stack. No headings above the rule — the
+     year for each row is shown on the date label under each logo. */
+  .year-section {
+    border-top: 1px solid var(--border);
+    padding: 22px 0;
+  }
+  .year-section .small-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 18px;
+  }
+  .year-section.four .small-grid { grid-template-columns: repeat(4, 1fr); }
+  .year-section .logo-card { gap: 10px; }
+  .year-section .logo-card .date { font-size: 10px; }
+  .year-section .logo-card .date .yr { font-size: 14px; margin-bottom: 0; }
 </style>
 
 </head>
@@ -198,120 +271,120 @@
 
   <div class="fc split">
     <div class="left-blue">
-      <div class="eyebrow"><span class="dot"></span>§ 04 · Past sponsors</div>
-      <h1 class="h1-outline" style="font-size: 110px;">
+      <div class="eyebrow"><span class="dot"></span>4 of 6</div>
+      <h1 class="h1-outline" style="font-size: 132px;">
         Past<br/>
         spon<br/>
         <span class="fill">sors.</span>
       </h1>
       <div class="lead">
-        <span class="lang">EN / English</span>
         <p>Organisations that have backed FOSSCOMM across past editions. Logos shown at the same scale — no podium, no leaderboard, just a record.</p>
       </div>
-      <div class="lead el">
-        <span class="lang">EL / Ελληνικά</span>
-        <p>Φορείς που στήριξαν το FOSSCOMM σε παλαιότερες διοργανώσεις. Λογότυπα στο ίδιο μέγεθος — καμία ιεραρχία.</p>
-      </div>
       <div class="summary">
-        <div><b>since 2008 ·</b>annual, unbroken</div>
-        <div><b>80+ orgs</b>across 18 editions</div>
-        <div><b>full archive ·</b>2026.fosscomm.gr/archive</div>
+        <div>
+          <div class="k">Editions</div>
+          <div class="v">19</div>
+        </div>
+        <div>
+          <div class="k">Organisations</div>
+          <div class="v">80+</div>
+        </div>
       </div>
     </div>
 
-    <div style="position: relative;">
-      <div class="status-bar">
-        <span class="brand">FOSSCOMM 2026</span>
-        <span>· Sponsorship · 31 OCT — 01 NOV · UniWA · Athens</span>
-        <span class="spacer"></span>
-        <span class="blip"></span>
-        <span>04 / 13 · Past sponsors</span>
-      </div>
+    <div class="right-paper">
+      <div class="body">
 
-      <div style="padding: 80px 56px 56px 56px; height: 100%; display: flex; flex-direction: column; gap: 18px; overflow: hidden;">
-        <div style="display: flex; justify-content: space-between; align-items: end; gap: 24px; border-bottom: 1.5px solid var(--ink); padding-bottom: 12px; font-family: var(--font-mono); font-size: 14px; letter-spacing: '0.18em'; text-transform: uppercase;">
-          <span>Feature row (large) + secondary grid (small)</span>
-          <span style="color: var(--ink-muted); font-size: 12px;">FCC-SPN-2026 § 04 — B</span>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; height: 280px;">
+        <!-- Large feature row: 3 longest-running supporters (blue) -->
+        <div class="feature-row">
           <div class="logo-card">
-            <div class="logo-ph lg"><span class="ph-tag">LOGO</span><span class="ph-label">GFOSS</span></div>
+            <div class="logo-ph lg blue"><span class="ph-tag">LOGO</span><span class="ph-label">GFOSS</span></div>
             <div class="date"><span class="yr">2008 — '25</span><span>longest-running supporter</span></div>
           </div>
           <div class="logo-card">
-            <div class="logo-ph lg"><span class="ph-tag">LOGO</span><span class="ph-label">Open Technologies</span></div>
-            <div class="date"><span class="yr">2014 — '25</span><span>longest-running supporter</span></div>
+            <div class="logo-ph lg blue"><span class="ph-tag">LOGO</span><span class="ph-label">Open Technologies</span></div>
+            <div class="date"><span class="yr">2014 — '25</span><span>recurring backer</span></div>
           </div>
           <div class="logo-card">
-            <div class="logo-ph lg"><span class="ph-tag">LOGO</span><span class="ph-label">Hellenic Telecom Lab</span></div>
-            <div class="date"><span class="yr">2018 — '25</span><span>longest-running supporter</span></div>
+            <div class="logo-ph lg blue"><span class="ph-tag">LOGO</span><span class="ph-label">Hellenic Telecom Lab</span></div>
+            <div class="date"><span class="yr">2018 — '25</span><span>recurring backer</span></div>
           </div>
         </div>
 
-        <div style="flex: 1; display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: 1fr 1fr; gap: 16px; min-height: 0;">
-          
-          <div class="logo-card">
-            <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">Athena RC</span></div>
-            <div class="date" style="font-size: 10px;"><span class="yr" style="font-size: 14px;">2019</span></div>
+        <!-- 2024 — 4 dark logos -->
+        <div class="year-section four">
+          <div class="small-grid">
+            <div class="logo-card">
+              <div class="logo-ph sm dark"><span class="ph-tag">LOGO</span><span class="ph-label">Athena RC</span></div>
+              <div class="date"><span class="yr">2024</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm dark"><span class="ph-tag">LOGO</span><span class="ph-label">Crete Cloud</span></div>
+              <div class="date"><span class="yr">2024</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm dark"><span class="ph-tag">LOGO</span><span class="ph-label">Polytechnic Press</span></div>
+              <div class="date"><span class="yr">2024</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm dark"><span class="ph-tag">LOGO</span><span class="ph-label">kernel.gr</span></div>
+              <div class="date"><span class="yr">2024</span></div>
+            </div>
           </div>
-
-          <div class="logo-card">
-            <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">Crete Cloud</span></div>
-            <div class="date" style="font-size: 10px;"><span class="yr" style="font-size: 14px;">2018</span></div>
-          </div>
-
-          <div class="logo-card">
-            <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">Polytechnic Press</span></div>
-            <div class="date" style="font-size: 10px;"><span class="yr" style="font-size: 14px;">2014</span></div>
-          </div>
-
-          <div class="logo-card">
-            <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">kernel.gr</span></div>
-            <div class="date" style="font-size: 10px;"><span class="yr" style="font-size: 14px;">2013</span></div>
-          </div>
-
-          <div class="logo-card">
-            <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">OpenISP</span></div>
-            <div class="date" style="font-size: 10px;"><span class="yr" style="font-size: 14px;">2021</span></div>
-          </div>
-
-          <div class="logo-card">
-            <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">GreekNOG</span></div>
-            <div class="date" style="font-size: 10px;"><span class="yr" style="font-size: 14px;">2021</span></div>
-          </div>
-
-          <div class="logo-card">
-            <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">DataCo-op</span></div>
-            <div class="date" style="font-size: 10px;"><span class="yr" style="font-size: 14px;">2021</span></div>
-          </div>
-
-          <div class="logo-card">
-            <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">OW2</span></div>
-            <div class="date" style="font-size: 10px;"><span class="yr" style="font-size: 14px;">2019</span></div>
-          </div>
-
-          <div class="logo-card">
-            <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">P2P Lab</span></div>
-            <div class="date" style="font-size: 10px;"><span class="yr" style="font-size: 14px;">2018</span></div>
-          </div>
-
-          <div class="logo-card">
-            <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">Mozilla GR</span></div>
-            <div class="date" style="font-size: 10px;"><span class="yr" style="font-size: 14px;">2015</span></div>
-          </div>
-
-          <div class="logo-card">
-            <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">OpenStreetMap GR</span></div>
-            <div class="date" style="font-size: 10px;"><span class="yr" style="font-size: 14px;">2017</span></div>
-          </div>
-
-          <div class="logo-card">
-            <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">KDE Greece</span></div>
-            <div class="date" style="font-size: 10px;"><span class="yr" style="font-size: 14px;">2012</span></div>
-          </div>
-
         </div>
+
+        <!-- 2019 -->
+        <div class="year-section">
+          <div class="small-grid">
+            <div class="logo-card">
+              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">GreekNOG</span></div>
+              <div class="date"><span class="yr">2019</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">DataCo-op</span></div>
+              <div class="date"><span class="yr">2019</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">OW2</span></div>
+              <div class="date"><span class="yr">2019</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">P2P Lab</span></div>
+              <div class="date"><span class="yr">2019</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">Mozilla GR</span></div>
+              <div class="date"><span class="yr">2019</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2017 -->
+        <div class="year-section">
+          <div class="small-grid">
+            <div class="logo-card">
+              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">OpenStreetMap GR</span></div>
+              <div class="date"><span class="yr">2017</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">KDE Greece</span></div>
+              <div class="date"><span class="yr">2017</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">Hellas Wiki</span></div>
+              <div class="date"><span class="yr">2017</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">Debian GR</span></div>
+              <div class="date"><span class="yr">2017</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">Linux Athens</span></div>
+              <div class="date"><span class="yr">2017</span></div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>

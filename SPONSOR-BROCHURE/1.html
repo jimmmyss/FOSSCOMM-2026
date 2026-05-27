@@ -82,8 +82,7 @@
     letter-spacing: -0.05em;
     color: #fff;
   }
-  .cover .blue .mark .slash {
-    color: var(--paper);
+  .cover .blue .mark .outline {
     -webkit-text-stroke: 3px #fff;
     color: transparent;
     font-weight: 700;
@@ -160,6 +159,28 @@
     display: block;
     margin-top: 12px;
   }
+  /* FOSSCOMM logo treatment in the title — same weight/size/letter-spacing
+     as the wordmark on the blue panel, but rendered in accent blue. */
+  .layout-b .what-is .logo {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 180px;
+    line-height: 0.84;
+    letter-spacing: -0.05em;
+    color: var(--accent);
+    margin-top: 12px;
+  }
+  /* Question mark sits inline after the logo, sized to balance with FOSSCOMM,
+     with a 60px gap separating it from the wordmark. */
+  .layout-b .what-is .logo .q {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 120px;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+    margin-left: 20px;
+  }
   .layout-b .cols {
     margin-top: 36px;
     margin-bottom: auto;
@@ -184,6 +205,20 @@
     margin: 0 0 14px;
   }
   .layout-b .cols .el p { color: var(--ink-muted); }
+
+  /* Pull-quote lede — display-font sentence with a 3px accent-blue rule on
+     the left, anchoring the paragraph block. */
+  .layout-b .cols .quote {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 26px;
+    line-height: 1.35;
+    letter-spacing: -0.012em;
+    color: var(--ink);
+    margin: 0 0 22px;
+    border-left: 3px solid var(--accent);
+    padding-left: 22px;
+  }
   .layout-b .strip {
     margin-top: 16px;
     border-top: 1px solid var(--border);
@@ -240,7 +275,7 @@
         <div class="mark">
           FOSS<br/>
           COMM<br/>
-          <span><span class="slash">/</span>26</span>
+          <span class="outline">/26</span>
         </div>
         <div class="foot">
           Sponsorship prospectus
@@ -251,13 +286,14 @@
         <div class="layout-b">
           <div class="head">
             <h1 class="what-is">
-              Greece's annual free-software<br/>
-              <span style="color: var(--accent);">communities meeting.</span>
+              What is<br/>
+              <span class="logo">FOSSCOMM<span class="q">?</span></span>
             </h1>
           </div>
 
           <div class="cols">
             <div>
+              <p class="quote">A volunteer-run, free-to-attend gathering of Greece's free and open-source software communities — every year since 2008.</p>
               <p>FOSSCOMM is a volunteer-run, free-to-attend gathering of Greece's free and open-source software communities. It has been running every year since 2008.</p>
               <p>For two days we meet, talk, run workshops, demo what we are building, argue about licences over coffee, and recruit each other into unpaid projects. The conference is free because the volunteers want it to be, and because sponsors make it possible.</p>
             </div>
