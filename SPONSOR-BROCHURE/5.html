@@ -146,7 +146,9 @@
     overflow: hidden;
   }
 
-  /* Generic Logo Container styles */
+  /* Generic Logo Container — coloured frame (border + hatched ring) with a
+     clean inner plate the logo sits on, so every logo stays legible no
+     matter what colour its tier frame is. */
   .logo-ph {
     position: relative;
     width: 100%;
@@ -165,34 +167,19 @@
     background: var(--paper);
     z-index: 1;
   }
-  .logo-ph .ph-label {
+  .logo-ph img {
     position: relative;
     z-index: 2;
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 26px;
-    letter-spacing: -0.02em;
-    color: var(--ink);
-    text-align: center;
-    line-height: 1;
-    padding: 6px 10px;
+    max-width: 82%;
+    max-height: 64%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
   }
-  .logo-ph .ph-tag {
-    position: absolute;
-    top: 8px; left: 10px;
-    z-index: 3;
-    font-family: var(--font-mono);
-    font-size: 9px;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-  }
-  .logo-ph.sm .ph-label { font-size: 16px; padding: 4px 8px; }
-  .logo-ph.lg .ph-label { font-size: 32px; padding: 8px 14px; }
 
-  /* Filled colour variants — full container in accent/ink with white text.
-     The inner ::before mat is recoloured to match so the hatched stripe
-     only shows along the 6px border. */
+  /* Filled colour variants — the frame stays accent/ink; the inner plate is
+     inherited (paper) so logos read against it. */
   .logo-ph.blue {
     background-color: var(--accent);
     background-image: linear-gradient(135deg, rgba(255,255,255,.28) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.28) 50%, rgba(255,255,255,.28) 75%, transparent 75%, transparent);
@@ -203,9 +190,6 @@
     background-image: radial-gradient(circle, rgba(255,255,255,.22) 1.25px, transparent 1.25px);
     background-size: 16px 16px;
   }
-  .logo-ph.blue .ph-label { color: #fff; }
-  .logo-ph.blue .ph-tag { color: rgba(255,255,255,.55); }
-
   .logo-ph.dark {
     background-color: var(--ink);
     background-image: linear-gradient(135deg, rgba(255,255,255,.28) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.28) 50%, rgba(255,255,255,.28) 75%, transparent 75%, transparent);
@@ -216,8 +200,6 @@
     background-image: radial-gradient(circle, rgba(255,255,255,.18) 1.25px, transparent 1.25px);
     background-size: 16px 16px;
   }
-  .logo-ph.dark .ph-label { color: #fff; }
-  .logo-ph.dark .ph-tag { color: rgba(255,255,255,.55); }
 
   /* Logo card — shared between feature row and year sections. */
   .logo-card { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
@@ -248,9 +230,8 @@
   }
 
   /* Year sections — separated by hairline rules in the 2.html style:
-     1px var(--border) border-top on every section, plus border-bottom on
-     the last one to close the stack. No headings above the rule — the
-     year for each row is shown on the date label under each logo. */
+     1px var(--border) border-top on every section. The year for each row is
+     shown on the date label under each logo. */
   .year-section {
     border-top: 1px solid var(--border);
     padding: 22px 0;
@@ -295,92 +276,92 @@
     <div class="right-paper">
       <div class="body">
 
-        <!-- Large feature row: 3 longest-running supporters (blue) -->
+        <!-- Large feature row (blue) -->
         <div class="feature-row">
           <div class="logo-card">
-            <div class="logo-ph lg blue"><span class="ph-tag">LOGO</span><span class="ph-label">GFOSS</span></div>
-            <div class="date"><span class="yr">2008 - '25</span><span>longest-running supporter</span></div>
+            <div class="logo-ph lg blue"><img src="logos/skroutz2.png" alt="Skroutz" style="transform: translateY(-7px);"></div>
+            <div class="date"><span class="yr">2024, 2025</span></div>
           </div>
           <div class="logo-card">
-            <div class="logo-ph lg blue"><span class="ph-tag">LOGO</span><span class="ph-label">Open Technologies</span></div>
-            <div class="date"><span class="yr">2014 - '25</span><span>recurring backer</span></div>
+            <div class="logo-ph lg blue"><img src="logos/aws2.png" alt="Amazon Web Services"></div>
+            <div class="date"><span class="yr">2024</span></div>
           </div>
           <div class="logo-card">
-            <div class="logo-ph lg blue"><span class="ph-tag">LOGO</span><span class="ph-label">Hellenic Telecom Lab</span></div>
-            <div class="date"><span class="yr">2018 - '25</span><span>recurring backer</span></div>
+            <div class="logo-ph lg blue"><img src="logos/deloitte.png" alt="Deloitte"></div>
+            <div class="date"><span class="yr">2024</span></div>
           </div>
         </div>
 
-        <!-- 2024 — 4 dark logos -->
+        <!-- 4 dark logos -->
         <div class="year-section four">
           <div class="small-grid">
             <div class="logo-card">
-              <div class="logo-ph sm dark"><span class="ph-tag">LOGO</span><span class="ph-label">Athena RC</span></div>
+              <div class="logo-ph sm dark"><img src="logos/viva.png" alt="Viva"></div>
+              <div class="date"><span class="yr">2017</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm dark"><img src="logos/meta.png" alt="Meta"></div>
+              <div class="date"><span class="yr">2018</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm dark"><img src="logos/jetbrains.png" alt="JetBrains"></div>
               <div class="date"><span class="yr">2024</span></div>
             </div>
             <div class="logo-card">
-              <div class="logo-ph sm dark"><span class="ph-tag">LOGO</span><span class="ph-label">Crete Cloud</span></div>
-              <div class="date"><span class="yr">2024</span></div>
-            </div>
-            <div class="logo-card">
-              <div class="logo-ph sm dark"><span class="ph-tag">LOGO</span><span class="ph-label">Polytechnic Press</span></div>
-              <div class="date"><span class="yr">2024</span></div>
-            </div>
-            <div class="logo-card">
-              <div class="logo-ph sm dark"><span class="ph-tag">LOGO</span><span class="ph-label">kernel.gr</span></div>
-              <div class="date"><span class="yr">2024</span></div>
+              <div class="logo-ph sm dark"><img src="logos/nbg.png" alt="National Bank of Greece"></div>
+              <div class="date"><span class="yr">2017</span></div>
             </div>
           </div>
         </div>
 
-        <!-- 2019 -->
+        <!-- 5 logos -->
         <div class="year-section">
           <div class="small-grid">
             <div class="logo-card">
-              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">GreekNOG</span></div>
-              <div class="date"><span class="yr">2019</span></div>
+              <div class="logo-ph sm"><img src="logos/ey.png" alt="EY"></div>
+              <div class="date"><span class="yr">2025</span></div>
             </div>
             <div class="logo-card">
-              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">DataCo-op</span></div>
-              <div class="date"><span class="yr">2019</span></div>
+              <div class="logo-ph sm"><img src="logos/enartia.png" alt="Enartia"></div>
+              <div class="date"><span class="yr">2018</span></div>
             </div>
             <div class="logo-card">
-              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">OW2</span></div>
-              <div class="date"><span class="yr">2019</span></div>
+              <div class="logo-ph sm"><img src="logos/collabora.png" alt="Collabora"></div>
+              <div class="date"><span class="yr">2018</span></div>
             </div>
             <div class="logo-card">
-              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">P2P Lab</span></div>
-              <div class="date"><span class="yr">2019</span></div>
+              <div class="logo-ph sm"><img src="logos/htc.png" alt="HTC"></div>
+              <div class="date"><span class="yr">2011</span></div>
             </div>
             <div class="logo-card">
-              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">Mozilla GR</span></div>
-              <div class="date"><span class="yr">2019</span></div>
+              <div class="logo-ph sm"><img src="logos/onlyoffice.png" alt="OnlyOffice"></div>
+              <div class="date"><span class="yr">2022, 2024</span></div>
             </div>
           </div>
         </div>
 
-        <!-- 2017 -->
+        <!-- 5 logos -->
         <div class="year-section">
           <div class="small-grid">
             <div class="logo-card">
-              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">OpenStreetMap GR</span></div>
-              <div class="date"><span class="yr">2017</span></div>
+              <div class="logo-ph sm"><img src="logos/mozillafoundation.png" alt="Mozilla Foundation"></div>
+              <div class="date"><span class="yr">2012</span></div>
             </div>
             <div class="logo-card">
-              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">KDE Greece</span></div>
-              <div class="date"><span class="yr">2017</span></div>
+              <div class="logo-ph sm"><img src="logos/redhat.png" alt="Red Hat"></div>
+              <div class="date"><span class="yr">2012</span></div>
             </div>
             <div class="logo-card">
-              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">Hellas Wiki</span></div>
-              <div class="date"><span class="yr">2017</span></div>
+              <div class="logo-ph sm"><img src="logos/fedora.png" alt="Fedora"></div>
+              <div class="date"><span class="yr">2019</span></div>
             </div>
             <div class="logo-card">
-              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">Debian GR</span></div>
-              <div class="date"><span class="yr">2017</span></div>
+              <div class="logo-ph sm"><img src="logos/gitlab.png" alt="GitLab"></div>
+              <div class="date"><span class="yr">2018</span></div>
             </div>
             <div class="logo-card">
-              <div class="logo-ph sm"><span class="ph-tag">LOGO</span><span class="ph-label">Linux Athens</span></div>
-              <div class="date"><span class="yr">2017</span></div>
+              <div class="logo-ph sm"><img src="logos/opensuse.png" alt="openSUSE"></div>
+              <div class="date"><span class="yr">2023, 2024</span></div>
             </div>
           </div>
         </div>
