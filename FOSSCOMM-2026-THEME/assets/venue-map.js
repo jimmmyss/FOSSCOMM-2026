@@ -4,12 +4,12 @@
  * paper/ink/blue palette and shown on a rotating globe. Editions become map
  * pins via a hard zoom switch (no pixel clustering): ALL editions are ONE
  * date-less sprite pin (the whole-Greece dot) below CLUSTER_UNTIL_ZOOM, then at
- * or above that threshold the dot gives way and every edition shows as its own
+ * or above that threshold the dot gives way and every VENUE shows as its own
  * pin — no in-between regional clusters. Editions sharing a venue (identical
- * coords — Athens, Thessaloniki…) can't separate by zoom alone, so they're
- * first fanned out into a tiny ring (fanOutColocated) that reads as one pin
- * through the mid zooms and spreads into one pin per edition — all visible —
- * when fully zoomed in. The custom +/−/⌂
+ * coords — Athens hosted 7, Thessaloniki/Heraklion 3…) collapse into ONE marker
+ * (groupColocated) rather than stacking or fanning out: a venue is a single pin
+ * no matter how many years it hosted, and hovering it lights up ALL of that
+ * venue's editions in the sidebar at once. The custom +/−/⌂
  * controls match the old globe's buttons. The editions sidebar (desktop panel +
  * mobile bar in template-parts/sections/venue.php) drives the map: hover moves
  * + highlights, click opens the archive in a new tab (or a sass message when an
@@ -98,12 +98,13 @@
         var restCenter = [defaultCenter[0], REST_LAT];
 
         // Editions that shared a venue have IDENTICAL coords (Athens hosted 7,
-        // Thessaloniki/Heraklion 3, Lamia 2). Stacked on one point they can never
-        // separate by zoom — only the top pin renders. Fan each same-place group
-        // into a small ring (sized to MAX_ZOOM) BEFORE building the source, so a
-        // same-venue city reads as one pin through the mid zooms, then the ring
-        // spreads into one visible pin per edition when fully zoomed in.
-        fanOutColocated(pins, MAX_ZOOM);
+        // Thessaloniki/Heraklion 3, Lamia 2). Rather than stack overlapping pins
+        // (or fan them into a ring), collapse each same-place group into ONE
+        // marker that remembers every edition it holds, so the map shows a single
+        // pin per venue and hovering it lights up ALL of that venue's editions in
+        // the sidebar. `pins` keeps the full per-edition list — the sidebar,
+        // fly-to and the zoomed-out "all editions" dot still need it.
+        var markers = groupColocated(pins);
 
         // ---- DOM: aspect-boxed map + custom controls ----
         mount.innerHTML = '';
@@ -257,12 +258,15 @@
 
         // ---- source + layers ----
         function setupLayers() {
-            var features = pins.map(function (p) {
+            var features = markers.map(function (m) {
                 return {
                     type: 'Feature',
-                    id: p.year,
-                    geometry: { type: 'Point', coordinates: [p.lon, p.lat] },
-                    properties: { year: p.year, city: p.city, url: p.url, current: p.current }
+                    id: m.id,
+                    geometry: { type: 'Point', coordinates: [m.lon, m.lat] },
+                    // `years` is the comma-joined list of every edition at this
+                    // venue. MapLibre flattens array/object feature properties, so
+                    // we keep a string and split it back in the hover/click handlers.
+                    properties: { years: m.years.join(','), city: m.city, url: m.url, current: m.current }
                 };
             });
 
@@ -335,7 +339,7 @@
                 map.getCanvas().style.cursor = 'pointer';
                 if (isMobile()) return;
                 var f = e.features && e.features[0];
-                if (f) highlightYear(f.id, false);
+                if (f) highlightYears(yearsOf(f), false);   // one venue pin lights up ALL its editions
             });
             map.on('mouseleave', 'fc-points', function () {
                 map.getCanvas().style.cursor = '';
@@ -347,7 +351,7 @@
                 if (!f) return;
                 var url = f.properties && f.properties.url;
                 if (url) { window.open(url, '_blank', 'noopener'); return; }
-                sassAtYear(f.id);
+                yearsOf(f).forEach(sassAtYear);   // no archive for this venue — sass every edition
             });
 
             // The single zoomed-out dot stands in for every edition: hovering it
@@ -412,6 +416,12 @@
         function pinByYear(year) {
             for (var i = 0; i < pins.length; i++) if (pins[i].year === year) return pins[i];
             return null;
+        }
+        // Parse a venue pin's comma-joined `years` property back into numbers.
+        function yearsOf(f) {
+            var raw = f && f.properties && f.properties.years;
+            if (raw == null) return [];
+            return String(raw).split(',').map(Number).filter(function (y) { return !isNaN(y); });
         }
 
         // Camera padding. Reserving space at the TOP pushes the globe DOWN so its
@@ -572,59 +582,50 @@
         return [23.73, 37.98]; // Athens fallback
     }
 
-    // Spread editions that share a venue (identical / near-identical coords) out
-    // into a small ring around that venue, so each pin gets its own pixels.
-    //   • SEP_PX is the gap we want between neighbouring pins at MAX_ZOOM. The
-    //     ring's circumradius is solved from it (chord = 2·r·sin(π/n)) so 2, 3 or
-    //     7 editions all end up the SAME comfortable distance apart, not piled up.
-    //   • Sizing the ring at MAX_ZOOM (metres-per-pixel via Web Mercator) keeps it
-    //     small in the world (a few hundred metres across), so a same-venue city
-    //     still reads as a single pin through the mid zooms and only opens up once
-    //     you're zoomed right in — past that point clustering is already off.
-    //   • Deterministic: groups are sorted by year and placed by index, so a given
-    //     edition always lands in the same spot across reloads.
-    // Mutates pins in place. Groups of one (Patras, Syros, Larissa, Piraeus…) are
-    // left exactly where they are.
-    function fanOutColocated(pins, maxZoom) {
-        var SEP_PX = 34;            // target gap between adjacent pins at maxZoom (pin sprite is ~25px)
-        var SAME_PLACE_M = 60;      // editions within 60 m count as the same venue
+    // Collapse editions that share a venue into ONE marker per venue, so the map
+    // shows a single pin no matter how many years a city hosted. Grouping is by
+    // EXACT coordinate equality: only editions whose lat AND lon match to the last
+    // digit merge (the admin stores them as the same decimal string, so identical
+    // venues parse to identical numbers). Two distinct spots in the same city —
+    // even a few metres apart — stay separate pins. Each marker keeps:
+    //   • years   — every edition year at this venue, so a hover can light them
+    //               ALL up in the sidebar at once (see yearsOf / highlightYears);
+    //   • lat/lon — the shared coordinate (identical → exactly that point);
+    //   • url     — a representative archive link (the most recent edition that
+    //               has one) for a click on the merged pin;
+    //   • id      — the venue's latest year: unique per venue and stable across
+    //               reloads, used as the GeoJSON feature id.
+    // Groups of one (Patras, Syros, Larissa, Piraeus…) become a one-year marker.
+    // Does NOT mutate pins (it returns a fresh markers array), so fly-to and the
+    // sidebar keep working off the original per-edition coordinates.
+    function groupColocated(pins) {
         var groups = [];
         pins.forEach(function (p) {
             for (var i = 0; i < groups.length; i++) {
                 var a = groups[i][0];
-                if (metersBetween(p.lat, p.lon, a.lat, a.lon) <= SAME_PLACE_M) { groups[i].push(p); return; }
+                if (p.lat === a.lat && p.lon === a.lon) { groups[i].push(p); return; }
             }
             groups.push([p]);
         });
-        groups.forEach(function (g) {
-            var n = g.length;
-            if (n < 2) return;
+        return groups.map(function (g) {
             g.sort(function (x, y) { return x.year - y.year; });
-            var lat0 = 0, lon0 = 0, k;
-            for (k = 0; k < n; k++) { lat0 += g[k].lat; lon0 += g[k].lon; }
-            lat0 /= n; lon0 /= n;                                   // ring centre = the venue
-            var latRad     = lat0 * Math.PI / 180;
-            var mPerPx     = 156543.03392 * Math.cos(latRad) / Math.pow(2, maxZoom);
-            var rPx        = SEP_PX / (2 * Math.sin(Math.PI / n));  // circumradius giving ~SEP_PX chords
-            var rM         = rPx * mPerPx;
-            var mPerDegLat = 110540;
-            var mPerDegLon = 111320 * Math.cos(latRad);
+            var n = g.length, current = false, url = '', k;
             for (k = 0; k < n; k++) {
-                var ang = (2 * Math.PI * k / n) - Math.PI / 2;      // first pin at top, then clockwise
-                g[k].lat = lat0 + (rM * Math.sin(ang)) / mPerDegLat;
-                g[k].lon = lon0 + (rM * Math.cos(ang)) / mPerDegLon;
+                if (g[k].current) current = true;
             }
+            // Click target for the merged pin: the most recent edition that
+            // actually has an archive link.
+            for (k = n - 1; k >= 0; k--) { if (g[k].url) { url = g[k].url; break; } }
+            return {
+                lat:     g[0].lat,          // identical across the group by definition
+                lon:     g[0].lon,
+                years:   g.map(function (p) { return p.year; }),
+                city:    g[n - 1].city,
+                url:     url,
+                current: current,
+                id:      g[n - 1].year      // unique, stable marker id (the venue's latest year)
+            };
         });
-    }
-
-    // Great-circle distance in metres (haversine) — used only to bucket editions
-    // that sit on the same venue.
-    function metersBetween(lat1, lon1, lat2, lon2) {
-        var R = 6371000, toRad = Math.PI / 180;
-        var dLat = (lat2 - lat1) * toRad, dLon = (lon2 - lon1) * toRad;
-        var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(lat1 * toRad) * Math.cos(lat2 * toRad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
     }
 
     function buildControls(box, map, defaultCenter, defaultZoom, resetView) {
