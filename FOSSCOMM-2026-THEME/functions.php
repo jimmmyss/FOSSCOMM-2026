@@ -7,7 +7,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('FC_THEME_VERSION', '0.1.0');
+define('FC_THEME_VERSION', '0.4.1');
 define('FC_THEME_DIR', get_template_directory());
 define('FC_THEME_URI', get_template_directory_uri());
 

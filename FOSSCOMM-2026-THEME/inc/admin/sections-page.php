@@ -116,10 +116,15 @@ function fc_render_section_admin_page(array $cfg): void {
         isset($_POST[$slug . '_save']) &&
         check_admin_referer($slug . '_save', $slug . '_nonce')
     ) {
-        $raw = isset($_POST['fc_field']) && is_array($_POST['fc_field']) ? $_POST['fc_field'] : [];
+        // WordPress adds transport slashes to $_POST on EVERY request. Strip them
+        // once (wp_unslash) before sanitising/saving — otherwise each save
+        // re-escapes the already-escaped value and quotes/apostrophes accumulate
+        // backslashes (\\\\' …) that grow on every save.
+        $post  = wp_unslash($_POST);
+        $raw   = isset($post['fc_field']) && is_array($post['fc_field']) ? $post['fc_field'] : [];
         $clean = fc_sanitize_fields($raw, $schema);
         if (isset($cfg['post_process']) && is_callable($cfg['post_process'])) {
-            $clean = call_user_func($cfg['post_process'], $clean, $_POST);
+            $clean = call_user_func($cfg['post_process'], $clean, $post);
         }
         update_option($option_key, $clean, false);
         echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Saved.', 'fosscomm') . '</p></div>';
@@ -199,10 +204,13 @@ function fc_render_collection_admin_page(array $cfg): void {
         isset($_POST[$slug . '_save']) &&
         check_admin_referer($slug . '_save', $slug . '_nonce')
     ) {
-        $rows = isset($_POST['fc_rows']) && is_array($_POST['fc_rows']) ? $_POST['fc_rows'] : [];
+        // Strip WordPress's transport slashes once before sanitising/saving (see
+        // fc_render_section_admin_page) so repeated saves can't pile up backslashes.
+        $post  = wp_unslash($_POST);
+        $rows  = isset($post['fc_rows']) && is_array($post['fc_rows']) ? $post['fc_rows'] : [];
         $clean = fc_sanitize_repeater($rows, $fields);
         if (isset($cfg['post_process']) && is_callable($cfg['post_process'])) {
-            $clean = call_user_func($cfg['post_process'], $clean, $_POST);
+            $clean = call_user_func($cfg['post_process'], $clean, $post);
         }
         update_option($option_key, $clean, false);
         echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__('Saved.', 'fosscomm') . '</p></div>';

@@ -44,7 +44,10 @@ function fc_admin_page_tba() {
         isset($_POST['fc_tba_save']) &&
         check_admin_referer('fc_tba_save', 'fc_tba_nonce')
     ) {
-        $raw   = isset($_POST['fc_tba']) && is_array($_POST['fc_tba']) ? $_POST['fc_tba'] : [];
+        // wp_unslash: strip WordPress's transport slashes before sanitising, or
+        // quotes/apostrophes accumulate backslashes on every save.
+        $post  = wp_unslash($_POST);
+        $raw   = isset($post['fc_tba']) && is_array($post['fc_tba']) ? $post['fc_tba'] : [];
         $clean = [];
         foreach ($keys as $k => $_label) {
             $row = isset($raw[$k]) && is_array($raw[$k]) ? $raw[$k] : [];

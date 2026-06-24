@@ -122,20 +122,84 @@ function fc_ascii_pre(string $content, string $extra_class = ''): string {
 
 /**
  * Global formatter for admin-written copy.
- * Escapes the string, then turns *text* segments into <span class="fc-accent">…</span>
- * so editors can highlight a word in any field by wrapping it with asterisks.
+ * Escapes the string, then applies three inline markups so editors can style a
+ * segment of any field by wrapping it:
+ *   *text*        → <span class="fc-accent">…</span>  — blue Qaroxe pixel face.
+ *   %text%        → <span class="fc-fine">…</span>    — small, muted-grey aside
+ *                   (e.g. a parenthetical gloss inside a big title).
+ *   [text](url)   → <a class="fc-link …">text →</a>   — same hyperlink treatment
+ *                   the FAQ uses (see fc_format_inline_links()).
  *
  * Use this wherever user-editable text is rendered on the front-end (in place of
- * esc_html). Multiline-safe; the pattern intentionally stops at a newline or a
- * second asterisk so unmatched asterisks render literally.
+ * esc_html). Multiline-safe; each pattern intentionally stops at a newline or its
+ * closing delimiter, so a lone unmatched * or % renders literally.
+ *
+ * Link support is global: fc_format() delegates to fc_format_inline_links(), so
+ * every field that already renders through fc_format() (titles, addresses, the
+ * venue "getting here" travel cards, schedule copy, …) accepts [text](url).
  */
 function fc_format(string $s): string {
-    $escaped = esc_html($s);
-    return (string) preg_replace(
+    return fc_format_inline_links($s);
+}
+
+/**
+ * The plain styling pass behind fc_format(): escape + *accent* + %fine%, with no
+ * link parsing. fc_format_inline_links() calls this for the non-link segments of
+ * the string (calling fc_format() there would recurse, since fc_format() now
+ * routes through fc_format_inline_links()).
+ */
+function fc_format_styles(string $s): string {
+    $out = esc_html($s);
+    // *highlight* → accent (blue Qaroxe pixel face).
+    $out = (string) preg_replace_callback(
         '/\*([^\*\n]+?)\*/u',
-        '<span class="fc-accent">$1</span>',
-        $escaped
+        function ($m) {
+            return '<span class="fc-accent">' . fc_fix_homoglyphs($m[1]) . '</span>';
+        },
+        $out
     );
+    // %fine print% → small, muted-grey aside.
+    $out = (string) preg_replace_callback(
+        '/%([^%\n]+?)%/u',
+        function ($m) {
+            return '<span class="fc-fine">' . $m[1] . '</span>';
+        },
+        $out
+    );
+    return $out;
+}
+
+/**
+ * Repair a Latin word contaminated by a visually-identical Greek/Cyrillic
+ * CAPITAL (a "homoglyph"). The accent face used by .fc-accent (Qaroxe) is
+ * Latin-only, so a stray Greek capital Tau in "Τhree" has no glyph and falls
+ * back to the body font for that one letter — the rest of the word stays in
+ * the pixel face, which is the reported bug.
+ *
+ * We map the confusable capitals back to their Latin twins, but ONLY inside a
+ * letter-run that already contains an ASCII Latin letter. That repairs an
+ * accidental mixed word ("Τhree" → "Three") while leaving genuinely Greek
+ * highlights (e.g. "ΕΛ/ΛΑΚ", "Δωρεάν" — no ASCII letters) untouched. Runs on
+ * the *highlight* segment only, so non-highlighted copy is never altered.
+ */
+function fc_fix_homoglyphs(string $text): string {
+    if ($text === '') return $text;
+    static $map = [
+        // Greek capitals → Latin look-alikes
+        'Α' => 'A', 'Β' => 'B', 'Ε' => 'E', 'Ζ' => 'Z', 'Η' => 'H',
+        'Ι' => 'I', 'Κ' => 'K', 'Μ' => 'M', 'Ν' => 'N', 'Ο' => 'O',
+        'Ρ' => 'P', 'Τ' => 'T', 'Υ' => 'Y', 'Χ' => 'X',
+        // Cyrillic capitals → Latin look-alikes
+        'А' => 'A', 'В' => 'B', 'Е' => 'E', 'К' => 'K', 'М' => 'M',
+        'Н' => 'H', 'О' => 'O', 'Р' => 'P', 'С' => 'C', 'Т' => 'T', 'Х' => 'X',
+    ];
+    return (string) preg_replace_callback('/\p{L}+/u', function ($m) use ($map) {
+        // Only repair runs that read as a Latin word (≥1 ASCII letter).
+        if (!preg_match('/[A-Za-z]/', $m[0])) {
+            return $m[0];
+        }
+        return strtr($m[0], $map);
+    }, $text);
 }
 
 /**
@@ -148,11 +212,14 @@ function fc_format_block(string $s): string {
 }
 
 /**
- * fc_format() + markdown-style inline links: any "[text](url)" segment becomes
- * an <a class="fc-link">text →</a>. Used by the FAQ so editors can drop a link
- * into an answer with the same underline + accent hover treatment as the CTA
- * links. Plain text is still escaped and the asterisk highlight still works
- * outside of link segments.
+ * fc_format()'s link-aware engine: any "[text](url)" segment becomes an
+ * <a class="fc-link">text →</a> with the same underline + accent hover treatment
+ * as the CTA links. Non-link text is run through fc_format_styles() so the
+ * asterisk/percent highlights still work, and everything is escaped.
+ *
+ * This is what fc_format() routes through, so link support is site-wide; the
+ * function name is kept for the explicit callers (FAQ, conduct page) that want
+ * to be self-documenting about needing links.
  *
  * Allowed URL schemes: http(s), mailto:, tel:, and #anchors (so editors can
  * point at on-page sections like "#schedule" or "#home").
@@ -165,38 +232,38 @@ function fc_format_inline_links(string $s): string {
     while ($offset < $len) {
         $open = strpos($s, '[', $offset);
         if ($open === false) {
-            $out .= fc_format(substr($s, $offset));
+            $out .= fc_format_styles(substr($s, $offset));
             break;
         }
         $close_text = strpos($s, ']', $open + 1);
         if ($close_text === false || $close_text + 1 >= $len || $s[$close_text + 1] !== '(') {
             // No "](" right after; treat the "[" as a literal.
-            $out .= fc_format(substr($s, $offset, $open - $offset + 1));
+            $out .= fc_format_styles(substr($s, $offset, $open - $offset + 1));
             $offset = $open + 1;
             continue;
         }
         $close_url = strpos($s, ')', $close_text + 2);
         if ($close_url === false) {
-            $out .= fc_format(substr($s, $offset));
+            $out .= fc_format_styles(substr($s, $offset));
             break;
         }
         // Pre-link text.
         if ($open > $offset) {
-            $out .= fc_format(substr($s, $offset, $open - $offset));
+            $out .= fc_format_styles(substr($s, $offset, $open - $offset));
         }
         $text = substr($s, $open + 1, $close_text - $open - 1);
         $url  = trim(substr($s, $close_text + 2, $close_url - $close_text - 2));
         $href = fc_sanitize_faq_link_url($url);
         if ($href === '' || $text === '') {
             // Bad link — keep the raw markdown so the editor notices.
-            $out .= fc_format(substr($s, $open, $close_url - $open + 1));
+            $out .= fc_format_styles(substr($s, $open, $close_url - $open + 1));
         } else {
             $is_external = (bool) preg_match('#^https?://#i', $href);
             $target_attr = $is_external ? ' target="_blank" rel="noreferrer noopener"' : '';
             $out .= '<a href="' . esc_url($href) . '"'
                 . ' class="fc-link underline-link accent-link inline-flex items-baseline gap-1 whitespace-nowrap"'
                 . $target_attr . '>'
-                . '<span>' . fc_format($text) . '</span>'
+                . '<span>' . fc_format_styles($text) . '</span>'
                 . '<span aria-hidden="true">→</span>'
                 . '</a>';
         }
@@ -311,19 +378,26 @@ function fc_bi_block(string $el, string $en, array $args = []): void {
     ?>
     <div class="grid grid-cols-12 gap-8 md:gap-12">
         <div class="col-span-12 md:col-span-6 space-y-3 <?php echo esc_attr($wrap_class); ?>" lang="en">
-            <?php if (!$no_labels) : ?>
-                <p class="font-mono text-[10px] uppercase tracking-widest text-ink-muted">EN / English</p>
-            <?php endif; ?>
+            <?php if (!$no_labels) echo fc_lang_label('en'); ?>
             <?php echo wp_kses_post(fc_format_block($en)); ?>
         </div>
         <div class="col-span-12 md:col-span-6 space-y-3 <?php echo esc_attr($wrap_class); ?>">
-            <?php if (!$no_labels) : ?>
-                <p class="font-mono text-[10px] uppercase tracking-widest text-ink-muted">EL / Ελληνικά</p>
-            <?php endif; ?>
+            <?php if (!$no_labels) echo fc_lang_label('el'); ?>
             <?php echo wp_kses_post(fc_format_block($el)); ?>
         </div>
     </div>
     <?php
+}
+
+/**
+ * The small "EN / English" · "EL / Ελληνικά" indicator shown above a bilingual
+ * block (the same one fc_bi_block prints over the manifesto columns). Reused so
+ * the Get Involved cards and the Venue "getting here" cards mark their two
+ * language blocks the same way. $lang: 'en' | 'el'.
+ */
+function fc_lang_label(string $lang): string {
+    $text = $lang === 'el' ? 'EL / Ελληνικά' : 'EN / English';
+    return '<p class="font-mono text-[10px] uppercase tracking-widest text-ink-muted">' . esc_html($text) . '</p>';
 }
 
 /**

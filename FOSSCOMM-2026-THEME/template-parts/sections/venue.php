@@ -1,10 +1,10 @@
 <?php
 /**
- * Venue — globe + editions section.
- * Left: intro text. Right: globe. Editions: a vertical list in the sections
- * sidebar on desktop (rendered by template-parts/partials/section-nav.php), a
- * sticky horizontal nav bar at the top of the section on mobile (below).
- * Below the globe: travel cards (how to get here).
+ * Venue — MapLibre map + editions section.
+ * Left: venue card. Right: the MapLibre globe map (assets/venue-map.js).
+ * Editions: a vertical sticky panel on desktop + a sticky horizontal bar on
+ * mobile (both below), which drive the map (hover-to-move, click-to-open).
+ * Below the map: travel cards (how to get here).
  */
 if (!defined('ABSPATH')) {
     exit;
@@ -22,6 +22,34 @@ $address     = fc_bi($data, 'address');
 $info_rows   = (array)  ($data['info_rows']       ?? []);
 $travel_cards = (array) ($data['travel_cards'] ?? []);
 $cluster_label = (string) ($data['cluster_label'] ?? 'FOSSCOMM');
+$pin_sprite    = (string) ($data['pin_sprite'] ?? '');
+$getting_here  = fc_bi($data, 'getting_here');
+
+/* Render one editions-sidebar item (shared by the mobile bar + desktop panel).
+   Rows with an archive URL render as a real <a target="_blank"> (hover moves
+   the map, click opens the archive instantly); link-less rows render as a
+   <button> that shows a sass message on click. assets/venue-map.js wires the
+   hover-to-move + highlight + mobile scroll-select off the data-* attributes. */
+$render_edition_item = function (array $ed, string $extra_class) {
+    $yr  = (int) ($ed['year'] ?? 0);
+    $ct  = (string) ($ed['city'] ?? '');
+    $url = (string) ($ed['url'] ?? '');
+    $tag = $url !== '' ? 'a' : 'button';
+    $attrs = 'class="fc-year-btn no-underline transition-colors text-ink-muted ' . esc_attr($extra_class) . '"'
+        . ' data-fc-edition-year="' . esc_attr($yr) . '"'
+        . ' data-fc-edition-lat="' . esc_attr($ed['lat'] ?? '') . '"'
+        . ' data-fc-edition-lon="' . esc_attr($ed['lon'] ?? '') . '"'
+        . ' data-fc-edition-city="' . esc_attr($ct) . '"'
+        . ' data-fc-edition-url="' . esc_attr($url) . '"';
+    if ($tag === 'a') {
+        $attrs .= ' href="' . esc_url($url) . '" target="_blank" rel="noopener noreferrer"';
+    } else {
+        $attrs = 'type="button" ' . $attrs;
+    }
+    echo '<' . $tag . ' ' . $attrs . '>';
+    echo '<span class="fc-edition-text">' . esc_html($yr . ' / ' . ucfirst($ct)) . '</span>';
+    echo '</' . $tag . '>';
+};
 
 // Editions data — serves as BOTH the year browser AND the globe pins.
 // Normalised centrally so the desktop sidebar list (section-nav.php) and the
@@ -38,19 +66,18 @@ if ($eyebrow_en === '') $eyebrow_en = (string) ($section['eyebrow_el'] ?? '');
 <section id="<?php echo esc_attr($id); ?>" class="bg-paper relative border-t border-border">
     <?php if (!empty($editions_json_arr)) : ?>
         <!-- Editions bar (MOBILE ONLY — lg:hidden). A sticky horizontal nav shown
-             while the venue section is on screen. On mobile the FOSSCOMM bar
-             scrolls away after home, so the only persistent top chrome is the
+             while the venue section is on screen. On mobile the blue FOSSCOMM
+             bar slides away after Home, so the persistent top chrome is the
              section nav (sticky top-0, 40px) — this sticks just below it at
              top-10. The desktop equivalent is the vertical sticky panel right
-             below this — same position:sticky mechanism, bounded by the venue
-             <section>. "Editions:" stays pinned far left; scrolling auto-selects
-             the leftmost. -->
+             below this. "Editions:" stays pinned far left; scrolling auto-selects
+             the leftmost item (assets/venue-map.js). -->
         <nav
             aria-label="<?php echo esc_attr(fc_t('past_editions_label')); ?>"
             data-fc-editions-mobile
             class="
                 lg:hidden
-                sticky top-10 z-30 h-[41px]
+                sticky top-10 z-40 h-[41px]
                 bg-paper border-b border-border
                 font-mono text-[11px] uppercase tracking-widest text-ink-muted
                 overflow-x-auto whitespace-nowrap fc-nav-no-scrollbar flex items-center
@@ -62,21 +89,11 @@ if ($eyebrow_en === '') $eyebrow_en = (string) ($section['eyebrow_el'] ?? '');
             </span>
             <?php foreach (array_reverse($editions_json_arr) as $ed) :
                 if (!empty($ed['current'])) continue;   // matches the desktop panel: past editions only
-                $yr = (int) $ed['year'];
-                $ct = (string) $ed['city'];
-                ?>
-                <button type="button"
-                        class="fc-year-btn fc-edition-mobile-btn shrink-0 h-full flex items-center pr-4 whitespace-nowrap transition-colors text-ink-muted"
-                        data-fc-edition-year="<?php echo esc_attr($yr); ?>"
-                        data-fc-edition-lat="<?php echo esc_attr($ed['lat']); ?>"
-                        data-fc-edition-lon="<?php echo esc_attr($ed['lon']); ?>"
-                        data-fc-edition-city="<?php echo esc_attr($ct); ?>"
-                        data-fc-edition-url="<?php echo esc_attr($ed['url']); ?>"
-                >
-                    <span class="fc-edition-text"><?php echo esc_html($yr); ?> / <?php echo esc_html(ucfirst($ct)); ?></span>
-                    <span class="fc-edition-arrow-sel">(click me again)</span>
-                </button>
-            <?php endforeach; ?>
+                $render_edition_item($ed, 'fc-edition-mobile-btn shrink-0 h-full flex items-center pr-4 whitespace-nowrap');
+            endforeach; ?>
+            <!-- Trailing spacer so the LAST item can scroll left far enough to
+                 reach the highlight edge (assets/venue-map.js selectLeftmost). -->
+            <span class="fc-edition-spacer shrink-0" aria-hidden="true"></span>
         </nav>
 
         <!-- Editions panel (DESKTOP ONLY — hidden lg:block). Same position:sticky
@@ -86,7 +103,7 @@ if ($eyebrow_en === '') $eyebrow_en = (string) ($section['eyebrow_el'] ?? '');
              position:sticky top-10 — bounded by the venue <section>, so it
              enters aligned to the section's top, locks, then releases at the
              section's bottom: the exact lifecycle the mobile bar has. -->
-        <div class="hidden lg:block lg:absolute lg:-top-px lg:-bottom-px lg:-left-[200px] lg:w-[200px] z-30 pointer-events-none">
+        <div class="hidden lg:block lg:absolute lg:-top-px lg:-bottom-px lg:-left-[200px] lg:w-[200px] z-40 pointer-events-none">
             <nav
                 aria-label="<?php echo esc_attr(fc_t('past_editions_label')); ?>"
                 data-fc-editions-desktop
@@ -104,22 +121,8 @@ if ($eyebrow_en === '') $eyebrow_en = (string) ($section['eyebrow_el'] ?? '');
                 <ul class="flex flex-col gap-y-2">
                     <?php foreach (array_reverse($editions_json_arr) as $ed) :
                         if (!empty($ed['current'])) continue;
-                        $yr = (int) $ed['year'];
-                        $ct = (string) $ed['city'];
                         ?>
-                        <li>
-                            <button type="button"
-                                    class="fc-year-btn block w-full text-left p-0 transition-colors text-ink-muted"
-                                    data-fc-edition-year="<?php echo esc_attr($yr); ?>"
-                                    data-fc-edition-lat="<?php echo esc_attr($ed['lat']); ?>"
-                                    data-fc-edition-lon="<?php echo esc_attr($ed['lon']); ?>"
-                                    data-fc-edition-city="<?php echo esc_attr($ct); ?>"
-                                    data-fc-edition-url="<?php echo esc_attr($ed['url']); ?>"
-                            >
-                                <span class="fc-edition-text"><?php echo esc_html($yr); ?> / <?php echo esc_html(ucfirst($ct)); ?></span>
-                                <span class="fc-edition-arrow-sel">(click me again)</span>
-                            </button>
-                        </li>
+                        <li><?php $render_edition_item($ed, 'block w-full text-left p-0'); ?></li>
                     <?php endforeach; ?>
                 </ul>
             </nav>
@@ -212,12 +215,18 @@ if ($eyebrow_en === '') $eyebrow_en = (string) ($section['eyebrow_el'] ?? '');
                 <?php endif; ?>
             </div>
 
-            <!-- Right: globe. Editions live in the globe's ED panel (desktop) and the
-                 mobile sticky bar above (mobile) — no side panel here anymore. -->
+            <!-- Right: MapLibre venue map (assets/venue-map.js). Editions are map
+                 pins; the year browser lives in the desktop panel + mobile bar. -->
             <div class="relative flex flex-col justify-end h-full">
-                <div class="w-full" data-fc-island="ascii-globe" data-fc-cluster-label="<?php echo esc_attr($cluster_label); ?>" data-fc-editions="<?php echo esc_attr($editions_json); ?>">
+                <div class="w-full"
+                     data-fc-island="venue-map"
+                     data-fc-cluster-label="<?php echo esc_attr($cluster_label); ?>"
+                     data-fc-pin-sprite="<?php echo esc_attr($pin_sprite); ?>"
+                     data-fc-venue-lat="<?php echo esc_attr($coords_lat); ?>"
+                     data-fc-venue-lon="<?php echo esc_attr($coords_lon); ?>"
+                     data-fc-editions="<?php echo esc_attr($editions_json); ?>">
                     <noscript>
-                        <div class="ascii text-xs text-ink-faint border border-border p-6 text-center">[ JavaScript-rendered globe — <?php echo esc_html(trim($coords_lat . ' ' . $coords_lon)); ?> ]</div>
+                        <div class="ascii text-xs text-ink-faint border border-border p-6 text-center">[ Map requires JavaScript — <?php echo esc_html(trim($coords_lat . ' ' . $coords_lon)); ?> ]</div>
                     </noscript>
                 </div>
             </div>
@@ -225,8 +234,12 @@ if ($eyebrow_en === '') $eyebrow_en = (string) ($section['eyebrow_el'] ?? '');
 
         <?php if (!empty($travel_cards)) : ?>
             <div class="grid grid-cols-12 gap-8 border-t border-border pt-12 mt-0">
+                <?php $gh_en = $getting_here['en'] !== '' ? $getting_here['en'] : fc_t('getting_here'); ?>
                 <div class="col-span-12 md:col-span-3 font-mono text-[11px] uppercase tracking-widest text-ink-muted">
-                    <?php echo esc_html(fc_t('getting_here')); ?>
+                    <div lang="en"><?php echo esc_html($gh_en); ?></div>
+                    <?php if ($getting_here['el'] !== '' && $getting_here['el'] !== $gh_en) : ?>
+                        <div class="opacity-60 mt-1"><?php echo esc_html($getting_here['el']); ?></div>
+                    <?php endif; ?>
                 </div>
                 <div class="col-span-12 md:col-span-9 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 text-base leading-relaxed">
                     <?php foreach ($travel_cards as $card) :
@@ -239,8 +252,18 @@ if ($eyebrow_en === '') $eyebrow_en = (string) ($section['eyebrow_el'] ?? '');
                             <?php if ($ct['en'] !== '' && $ct['el'] !== '') : ?>
                                 <div class="font-display text-lg text-ink-muted mb-2"><?php echo fc_format($ct['el']); ?></div>
                             <?php endif; ?>
-                            <?php if ($cb['en'] !== '') : ?><p class="text-ink-muted" lang="en"><?php echo fc_format($cb['en']); ?></p><?php endif; ?>
-                            <?php if ($cb['el'] !== '') : ?><p class="text-ink-muted opacity-80 mt-1"><?php echo fc_format($cb['el']); ?></p><?php endif; ?>
+                            <?php if ($cb['en'] !== '') : ?>
+                                <div lang="en" class="mt-3">
+                                    <?php echo fc_lang_label('en'); ?>
+                                    <p class="text-ink-muted mt-1"><?php echo fc_format($cb['en']); ?></p>
+                                </div>
+                            <?php endif; ?>
+                            <?php if ($cb['el'] !== '') : ?>
+                                <div class="mt-3">
+                                    <?php echo fc_lang_label('el'); ?>
+                                    <p class="text-ink-muted opacity-80 mt-1"><?php echo fc_format($cb['el']); ?></p>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
                 </div>
@@ -267,28 +290,20 @@ if ($eyebrow_en === '') $eyebrow_en = (string) ($section['eyebrow_el'] ?? '');
    the section nav's bg-paper). */
 [data-fc-editions-desktop] { top: calc(var(--fc-sections-end, 2.5rem) + 1px); }
 
-/* Selected NON-current bar item: its whole label is replaced by "(click me again)"
-   — a hint to click once more to open the archive. The current edition (2026) is
-   excluded: it keeps its "year / city ← you are here" and never says that. */
-.fc-year-btn .fc-edition-arrow-sel { display: none; }
-.fc-year-btn[data-fc-edition-selected]:not([data-fc-edition-current]) .fc-edition-text,
-.fc-year-btn[data-fc-edition-selected]:not([data-fc-edition-current]) .fc-edition-arrow { display: none; }
-.fc-year-btn[data-fc-edition-selected]:not([data-fc-edition-current]) .fc-edition-arrow-sel { display: inline; }
-
-/* A real :hover (mouse devices only — touch keeps no sticky hover) OR a hovered globe
-   pin (.is-hovered, set from JS) turns the matching item black. */
+/* Editions sidebar items behave like normal links now: a real :hover (mouse
+   only) OR a JS-set .is-hovered (from a map-pin hover, or the mobile bar's
+   scroll-select) turns the item accent and shows the pointer cursor. Rows with
+   an archive URL are <a target="_blank">; link-less rows are <button>s that
+   show a sass message on click (assets/venue-map.js). */
+.fc-year-btn { cursor: pointer; }
 @media (hover: hover) {
-    .fc-year-btn:not([data-fc-edition-selected]):not([data-fc-edition-current]):hover {
-        color: var(--accent) !important;
-    }
+    .fc-year-btn:hover { color: var(--accent) !important; }
 }
-.fc-year-btn.is-hovered:not([data-fc-edition-selected]):not([data-fc-edition-current]) {
-    color: var(--accent) !important;
-}
-/* Selected (mobile or desktop): stays accent. */
-.fc-year-btn[data-fc-edition-selected] {
-    color: var(--accent) !important;
-}
+.fc-year-btn.is-hovered { color: var(--accent) !important; }
+
+/* Mobile bar trailing spacer — lets the last item scroll left to the highlight
+   edge so it can be auto-selected like the rest. */
+.fc-edition-spacer { width: 70vw; }
 
 /* Venue card title: hover scrambles the English title into the coordinates
    label (window.fcScramble, same engine the FAQ uses) and instantly hides the
@@ -324,7 +339,7 @@ if ($eyebrow_en === '') $eyebrow_en = (string) ($section['eyebrow_el'] ?? '');
     // without reload.
     var mqMobile = window.matchMedia && window.matchMedia('(max-width: 1023.98px)');
     function isMobile() { return !!(mqMobile && mqMobile.matches); }
-    var GLYPHS = 'ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩ░▒▓0123456789@#';
+    var GLYPHS = 'αβγδεζηθικλμνξοπρστυφχψω0123456789';
     function glyphify(text) {
         var out = '';
         for (var i = 0; i < text.length; i++) {

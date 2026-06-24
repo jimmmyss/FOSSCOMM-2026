@@ -35,6 +35,8 @@ function fc_admin_page_venue() {
             'google_maps_url'  => 'url',
             'address'          => 'bilingual_textarea',
             'cluster_label'    => 'text',
+            'pin_sprite'       => 'url',
+            'getting_here'     => 'bilingual',
         ],
         'render_form' => function ($values) use ($card_fields, $edition_fields, $info_fields) {
             fc_bilingual_field('title', $values, ['label' => 'Section title']);
@@ -86,8 +88,19 @@ function fc_admin_page_venue() {
             <h2 style="margin-top:2rem;">Editions (globe pins + editions list)</h2>
             <p class="description">Each edition appears as a pin on the globe AND in the "Editions" list (opened from the globe's ED button on desktop, or the sticky editions bar on mobile). Selecting a year pans the globe to its coordinates. The year marked "current" is always highlighted in accent color. Editions without explicit lat/lon are listed in the editions bar but don't get a pin on the globe.</p>
             <div class="fc-field">
-                <label>Cluster label (shown on the single pin when zoomed out)</label>
+                <label>Cluster label (fallback name for the grouped pin)</label>
                 <input type="text" name="fc_field[cluster_label]" value="<?php echo esc_attr((string) ($values['cluster_label'] ?? 'FOSSCOMM')); ?>" placeholder="FOSSCOMM">
+            </div>
+            <?php $pin_sprite = (string) ($values['pin_sprite'] ?? ''); ?>
+            <div class="fc-field">
+                <label>Pin sprite (pixel-art marker on the map)</label>
+                <p class="description">Small PNG (≤ ~96px, transparent background). Used for every map pin — grouped/co-located editions collapse into one sprite with no date. Leave empty for the built-in default pin.</p>
+                <div class="fc-media">
+                    <input type="hidden" class="fc-media-input" name="fc_field[pin_sprite]" value="<?php echo esc_attr($pin_sprite); ?>">
+                    <div class="fc-media-preview"><?php if ($pin_sprite !== '') : ?><img src="<?php echo esc_url($pin_sprite); ?>" alt=""><?php endif; ?></div>
+                    <button type="button" class="button fc-media-pick"><?php echo $pin_sprite !== '' ? 'Replace image' : 'Select image'; ?></button>
+                    <button type="button" class="button fc-media-clear"<?php echo $pin_sprite === '' ? ' style="display:none"' : ''; ?>>Remove</button>
+                </div>
             </div>
             <?php
             fc_repeater([
@@ -99,6 +112,13 @@ function fc_admin_page_venue() {
             ?>
 
             <h2 style="margin-top:2rem;">Travel cards (How to get here)</h2>
+            <?php
+            fc_bilingual_field('getting_here', $values, [
+                'label'          => 'Section label (the small heading shown beside the travel cards)',
+                'placeholder_en' => 'Getting here',
+                'placeholder_el' => 'Πώς θα έρθεις',
+            ]);
+            ?>
             <?php
             fc_repeater([
                 'name'      => 'fc_travel',

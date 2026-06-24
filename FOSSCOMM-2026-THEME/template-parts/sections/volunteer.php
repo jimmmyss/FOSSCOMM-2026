@@ -128,12 +128,18 @@ if ($has_cfp) : ?>
                     ]); ?>
                 </div>
                 <?php if ($card_body['en'] !== '' || $card_body['el'] !== '') : ?>
-                    <div class="mt-3 pl-8 text-base text-ink-muted leading-relaxed space-y-1 max-w-sm">
+                    <div class="mt-3 pl-8 text-base text-ink-muted leading-relaxed space-y-3 max-w-sm">
                         <?php if ($card_body['en'] !== '') : ?>
-                            <p lang="en"><?php echo fc_format($card_body['en']); ?></p>
+                            <div lang="en">
+                                <?php echo fc_lang_label('en'); ?>
+                                <p class="mt-1"><?php echo fc_format($card_body['en']); ?></p>
+                            </div>
                         <?php endif; ?>
                         <?php if ($card_body['el'] !== '') : ?>
-                            <p class="opacity-80"><?php echo fc_format($card_body['el']); ?></p>
+                            <div>
+                                <?php echo fc_lang_label('el'); ?>
+                                <p class="opacity-80 mt-1"><?php echo fc_format($card_body['el']); ?></p>
+                            </div>
                         <?php endif; ?>
                     </div>
                 <?php endif; ?>

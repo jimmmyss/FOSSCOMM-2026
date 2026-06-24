@@ -60,16 +60,32 @@ function fc_enqueue_assets() {
         FC_THEME_VERSION
     );
     wp_enqueue_script(
-        'fc-coastlines',
-        FC_THEME_URI . '/assets/dist/fc-coastlines.js',
+        'fc-app',
+        FC_THEME_URI . '/assets/dist/fc.js',
         [],
         FC_THEME_VERSION,
         true
     );
+    // MapLibre GL JS (v5 — globe projection) + the venue map island. Loaded from
+    // CDN, matching the Tailwind-from-CDN pattern above. Map data is OpenFreeMap
+    // (no API key, no usage cap); the recoloured style is built in venue-map.js.
+    wp_enqueue_style(
+        'maplibre-gl',
+        'https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css',
+        [],
+        '5'
+    );
     wp_enqueue_script(
-        'fc-app',
-        FC_THEME_URI . '/assets/dist/fc.js',
-        ['fc-coastlines'],
+        'maplibre-gl',
+        'https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js',
+        [],
+        '5',
+        true
+    );
+    wp_enqueue_script(
+        'fc-venue-map',
+        FC_THEME_URI . '/assets/venue-map.js',
+        ['maplibre-gl'],
         FC_THEME_VERSION,
         true
     );
@@ -156,6 +172,33 @@ function fc_inline_theme_config() {
 }
 </style>
     <?php
+}
+
+/**
+ * Custom site cursor (FOSSCOMM → Appearance). `cursor` is an inherited CSS
+ * property, so setting it on <html> cascades everywhere; the pointer variant
+ * (or the default cursor when none is set) overrides it on interactive
+ * elements. Emitted only when an image is uploaded — otherwise the site keeps
+ * the system cursor. Front-end only (wp_head), so the WP admin is untouched.
+ */
+add_action('wp_head', 'fc_inline_cursor_css', 6);
+function fc_inline_cursor_css() {
+    $a = get_option('fc_appearance', []);
+    if (!is_array($a)) return;
+    $cursor  = (string) ($a['cursor'] ?? '');
+    $pointer = (string) ($a['cursor_pointer'] ?? '');
+    if ($cursor === '' && $pointer === '') return;
+
+    $css = '';
+    if ($cursor !== '') {
+        $css .= 'html{cursor:url("' . esc_url_raw($cursor) . '") 0 0,auto}';
+    }
+    $ptr = $pointer !== '' ? $pointer : $cursor;
+    if ($ptr !== '') {
+        $css .= 'a,button,[role="button"],summary,label,.fc-nav-link,.fc-year-btn,.cursor-pointer{cursor:url("'
+            . esc_url_raw($ptr) . '") 0 0,pointer}';
+    }
+    echo "\n<style id=\"fc-cursor\">" . $css . "</style>\n";
 }
 
 add_action('after_switch_theme', 'fc_on_activate');

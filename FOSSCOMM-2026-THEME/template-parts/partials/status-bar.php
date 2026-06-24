@@ -28,7 +28,7 @@ document.addEventListener('click', function (e) {
     }
 });
 </script>
-<header class="fixed top-0 inset-x-0 z-50 h-10 border-b border-border bg-paper font-mono text-[11px] uppercase tracking-wider" <?php echo fc_island_attrs('status-bar', ['eventStart' => fc_get_event_start_iso()]); ?>>
+<header class="fixed top-0 inset-x-0 z-50 h-10 border-b border-border bg-paper font-mono text-[11px] uppercase tracking-wider<?php echo fc_is_landing_page() ? ' fc-topbar-blue' : ''; ?>" <?php echo fc_island_attrs('status-bar', ['eventStart' => fc_get_event_start_iso()]); ?>>
     <!-- Left padding matches the section-nav (px-4 until lg, lg:pl-5) so the
          "FOSSCOMM…" brand starts at the exact same horizontal offset as the
          "00 / HOME" link in the nav strip below it on every breakpoint.

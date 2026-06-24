@@ -37,6 +37,10 @@ if (window.location.hash) {
     requestAnimationFrame(scrollToTarget)
     window.addEventListener('load', scrollToTarget, { once: true })
   }
+} else {
+  // No hash → always begin at the very top (the intro curtain plays from here,
+  // and a reload no longer leaves you part-way down the page).
+  window.scrollTo(0, 0)
 }
 
 // Re-enable CSS smooth-scroll only after the page has finished loading. During
@@ -56,6 +60,52 @@ if (document.readyState === 'complete') {
   // scroll-restoration window for any reasonable navigation.
   setTimeout(enableSmoothScroll, 800)
 }
+
+// ---------- Global in-page anchor smooth-scroll ----------
+// Makes EVERY same-page hash link behave the same: hero/sponsor/footer CTAs
+// (href="#schedule"…), FAQ anchors, and a `#section` typed straight into the URL
+// bar all smooth-scroll to their target. Runs on every page, independent of the
+// sidebar nav (which keeps its own handler — we skip [data-fc-nav-link] here so
+// it isn't handled twice). Robust by design: it scrolls with JS instead of
+// relying on the browser's native hash jump or the CSS `scroll-behavior`.
+const fcPrefersReducedMotion =
+  window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+function fcSmoothScrollToEl(el) {
+  const top = el.getBoundingClientRect().top + window.scrollY
+  window.scrollTo({ top, behavior: fcPrefersReducedMotion ? 'auto' : 'smooth' })
+}
+
+// The on-THIS-page element id an anchor points at, or null. Uses the anchor's
+// resolved .pathname/.host/.hash, so both href="#x" and a full
+// "https://site/page#x" work, while links to another page return null.
+function fcSamePageHashTarget(a) {
+  if (!a || !a.hash) return null
+  if (a.pathname !== window.location.pathname || a.host !== window.location.host) return null
+  const id = decodeURIComponent(a.hash.slice(1))
+  return id && document.getElementById(id) ? id : null
+}
+
+document.addEventListener('click', (e) => {
+  // Bail if something already handled it (the dead-anchor guard or the mobile
+  // tap-to-scramble in hover-scramble.js both preventDefault), and let modified
+  // clicks (open-in-new-tab/window) keep their native behaviour.
+  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+  const a = e.target && e.target.closest && e.target.closest('a[href]')
+  if (!a || a.hasAttribute('data-fc-nav-link')) return
+  const id = fcSamePageHashTarget(a)
+  if (!id) return
+  e.preventDefault()
+  fcSmoothScrollToEl(document.getElementById(id))
+})
+
+// A hash typed/pasted into the URL bar (or back/forward between hashes) on the
+// page that's already open: scroll to it smoothly too.
+window.addEventListener('hashchange', () => {
+  const id = window.location.hash ? decodeURIComponent(window.location.hash.slice(1)) : ''
+  const el = id ? document.getElementById(id) : null
+  if (el) fcSmoothScrollToEl(el)
+})
 
 const THRESHOLD = 0.35
 
@@ -91,37 +141,40 @@ function init() {
   // same gap that sits between the top bar and the first link. Desktop only;
   // the panel is hidden < lg and falls back to 2.5rem until this runs.
   function measureSectionsEnd() {
-    if (isMobileNav() || links.length === 0) return
-    const statusBar = document.querySelector('[data-fc-island="status-bar"]')
-    const topBarH = statusBar ? statusBar.offsetHeight : 40
-    const firstTop = links[0].getBoundingClientRect().top
-    const lastBottom = links[links.length - 1].getBoundingClientRect().bottom
-    const gap = Math.max(0, firstTop - topBarH)
-    document.documentElement.style.setProperty('--fc-sections-end', lastBottom + gap + 'px')
+    if (isMobileNav()) return
+    // The nav rail's <nav> is sticky at top:40px (lg:top-10) once locked, so its
+    // stuck bottom is 40 + the nav's own content height. Measuring offsetHeight
+    // is position-independent — correct even before the rail scrolls into view
+    // (it starts at the Manifesto line, off-screen on Home).
+    const navEl = document.querySelector('[data-fc-section-nav]')
+    if (!navEl) return
+    document.documentElement.style.setProperty('--fc-sections-end', (40 + navEl.offsetHeight) + 'px')
   }
 
-  // Mobile only: make the fixed FOSSCOMM bar behave like the venue/schedule
-  // sticky bars but bounded by the HERO section — pinned at the top through
-  // all of home, then scrolling out exactly as hero's bottom (the next
-  // section's line) passes. The section-nav rides directly beneath it and
-  // slides up to top:0 in lockstep as the bar leaves. Pure transform, so it's
-  // independent of DOM order; hero's overflow-hidden rules out CSS sticky here.
+  // Top-bar chrome, driven off the HERO's bottom edge — the actual Manifesto
+  // section line, NOT a scroll-percentage threshold. The sidebar itself is a
+  // pure CSS-sticky rail (template-parts/partials/section-nav.php), so JS never
+  // touches it.
+  //   • Mobile: the blue bar slides up and off as Home leaves (its sliding-away
+  //     is the only "hide" — the section-nav rail then locks at the top on its
+  //     own as you reach Manifesto).
+  //   • Desktop: the bar stays put and flips blue→white the moment the Manifesto
+  //     line reaches it.
   const statusBar = document.querySelector('[data-fc-island="status-bar"]')
-  function syncHomeChrome() {
-    if (!isMobileNav()) {
-      if (statusBar) statusBar.style.transform = ''
-      nav.style.transform = ''
-      return
-    }
+  const isLanding = document.body.classList.contains('fc-landing')
+  function chrome() {
+    if (!isLanding || !statusBar) return
     const hero = document.getElementById('hero')
-    const barH = statusBar ? statusBar.offsetHeight : 40
-    let offset = 0
-    if (hero) {
-      const heroBottom = hero.getBoundingClientRect().bottom
-      offset = Math.max(-barH, Math.min(0, heroBottom - barH))
+    const barH = statusBar.offsetHeight || 40
+    const heroBottom = hero ? hero.getBoundingClientRect().bottom : -barH
+    if (isMobileNav()) {
+      const offset = Math.max(-barH, Math.min(0, heroBottom - barH))
+      statusBar.style.transform = 'translateY(' + offset + 'px)'
+      statusBar.classList.add('fc-topbar-blue')        // stays blue; it slides away
+    } else {
+      statusBar.style.transform = ''
+      statusBar.classList.toggle('fc-topbar-blue', heroBottom > barH)  // white once past the line
     }
-    if (statusBar) statusBar.style.transform = 'translateY(' + offset + 'px)'
-    nav.style.transform = 'translateY(' + Math.max(0, barH + offset) + 'px)'
   }
 
   function setActive(key) {
@@ -153,10 +206,10 @@ function init() {
   window.addEventListener('resize', tick)
   tick()
 
-  window.addEventListener('scroll', syncHomeChrome, { passive: true })
-  window.addEventListener('resize', syncHomeChrome)
-  window.addEventListener('load', syncHomeChrome)
-  syncHomeChrome()
+  window.addEventListener('scroll', chrome, { passive: true })
+  window.addEventListener('resize', chrome)
+  window.addEventListener('load', chrome)
+  chrome()
 
   measureSectionsEnd()
   requestAnimationFrame(measureSectionsEnd)

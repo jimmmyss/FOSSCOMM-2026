@@ -1,3 +1,16 @@
+/* Qaroxe — 16px bitmap accent face from wepfont.com (via dafont). Used by
+   .fc-accent (every *asterisk* span produced by fc_format()) and by
+   .fc-hero-year-outline (the blue title year in the hero). Drop the file at
+   assets/fonts/Qaroxe.ttf — the URL below is relative to this stylesheet.
+   font-display: swap so paint isn't blocked while the .ttf loads. */
+@font-face {
+    font-family: "Qaroxe";
+    src: url("./fonts/Qaroxe.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 /* `scroll-behavior` is `auto` until the page has finished loading; the
    `.fc-scroll-smooth` class is added by assets/section-nav.js after the load
    event. Reason: with smooth set during load, the browser's scroll-restoration
@@ -8,6 +21,22 @@
 html.fc-scroll-smooth {
     scroll-behavior: smooth;
 }
+
+/* --------------------------------------------------------------------------
+   Global mobile (phone) text down-scale.
+   On phones we shrink the ROOT font-size, so every rem-based piece of content
+   — section titles, paragraphs/body, CTA labels, info-row values, FAQ text,
+   schedule / sponsor / venue copy, etc. — scales down ~12.5% together with its
+   rem spacing (so proportions stay balanced, just smaller). The site chrome is
+   sized in fixed px and is therefore UNTOUCHED: the section-nav sidebar
+   (.fc-nav-link, 11px), the section eyebrows, the 19th-Panhellenic / email /
+   socials lines, and the mobile bars all keep their size. Desktop and tablet
+   (>= 768px) are unaffected.
+   -------------------------------------------------------------------------- */
+@media (max-width: 767.98px) {
+    html { font-size: 87.5%; }
+}
+
 
 /* Body must be TRANSPARENT so the global wave-canvas (assets/wave-bg.js,
    appended to body with z-index: -1) is visible. In CSS painting order
@@ -101,9 +130,26 @@ html, body {
 
 /* Global *asterisk* highlight applied by fc_format(). Editors wrap any segment
    in *…* in any admin field and it renders in the theme accent colour on the
-   front-end. Inherits font-weight/size so it never breaks line metrics. */
-.fc-accent {
+   front-end. Inherits font-weight/size so it never breaks line metrics.
+   Typography swap: Qaroxe is the dedicated accent face — same blue treatment
+   is also applied to the hero title year (.fc-hero-year-outline).
+   Doubled class selector + !important on font-family: bumps specificity above
+   Tailwind v4's font utilities (.font-display etc) on ancestors, since the
+   Tailwind browser build injects its compiled CSS after this stylesheet. */
+.fc-accent.fc-accent {
     color: var(--color-accent, #0033FF);
+    font-family: "Qaroxe", var(--font-display, "Space Grotesk"), ui-sans-serif, system-ui, sans-serif !important;
+}
+
+/* Global %fine print% aside applied by fc_format(): wrap any segment in %…% in an
+   admin field and it renders small + muted-grey on the front-end — e.g. a
+   parenthetical gloss inside a big title. Size is relative (em) so it scales to
+   whatever text it sits in; bump 0.5em to taste. Doubled class beats Tailwind
+   utilities injected after this stylesheet (same trick as .fc-accent above). */
+.fc-fine.fc-fine {
+    font-size: 0.5em;
+    font-weight: 400;
+    color: var(--color-ink-muted, #6B6B66);
 }
 
 .fc-nav-no-scrollbar::-webkit-scrollbar { display: none; }
@@ -139,6 +185,26 @@ html, body {
 .fc-topbar-brand { cursor: pointer; }
 .fc-topbar-brand:hover,
 .fc-topbar-brand:focus-visible { color: var(--accent); outline: none; }
+
+/* ── Landing-page home chrome ────────────────────────────────────────────────
+   The section-nav sidebar is a CSS-sticky rail anchored to the post-hero column
+   (template-parts/partials/section-nav.php + front-page.php's .fc-rest), so it
+   starts at the Manifesto section line on its own — no JS show/hide here.
+
+   Top bar: blue over Home, flips to white the moment the Manifesto section line
+   reaches it (assets/section-nav.js, off the hero's bottom edge — not a scroll
+   threshold) — an instant swap (no fade). `.fc-topbar-blue` is server-rendered
+   on the landing page so there's no first-paint flash. The doubled-up overrides
+   use !important to beat the inline Tailwind utilities on the bar + its spans. */
+.fc-topbar-blue {
+    background-color: var(--color-accent, #0033FF) !important;
+    border-bottom-color: rgba(255, 255, 255, 0.28) !important;
+}
+.fc-topbar-blue,
+.fc-topbar-blue * { color: #fff !important; }
+.fc-topbar-blue .opacity-50 { opacity: 0.65 !important; }
+.fc-topbar-blue .fc-topbar-brand:hover,
+.fc-topbar-blue .fc-topbar-brand:focus-visible { color: rgba(255, 255, 255, 0.75) !important; }
 
 /* ── Sponsors: centered balanced rows, per-tier sizing, logo hover swap ──── */
 /* Sizes use clamp(min, vw, max) so every tier rescales together, fluidly,   */

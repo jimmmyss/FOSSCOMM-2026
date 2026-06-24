@@ -61,6 +61,33 @@
         }
         if (!hasAlt) return;
 
+        // --- Stable hitbox ------------------------------------------------
+        // Reserve the LINK's hitbox at its default-content width, so swapping to
+        // a SHORTER hover label can't shrink the link out from under the cursor
+        // (which would yank the hitbox away → mouseleave → revert/grow →
+        // mouseenter → … a rapid flicker loop). We pin the LINK — not the label
+        // spans — so the text + trailing arrow still pack tightly together (the
+        // arrow stays right next to the actual text); the reserved slack sits
+        // PAST the arrow, inside the hitbox. Re-measured after fonts load and on
+        // resize, since the labels change size at the md breakpoint.
+        function pinLink() {
+            var cs = window.getComputedStyle ? window.getComputedStyle(link) : null;
+            if (cs && cs.display === 'inline') link.style.display = 'inline-block';  // make min-width apply to plain <a>
+            link.style.minWidth = '';                      // release to read natural width
+            var w = link.getBoundingClientRect().width;
+            if (w > 0) link.style.minWidth = w + 'px';
+        }
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(pinLink);
+        } else {
+            pinLink();
+        }
+        var repinTimer;
+        window.addEventListener('resize', function () {
+            clearTimeout(repinTimer);
+            repinTimer = setTimeout(pinLink, 200);
+        }, { passive: true });
+
         function scrambleTo(attr) {
             targets.forEach(function (el) {
                 var to = el.getAttribute(attr);
@@ -70,7 +97,7 @@
                 // Greek span disappear (and vice versa).
                 if (to === null) return;
                 if (typeof window.fcScramble === 'function') {
-                    window.fcScramble(el, to);
+                    window.fcScramble(el, to);   // global type-in reveal (see scramble.js)
                 } else {
                     el.textContent = to;     // graceful fallback if scramble.js failed
                 }
