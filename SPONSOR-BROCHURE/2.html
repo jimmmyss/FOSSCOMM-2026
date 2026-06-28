@@ -74,11 +74,11 @@
   .left .h1-outline {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 132px;
+    font-size: 110px;
     line-height: 0.84;
     letter-spacing: -0.045em;
     color: transparent;
-    -webkit-text-stroke: 2px #fff;
+    -webkit-text-stroke: 2.5px #fff;
     margin: 0;
     /* Auto margins on h1 (top) and lead (bottom) split the leftover space,
        so the title + paragraph block sits centred between the top eyebrow
@@ -100,7 +100,7 @@
     margin-bottom: 12px;
   }
   .left .lead p {
-    margin: 0;
+    margin: 0 0 14px;
     font-family: var(--font-sans);
     font-size: 17px;
     line-height: 1.6;
@@ -109,6 +109,10 @@
   }
   .left .lead.el p { color: rgba(255,255,255,.78); font-size: 16px; }
   .left .lead em { font-style: normal; color: #fff; font-weight: 600; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+  .left .lead a { color: #fff; text-decoration: underline; text-decoration-color: rgba(255,255,255,.32); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  /* Reference appended inside the link — muted, inline-block so the underline
+     covers only the point and stops before the source (matches the right side). */
+  .left .lead a .src { color: rgba(255,255,255,.55); font-size: 13px; white-space: nowrap; margin-left: 5px; display: inline-block; }
 
   /* Pillars block — structured to mirror 1.html's right-bottom strip:
      1px top rule + 1px vertical dividers between cells, no gap, mono label
@@ -130,7 +134,8 @@
     font-family: var(--font-mono);
     font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.14em;
+    white-space: nowrap;
     color: rgba(255,255,255,.72);
     margin-bottom: 8px;
   }
@@ -165,11 +170,11 @@
      stacked border-top on every other item handles the in-between lines. */
   .va .item {
     border-top: 1px solid var(--border);
-    padding: 18px 0;
+    padding: 14px 0;
     display: grid;
     grid-template-columns: 60px 1fr;
     column-gap: 22px;
-    row-gap: 10px;
+    row-gap: 8px;
   }
   .va .item:last-of-type { border-bottom: 1px solid var(--border); }
   .va .item .num {
@@ -251,6 +256,18 @@
     font-size: 12.5px;
     margin-top: 1px;
   }
+  /* Source citation appended to a bullet — muted and a touch smaller so the
+     claim reads first and the attribution sits quietly behind it. */
+  .va .item .bullets li .src { color: color-mix(in oklab, #0A0A0A 28%, transparent); font-size: 11.5px; white-space: nowrap; margin-left: 5px; display: inline-block; }
+  /* A sourced bullet whose whole line links out — claim ink, source muted,
+     with a very faint underline as a quiet clickable cue. */
+  .va .item .bullets li a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--border);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
 </style>
 </head>
 <body>
@@ -261,29 +278,28 @@
       <div class="eyebrow"><span class="dot"></span>2 of 5</div>
 
       <h1 class="h1-outline">
-        Why<br/>
-        sponsor<br/>
-        <span class="fill">us<span style="color:#fff">?</span></span>
+        <span class="fill">WHY<br/>
+        SPONSOR</span><br/>
+        US?
       </h1>
 
       <div class="lead">
-        <p>
-          FOSSCOMM is the only event in Greece where hundreds of free-software practitioners of all experience levels sit in the same room for two days.</p>
-          <em>Sponsoring is the inverse of buying ad placement.</em>
+        <p>Developers who choose and maintain open-source software are the most valuable audience in technology and the hardest one to reach. Their work sits inside almost everything and currently <a href="https://www.blackduck.com/content/dam/black-duck/en-us/reports/rep-ossra.pdf" target="_blank" rel="noopener">appears in 98% of all commercial codebases.<span class="src">Black Duck</span></a></p>
+        <p>To this audience, what you choose to fund says more than anything you could advertise. This community trusts what its own people vouch for. Back the work they value, and the message lands on its own.</p>
       </div>
 
       <div class="pillars">
         <div>
-          <div class="k">Editions</div>
-          <div class="v">19</div>
+          <div class="k">Expected Attendees</div>
+          <div class="v">500+</div>
         </div>
         <div>
-          <div class="k"> Expected Attendees</div>
-          <div class="v">~800</div>
+          <div class="k">Presentations</div>
+          <div class="v">50+</div>
         </div>
         <div>
-          <div class="k">Participants</div>
-          <div class="v">60+</div>
+          <div class="k">Communities</div>
+          <div class="v">30+</div>
         </div>
       </div>
     </div>
@@ -294,36 +310,36 @@
         <div class="num">/01</div>
         <div class="title-row">
           <div class="title">
-            <span class="title-en">Community reach</span>
+            <span class="title-en">Hire FOSS talent</span>
           </div>
         </div>
         <div class="split">
           <div>
-            <p class="para">Two days, around 800 participants. Professionals, students, researchers and contributors from across the open-source ecosystem.</p>
+            <p class="para">Recruiting engineers is one of tech's most expensive problems, and open-source talent is the scarcest of all. A single recruiter placement can cost more than your entire sponsorship. Here, you meet that talent in person, over two days.</p>
           </div>
           <ul class="bullets">
-            <li>engineers, students, academia, gov IT</li>
-            <li>high returning attendees percentage, 18 years unbroken</li>
-            <li>live streaming and recorded content reaching audiences beyond the venue</li>
+            <li><a href="https://training.linuxfoundation.org/wp-content/uploads/2022/06/OpenSourceJobsReport2022_FINAL.pdf" target="_blank" rel="noopener">93% of employers struggle to find enough open-source talent.<span class="src"> Linux Foundation</span></a></li>
+            <li><a href="https://training.linuxfoundation.org/wp-content/uploads/2020/10/OpenSourceJobsReport_2020_Final-1.pdf" target="_blank" rel="noopener">63% of companies already contribute to open source just to recruit from it.<span class="src">  Linux Foundation</span></a></li>
+            <li>Meet students, graduates and contributors who already know your stack.</li>
           </ul>
         </div>
       </div>
-
+      
       <div class="item">
         <div class="num">/02</div>
         <div class="title-row">
           <div class="title">
-            <span class="title-en">Brand placement</span>
+            <span class="title-en">Community trust</span>
           </div>
         </div>
         <div class="split">
           <div>
-            <p class="para">Your logo travels with the event across digital platforms, physical spaces and the live broadcast.</p>
+            <p class="para">These aren't just passive attendees, they're the engineers and team leads who choose what their organisations adopt and they're rarely all in one place. Two days at this event is direct access to them, as a name they associate with supporting the work they value.</p>
           </div>
           <ul class="bullets">
-            <li>Logo on every section of the live site & the permanent archive</li>
-            <li>Branding on printed materials and venue signage</li>
-            <li>Mentions during opening and closing ceremonies</li>
+            <li><a href="https://www.devopsdigest.com/the-growing-importance-of-developers-to-the-modern-enterprise" target="_blank" rel="noopener">~75% of developers have significant or complete influence over what their organisation buy. <span class="src"> IDC</span></a></li>
+            <li><a href="https://survey.stackoverflow.co/2024/work" target="_blank" rel="noopener">62% have a direct say in their company's technology purchases. <span class="src"> Stack Overflow</span></a></li>
+            <li>Seen as a trusted peer and a contributor to open source, rather than an advertiser interrupting it.</li>
           </ul>
         </div>
       </div>
@@ -332,17 +348,18 @@
         <div class="num">/03</div>
         <div class="title-row">
           <div class="title">
-            <span class="title-en">Hire FOSS talent</span>
+            <span class="title-en">Targeted exposure</span>
           </div>
         </div>
         <div class="split">
           <div>
-            <p class="para">Your booth brings you closer to the people behind the projects, tools, and communities shaping the open source ecosystem.</p>
+            <p class="para">Your logo across the site, signage, broadcast, recordings and the archive that stays online for as long as the internet exists. Your name is in places this audience actually looks, that most advertising never touches.</p>
           </div>
           <ul class="bullets">
-            <li>Post-event jobs page, live for 6 months</li>
-            <li>Many attendees are students, recent graduates and early-career professionals exploring opportunities in open source and technology</li>
-            <li>Conversations at FOSSCOMM often lead to internships, jobs and collaborations</li>
+            <li><a href="https://www.marketingtechnews.net/news/developers-use-adblockers-and-dont-engage-online-ads/" target="_blank" rel="noopener">72% of developers use an ad blocker regularly, versus 11% of internet users.<span class="src"> Stack Overflow</span></a></li>
+            <li><a href="https://www.marketingtechnews.net/news/developers-use-adblockers-and-dont-engage-online-ads/" target="_blank" rel="noopener">62% have stopped visiting a site because of its advertising.<span class="src"> Stack Overflow</span></a></li>
+            <li><a href="https://www.marketingtechnews.net/news/developers-use-adblockers-and-dont-engage-online-ads/" target="_blank" rel="noopener">48% of developers will research a product without ever clicking an ad.<span class="src"> Stack Overflow</span></a></li>
+            <li>Your name in a context this audience chooses to be in. Seen on their terms, in a setting where they're actually paying attention.</li>
           </ul>
         </div>
       </div>
@@ -351,18 +368,17 @@
         <div class="num">/04</div>
         <div class="title-row">
           <div class="title">
-            <span class="title-en">Direct engagement</span>
+            <span class="title-en">Share your work</span>
           </div>
         </div>
         <div class="split">
           <div>
-            <p class="para">More than logo placement. A presence at the event, a chance to share your work and gain recognition from the community.</p>
+            <p class="para">These are open-source engineers who actually want to dig into what you're building. Back the event and you're among people who'll dig into the substance and tell you what holds up and what doesn't. It's a community that notices who's genuinely invested in open source, whether you're sharing it across a table or from the stage.</p>
           </div>
           <ul class="bullets">
-            <li>Booth: 3 × 2 m (Plat.) · 2 × 2 m (Gold) · shared (Silver)</li>
-            <li>Sponsor talk: 25 min (Plat.) or 10 min (Gold)</li>
-            <li>Direct line to the organising committee · pre-event check-ins</li>
-            <li>Named on stage in the Day-2 closing panel</li>
+            <li><a href="https://survey.stackoverflow.co/2025/work" target="_blank" rel="noopener">Developers adopt or reject technology on substance like security, pricing and quality, not marketing.<span class="src"> Stack Overflow</span></a></li>
+            <li>Get technical feedback straight from practitioners who'd actually use what you build.</li>
+            <li>Companies and organizations that actively support the open-source ecosystem are the ones we <span style="color: var(--accent);">most want to feature</span>.</li>
           </ul>
         </div>
       </div>
