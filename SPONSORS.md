@@ -10,6 +10,6 @@
 ### ![Bronze](https://img.shields.io/badge/BRONZE-B87333?style=for-the-badge&labelColor=333333)
 
 
-### ![Community](https://img.shields.io/badge/COMMUNITY-FFFFFF?style=for-the-badge&labelColor=333333:
+### ![Community](https://img.shields.io/badge/COMMUNITY-FFFFFF?style=for-the-badge&labelColor=333333)
 
 * GFOSS
