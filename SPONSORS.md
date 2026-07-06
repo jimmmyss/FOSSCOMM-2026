@@ -1,10 +1,15 @@
-### ![Diamond](https://placehold.co/180x40/transparent/67E8F9.svg?text=DIAMOND&font=Montserrat)
+### ![Diamond](https://img.shields.io/badge/DIAMOND-67E8F9?style=for-the-badge&labelColor=333333)
 
-### ![Gold](https://placehold.co/120x40/transparent/E5C55B.svg?text=GOLD&font=Montserrat)
 
-### ![Silver](https://placehold.co/140x40/transparent/8C929B.svg?text=SILVER&font=Montserrat)
+### ![Gold](https://img.shields.io/badge/GOLD-E5C55B?style=for-the-badge&labelColor=333333)
 
-### ![Bronze](https://placehold.co/160x40/transparent/B87333.svg?text=BRONZE&font=Montserrat)
 
-### ![COMMUNITY](https://placehold.co/160x40/transparent/FFFFFF.svg?text=COMMUNITY&font=Montserrat)
+### ![Silver](https://img.shields.io/badge/SILVER-8C929B?style=for-the-badge&labelColor=333333)
+
+
+### ![Bronze](https://img.shields.io/badge/BRONZE-B87333?style=for-the-badge&labelColor=333333)
+
+
+### ![Community](https://img.shields.io/badge/COMMUNITY-FFFFFF?style=for-the-badge&labelColor=333333:
+
 * GFOSS
