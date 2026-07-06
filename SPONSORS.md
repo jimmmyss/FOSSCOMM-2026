@@ -1,10 +1,10 @@
-### DIAMOND:
+### <span style="color: #67E8F9">DIAMOND:</span>
 
-### GOLD:
+### <span style="color: #E5C55B">GOLD:</span>
 
-### SILVER:
+### <span style="color: #8C929B">SILVER:</span>
 
-### BRONZE:
+### <span style="color: #B87333">BRONZE:</span>
 
 ### COMMUNITY:
-- GFOSS
+* GFOSS
