@@ -1,10 +1,10 @@
-## DIAMOND:
+### DIAMOND:
 
-## GOLD:
+### GOLD:
 
-## SILVER:
+### SILVER:
 
-## BRONZE:
+### BRONZE:
 
-## COMMUNITY:
+### COMMUNITY:
 - GFOSS
