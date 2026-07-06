@@ -7,4 +7,4 @@
 ## BRONZE:
 
 ## COMMUNITY:
--GFOSS
+- GFOSS
