@@ -18,7 +18,7 @@
     min-height: 100vh;
   }
 
-  .fc {
+  .fc { 
     --paper: #FAFAF7;
     --ink: #0A0A0A;
     --accent: #0033FF;
@@ -66,7 +66,7 @@
     flex: 1;
     display: grid;
     grid-template-columns: 1.15fr 1fr;
-    gap: 72px;
+    gap: 120px;
     align-items: center;
     padding: 32px 0;
     min-height: 0;
@@ -98,7 +98,7 @@
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: rgba(255,255,255,.7);
-    margin-bottom: 10px;
+    margin-bottom: 18px;
   }
   .card .v {
     font-family: var(--font-display);
@@ -107,6 +107,28 @@
     line-height: 1.1;
     letter-spacing: -0.018em;
     color: #fff;
+  }
+  .card .v a,
+  .card .meta a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .card .org + .org { margin-top: 22px; }
+  .card .org .v { font-size: 22px; }
+
+  /* Social media links */
+  .socials {
+    display: flex;
+    gap: 18px;
+    margin-top: 12px;
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 14.5px;
+    color: rgba(255,255,255,.82);
+  }
+  .socials a {
+    color: inherit;
+    text-decoration: none;
   }
   .card .meta {
     margin-top: 10px;
@@ -117,7 +139,15 @@
     color: rgba(255,255,255,.82);
   }
   .card .meta + .meta { margin-top: 4px; }
-  .card + .card { padding-top: 32px; border-top: 1px solid rgba(255,255,255,.22); }
+  .card + .card { padding-top: 32px; position: relative; }
+  .card + .card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 50%;
+    height: 1px;
+    background: rgba(255,255,255,.32);
+  }
 
   /* Footer 'made with love' line — matches the size and colour of the
      removed "See you on..." sub-line (mono, 17px, .78 white, 0.22em). */
@@ -140,29 +170,46 @@
 
     <div class="split">
       <div class="left">
-        <h1>Thank<br/><span class="fill">you!</span></h1>
+        <h1><span class="fill">Thank</span><br/>you!</h1>
       </div>
 
       <div class="right">
         <div class="card">
-          <div class="k">Sponsorship · next step</div>
-          <div class="v">fosscomm2026@gmail.com</div>
-          <div class="meta">Pre-event check-in scheduled September 2026.</div>
+          <div class="k">Talk to us</div>
+          <div class="v"><a href="mailto:info@fosscomm.gr">info@fosscomm.gr</a></div>
+          <div class="meta">Don't worry, actual humans read these. Deadline is Sept 30.</div>
         </div>
 
         <div class="card">
-          <div class="k">Fiscal host · GFOSS</div>
-          <div class="v">Open Technologies Alliance</div>
-          <div class="meta">64A Skoufa Str · 10680 Athens · Greece</div>
-          <div class="meta">VAT EL 997 955 830</div>
-          <div class="meta">+30 210 809 4862 · info@gfoss.eu</div>
+          <div class="k">In collaboration with</div>
+
+          <div class="org">
+            <div class="v"><a href="https://gfoss.eu" target="_blank" rel="noopener">GFOSS - Open Technologies Alliance</a></div>
+            <div class="meta"><a href="https://maps.app.goo.gl/CpZuJbhSKP97joAM6" target="_blank" rel="noopener">Iroon Politechniou 9 · Zografou 157 73 · Athens · Greece</a></div>
+            <div class="meta"><a href="tel:+302102209380">+30 210 220 9380</a></div>
+            <div class="meta"><a href="mailto:info@gfoss.eu">info@gfoss.gr</a></div>
+          </div>
+
+          <div class="org">
+            <div class="v"><a href="https://www.uniwa.gr" target="_blank" rel="noopener">UNIWA - University of West Attica</a></div>
+            <div class="meta"><a href="https://maps.app.goo.gl/oo8QsEvmbfHPbcgTA" target="_blank" rel="noopener">Thivon 250 · Egaleo 122 44 · Athens · Greece</a></div>
+            <div class="meta"><a href="tel:+302105381100">+30 210 538 1100</a></div>
+          </div>
         </div>
 
         <div class="card">
-          <div class="k">Community channels</div>
-          <div class="v">@fosscomm@fosstodon.org</div>
-          <div class="meta">github.com/FOSSCOMM</div>
-          <div class="meta">#fosscomm on libera.chat</div>
+          <div class="k">Fiscal host</div>
+
+          <div class="org">
+            <div class="v"><a href="https://geekos.org/" target="_blank" rel="noopener">Geeko Foundation</a></div>
+            <div class="meta"><a href="https://maps.app.goo.gl/dgg8PqUARwSNA8X86" target="_blank" rel="noopener">102 Fulham Palace Road · London W6 9PL · United Kingdom</a></div>
+            <div class="meta"><a href="mailto:info@geekos.org">info@geekos.org</a></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="k">Learn more</div>
+          <div class="v"><a href="https://2026.fosscomm.gr" target="_blank" rel="noopener">2026.fosscomm.gr</a></div>
         </div>
       </div>
     </div>
