@@ -30,6 +30,12 @@
     --red: #FF1E1E;
     --border: color-mix(in oklab, #0A0A0A 12%, transparent);
     --border-strong: color-mix(in oklab, #0A0A0A 24%, transparent);
+    /* Tier accent colours (mirror the .tcard.tier-* definitions) — reusable
+       for per-bullet colouring via the b-<tier> classes below. */
+    --c-diamond: #67E8F9;
+    --c-gold: #E5C55B;
+    --c-silver: #8C929B;
+    --c-bronze: #B87333;
     --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
     --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
@@ -183,24 +189,99 @@
 
   .tcard .pitch { font-family: var(--font-sans); font-size: 14.5px; line-height: 1.5; color: var(--ink-muted); margin: 0; }
   .tcard.featured .pitch, .tcard.ink .pitch { color: rgba(255,255,255,.82); }
-  .tcard hr { border: 0; border-top: 1px solid var(--border); margin: 0; }
+  .tcard hr { border: 0; border-top: 2px solid var(--border); margin: 0; }
   .tcard.featured hr, .tcard.ink hr { border-top-color: rgba(255,255,255,.24); }
 
   .tcard ul.benefits { list-style: none; margin: 0; padding: 0; font-family: var(--font-sans); font-size: 14.5px; line-height: 1.5; color: var(--ink); }
-  .tcard ul.benefits li { padding: 5px 0 5px 22px; position: relative; }
-  .tcard ul.benefits li::before { content: "+"; position: absolute; left: 0; top: 5px; font-family: var(--font-mono); color: var(--accent); font-weight: 600; font-size: 14px; }
+  .tcard ul.benefits li { position: relative; padding: 5px 0 5px 22px; line-height: 1; }
+  /* Body text keeps the roomy 1.5 line-height via the wrapper span, while the
+     li itself has a tight line-height (strut) — so a wrapped line that holds
+     only the small muted note sits shorter and closer than a body-text line. */
+  .tcard ul.benefits li > span { line-height: 1.5; }
+  /* "+" pinned to the first line (absolute + hanging indent, like 6.html);
+     line-height matches the body text so it sits centred on that first line. */
+  .tcard ul.benefits li::before { content: "+"; position: absolute; left: 0; top: 5px; font-family: var(--font-mono); color: var(--accent); font-weight: 600; font-size: inherit; line-height: 1.5; }
   .tcard.featured ul.benefits, .tcard.ink ul.benefits { color: rgba(255,255,255,.94); }
   .tcard.featured ul.benefits li::before, .tcard.ink ul.benefits li::before { color: #fff; }
+
+  /* ─── Metallic tier accents — the card keeps its original background
+     (Diamond blue, Gold black, Silver/Bronze white). The tier colour is
+     applied to the outline and the "inside" accents (name, hairline and
+     bullet markers). The "/0x TIER" label and body copy stay muted so the
+     label reads the same on every card. The four metal tiers share a 3px
+     outline; Custom and In-kind use 2px. ─── */
+  .tcard.tier { border-color: var(--tier); }
+  .tcard.tier .name { color: var(--tier); }
+  .tcard.tier hr { border-top-color: color-mix(in oklab, var(--tier) 55%, transparent); }
+  .tcard.tier ul.benefits li::before { color: var(--tier); }
+
+  /* Per-bullet tier colour — add a b-<tier> class to any <li> to tint its
+     "+" marker that tier's colour (e.g. a Bronze perk listed inside Gold),
+     so it's easy to tell apart. Overrides the card's own tier colour. */
+  .tcard ul.benefits li.b-diamond::before { color: var(--c-diamond); }
+  .tcard ul.benefits li.b-gold::before    { color: var(--c-gold); }
+  .tcard ul.benefits li.b-silver::before  { color: var(--c-silver); }
+  .tcard ul.benefits li.b-bronze::before  { color: var(--c-bronze); }
+
+  .tcard ul.benefits li .muted-note {
+    color: var(--ink-muted);
+    font-size: 10px;
+    /* Give the note's line box the SAME leading as a body line, so a wrapped
+       muted-only line spaces exactly like a body line (even gaps everywhere).
+       Body line = 14.5px × 1.5 = 21.75px → 7.25px leading; 10px + 7.25 = 17.25px. */
+    line-height: 17.25px;
+  }
+  /* On the dark cards the note follows the pitch/description colour so it
+     stays legible (plain --ink-muted vanishes on blue/black). */
+  .tcard.featured ul.benefits li .muted-note,
+  .tcard.ink ul.benefits li .muted-note { color: rgba(255,255,255,.82); }
+  /* 5.html-style hatched frame — uniform 2px outer border in the sponsor
+     colour + a diagonal-hatch ring, with an inset plate the content sits on
+     (bottom stays open per the .tcard rule). --fill = card background,
+     --stripe = hatch colour, --tier = border colour. */
+  .tcard.framed {
+    position: relative;
+    border-top-width: 2px; border-left-width: 2px; border-right-width: 2px;
+    border-color: var(--tier);
+    background-color: var(--fill);
+    background-image: linear-gradient(135deg, var(--stripe) 25%, transparent 25%, transparent 50%, var(--stripe) 50%, var(--stripe) 75%, transparent 75%, transparent);
+    background-size: 12px 12px;
+  }
+  .tcard.framed::before { content: ''; position: absolute; inset: 8px 8px 0 8px; background: var(--fill); z-index: 0; }
+  .tcard.framed > * { position: relative; z-index: 1; }
+
+  .tcard.tier-diamond { --tier: var(--c-diamond); --fill: var(--accent); --stripe: color-mix(in oklab, var(--c-diamond) 60%, transparent); border-top-width: 3px; border-left-width: 3px; border-right-width: 3px; }
+  .tcard.tier-gold    { --tier: #E5C55B; --fill: var(--ink);    --stripe: color-mix(in oklab, #E5C55B 55%, transparent); border-top-width: 3px; border-left-width: 3px; border-right-width: 3px; }
+  .tcard.tier-silver  { --tier: #8C929B; --fill: var(--paper);  --stripe: color-mix(in oklab, #8C929B 55%, transparent); border-top-width: 3px; border-left-width: 3px; border-right-width: 3px; }
+  .tcard.tier-bronze  { --tier: #B87333; --fill: var(--paper);  --stripe: color-mix(in oklab, #B87333 50%, transparent); border-top-width: 3px; border-left-width: 3px; border-right-width: 3px; }
+  .tcard.tier-custom  { --tier: var(--accent); --fill: var(--accent); --stripe: rgba(255,255,255,.28); border-color: transparent; border-top-width: 3px; border-left-width: 3px; border-right-width: 3px; }
+  .tcard.tier-inkind  { --tier: var(--ink);    --fill: var(--ink);    --stripe: rgba(255,255,255,.22); border-color: transparent; border-top-width: 3px; border-left-width: 3px; border-right-width: 3px; }
+
+  /* Custom keeps its hatch on the bottom too (closed box); In-kind and the
+     metal tiers open at the bottom. Inset is 5px (not 8px) so the hatch — 5px
+     of plate gap + the 3px transparent border it bleeds through — reads 8px
+     wide, matching the metal tiers' hatch, but with no visible border line. */
+  .tcard.framed.tier-custom::before { inset: 5px 5px 8px 5px; }
+  .tcard.framed.tier-inkind::before { inset: 5px 5px 0 5px; }
+
+  /* Dotted inner plate on the blue/black filled cards — restores the texture. */
+  .tcard.tier-diamond::before, .tcard.tier-custom::before { background-image: radial-gradient(circle, rgba(255,255,255,.18) 1.25px, transparent 1.25px); background-size: 16px 16px; }
+  .tcard.tier-gold::before, .tcard.tier-inkind::before { background-image: radial-gradient(circle, rgba(255,255,255,.14) 1.25px, transparent 1.25px); background-size: 16px 16px; }
+
+  /* Bottom border removed so cards "open" at the page's bottom edge — matches
+     4.html, so Diamond/Gold frame on 3 sides like Silver/Bronze instead of
+     showing a tinted bottom line. */
+  .tcard { border-bottom: 0; }
 
   .tcard .ribbon { position: absolute; top: 16px; right: -10px; font-family: var(--font-mono); font-weight: 600; font-size: 18px; letter-spacing: 0.22em; text-transform: uppercase; background: #fff; color: var(--accent); padding: 10px 20px; border: 1px solid #fff; }
 
   /* Spec-tall layout specific tweaks */
-  .tcard.spec { padding: 36px 36px 30px; gap: 18px; }
-  .tcard.spec .name { font-size: 64px; }
+  .tcard.spec { padding: 36px 36px 30px; gap: 16px; }
+  .tcard.spec .name { font-size: 44px; }
   .tcard.spec .name small { font-size: 22px; }
-  .tcard.spec .price { font-size: 96px; }
-  .tcard.spec .pitch { font-size: 17px; max-width: 480px; }
-  .tcard.spec ul.benefits { font-size: 16px; line-height: 1.5; }
+  .tcard.spec .price { font-size: 64px; }
+  .tcard.spec .pitch { font-size: 14.5px; max-width: 480px; }
+  .tcard.spec ul.benefits { font-size: 14.5px; line-height: 1.5; }
 
   /* Right side wrapper — static dot grid background (matches 1.html). */
   .fc .right-paper {
@@ -253,59 +334,66 @@
   <div class="fc split">
     <div class="left-blue">
       <div class="eyebrow"><span class="dot"></span>3 of 5</div>
-      <h1 class="h1-outline" style="font-size: 132px;">
-        The two<br/>headline<br/><span class="fill">tiers.</span>
+      <h1 class="h1-outline" style="font-size: 110px;">
+        <span class="fill">BECOME A</span><br/>SPONSOR
       </h1>
       <div class="lead">
-        <p>Platinum and Gold are the two tiers that go on the conference t-shirt and the printed programme. Confirm before 30 September 2026 or it's web-only.</p>
+        <p>Diamond and Gold are the two tiers that go on the conference t-shirt and the printed programme. Confirm before 30 September 2026 or it's web-only.</p>
       </div>
     </div>
 
     <div class="right-paper">
       <div class="layout-c-right">
         <div class="pair">
-          <div class="tcard spec featured">
-            <div class="tier-num">/01 TIER</div>
-            <div>
-              <div class="name">Platinum</div>
+          <div class="tcard spec featured tier tier-diamond framed">
+            <div class="top">
+              <div class="tier-num">/01 TIER</div>
+              <div class="tier-num">Limited to 3 spots</div>
             </div>
             <div>
-              <div class="price">€2 000</div>
+              <div class="name">Diamond</div>
+            </div>
+            <div>
+              <div class="price">€2.000</div>
             </div>
             <p class="pitch">For organizations that build their infrastructure on FOSS and are ready to make a significant, public investment in the community's future.</p>
             <hr/>
             <ul class="benefits">
-             <li>3min. Lightning Talk Presentation.</li>
-             <li>"Thank You" mention in opening Session and Social Media.</li>
-             <li>"Thank You" mention in closing Session and Social Media.</li>
-             <li>Distribute Promotional Material During the Event.</li>
-             <li>Featured logo in event's home page, posters and sponsors page with description.</li>
-             <li>Featured Logo in Conference Videos and on Badge.</li>
-             <li>Company banner in reception and hacking area</li>
-             <li>Reserved Recruiting, Meeting and Interview Area + Space on the "Job Board"</li>
+              <li class="b-diamond"><span><span style="color: var(--c-diamond);">Floor space</span> in the main hall with an optional desk and chairs </span><span class="muted-note">(Custom booth, monitors and activities are welcome; location choosen by <span style="color: var(--c-diamond);">YOU</span>)</span>.</li>
+              <li class="b-diamond"><span><span style="color: var(--c-diamond);">Headline</span> logo placement on the website, kept permanently in the archive, on-site signage, on-screen sponsor slide, attendee badges, lanyards, t-shirts and talk recordings.</span></li>
+              <li class="b-diamond"><span>Featured in a "Thank You! <3" shared <span style="color: var(--c-diamond);">post</span> on our social media </span><span class="muted-note">(alongside all <span style="color: var(--c-diamond);">Diamond</span> sponsors)</span>.</span></li>
+              <li class="b-diamond tight"><span>Exclusive "<span style="color: var(--c-diamond);">Stamp Rally</span>" checkpoint at your booth </span><span class="muted-note">(attendees collect a stamp at your booth; a full set from every diamond booth enters them in a prize raffle; prizes are provided by us; you're more than welcome to add your own to the pool)</span>.</li>
+              <li class="b-diamond"><span>Live "<span style="color: var(--c-diamond);">Sponsor Spotlight</span>" interview </span><span class="muted-note">(on-site recorded interview based on community crowd-sourced questions; published on social media and on our website)</span>.</li>
+              <li class="b-diamond"><span>Open to <span style="color: var(--c-diamond);">collaboration</span> </span><span class="muted-note">(if you have more creative ideas that you want to be incorporated; we're open to making it happen)</span>.</li>
+              <li class="b-diamond"><span>First <span style="color: var(--c-diamond);">right of refusal</span> to return next year.</span></li>
+              <li class="b-gold"><span>Public "Thank You! <3" mention from the main stage during the opening and closing remarks.</span></li>
+              <li class="b-gold"><span>Access to our opt-in CV database </span><span class="muted-note">(GDPR-compliant list of attendees who explicitly shared their resumes during registration)</span>.</li>
+              <li class="b-bronze"><span>Permanent credit in the conference's open-source repository </span><span class="muted-note">(SPONSORS.md)</span>.</li>
+              <li class="b-bronze"><span>Right to feature open roles on the physical and digital job boards.</span></li>
+              <li class="b-bronze"><span>Dedicated mention in the official post-conference wrap-up email sent to all registered attendees.</span></li>
             </ul>
           </div>
 
-          <div class="tcard spec ink">
+          <div class="tcard spec ink tier tier-gold framed">
             <div class="tier-num">/02 TIER</div>
             <div>
               <div class="name">Gold</div>
             </div>
             <div>
-              <div class="price">€1 200</div>
+              <div class="price">€1.200</div>
             </div>
             <p class="pitch">For established companies and institutions that want a prominent, reliable presence and a long-term partnership with the project.</p>
             <hr/>
-            <ul class="benefits">
-              <li>3min. Lightning Talk Presentation.</li>
-              <li>"Thank You" mention in opening Session and Social Media.</li>
-              <li>"Thank You" mention in closing Session and Social Media.</li>
-              <li>Distribute Promotional Material During the Event.</li>
-              <li>Featured logo in event's home page, posters and sponsors page with description.</li>
-              <li>Featured Logo in Conference Videos and on Badge.</li>
-              <li>Company banner in reception and hacking area</li>
-              <li>Space on the "Job Board"</li>
-            </ul>
+              <ul class="benefits">
+                <li class="b-gold"><span><span style="color: var(--c-gold);">Floor space</span> in the main hall with an optional desk and chairs </span><span class="muted-note">(Custom booth, monitors and activities are welcome; location assigned by organizers)</span>.</li>
+                <li class="b-gold"><span><span style="color: var(--c-gold);">Large</span> logo placement on the website, kept permanently in the archive, on-site signage and on-screen sponsor slide.</span></li>              
+                <li class="b-gold"><span>Public "Thank You! <3" mention from the main stage during the <span style="color: var(--c-gold);">opening</span> and <span style="color: var(--c-gold);">closing</span> remarks.</span></li>
+                <li class="b-gold"><span>Featured in a "Thank You! <3" shared <span style="color: var(--c-gold);">post</span> on our social media </span><span class="muted-note">(alongside all <span style="color: var(--c-gold);">Gold</span> sponsors)</span>.</span></li>
+                <li class="b-gold"><span>Access to our opt-in <span style="color: var(--c-gold);">CV database</span> </span><span class="muted-note">(GDPR-compliant list of attendees who explicitly shared their resumes during registration)</span>.</li>
+                <li class="b-bronze"><span>Permanent credit in the conference's open-source repository </span><span class="muted-note">(SPONSORS.md)</span>.</li>
+                <li class="b-bronze"><span>Right to feature open roles on the physical and digital job boards.</span></li>
+                <li class="b-bronze"><span>Dedicated mention in the official post-conference wrap-up email sent to all registered attendees.</span></li>
+              </ul>
           </div>
         </div>
       </div>

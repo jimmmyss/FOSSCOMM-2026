@@ -180,7 +180,10 @@
     font-family: var(--font-mono);
     color: var(--accent);
     font-weight: 600;
-    font-size: 13px;
+    /* inherit size + line-height so the "+" centres on the first line
+       (matches 3.html / 4.html) */
+    font-size: inherit;
+    line-height: inherit;
   }
   /* Legal-reference links — plain blue text, no underline (matches the
      "most want to feature" accent span in 2.html); the link is just clickable. */
