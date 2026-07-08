@@ -1,15 +1,14 @@
-### ![Diamond](https://img.shields.io/badge/DIAMOND-67E8F9?style=for-the-badge&labelColor=333333)
+### DIAMOND
 
 
-### ![Gold](https://img.shields.io/badge/GOLD-E5C55B?style=for-the-badge&labelColor=333333)
+### GOLD
 
 
-### ![Silver](https://img.shields.io/badge/SILVER-8C929B?style=for-the-badge&labelColor=333333)
+### SILVER
 
 
-### ![Bronze](https://img.shields.io/badge/BRONZE-B87333?style=for-the-badge&labelColor=333333)
+### BRONZE
 
 
-### ![Community](https://img.shields.io/badge/COMMUNITY-FFFFFF?style=for-the-badge&labelColor=333333)
-
-* GFOSS
+### COMMUNITY
+- GFOSS
