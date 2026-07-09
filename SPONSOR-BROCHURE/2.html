@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>FOSSCOMM 2026 — Page 02 / Why sponsor (Variant A)</title>
+<title>FOSSCOMM 2026 — Page 03.A / Premium Tiers</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,6 +18,7 @@
     min-height: 100vh;
   }
 
+  /* FOSSCOMM theme tokens */
   .fc {
     --paper: #FAFAF7;
     --paper-2: #F2F0E9;
@@ -25,9 +26,16 @@
     --ink-muted: #6B6B66;
     --ink-faint: #C9C7BF;
     --accent: #0033FF;
+    --accent-deep: #0023BB;
     --red: #FF1E1E;
     --border: color-mix(in oklab, #0A0A0A 12%, transparent);
-    --border-on-blue: color-mix(in oklab, white 22%, transparent);
+    --border-strong: color-mix(in oklab, #0A0A0A 24%, transparent);
+    /* Tier accent colours (mirror the .tcard.tier-* definitions) — reusable
+       for per-bullet colouring via the b-<tier> classes below. */
+    --c-diamond: #67E8F9;
+    --c-gold: #E5C55B;
+    --c-silver: #8C929B;
+    --c-bronze: #B87333;
     --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
     --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
@@ -37,27 +45,54 @@
     -webkit-font-smoothing: antialiased;
     font-variant-numeric: tabular-nums;
     width: 1920px; height: 1080px;
-    display: grid;
-    grid-template-columns: 1fr 2fr;
     overflow: hidden;
-    box-shadow: 0 20px 80px rgba(0,0,0,0.4);
+    position: relative;
   }
   .fc * { box-sizing: border-box; }
 
-  /* ─── LEFT — Blue panel ─────────────────────────────────────── */
-  /* Padding matches 1.html's blue half (40 top/bottom, 48 left/right) so the
-     "2 of 6" eyebrow sits in exactly the same spot as 1.html's "1 of 6". */
-  .left {
+  /* Split layout (1/3 blue, 2/3 paper) */
+  .fc.split { display: grid; grid-template-columns: 1fr 2fr; }
+
+  /* Status Bar */
+  .fc .status-bar {
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 44px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(250,250,247,.94);
+    padding: 0 56px;
+    display: flex; align-items: center; gap: 24px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-muted);
+    z-index: 4;
+  }
+  .fc .status-bar .brand { color: var(--ink); font-weight: 500; }
+  .fc .status-bar .blip { width: 8px; height: 8px; background: var(--accent); display: inline-block; }
+  .fc .status-bar .spacer { flex: 1; }
+
+  .fc .micro {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--ink-muted);
+  }
+
+  /* Left blue panel — padding matches 1.html's blue half (40 top/bottom,
+     48 left/right) so the "3 of 6" eyebrow lines up with 1.html's. */
+  .fc .left-blue {
     background: var(--accent);
     color: #fff;
     padding: 40px 48px;
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 28px;
     position: relative;
     overflow: hidden;
   }
-  .left .eyebrow {
+  .fc .left-blue .eyebrow {
     font-family: var(--font-mono);
     font-weight: 600;
     font-size: 18px;
@@ -66,318 +101,297 @@
     color: rgba(255,255,255,.72);
     display: flex; align-items: center; gap: 12px;
   }
-  .left .h1-outline {
+  .fc .left-blue .h1-outline {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 110px;
     line-height: 0.84;
     letter-spacing: -0.045em;
-    color: transparent;
-    -webkit-text-stroke: 2.5px #fff;
     margin: 0;
-    /* Auto margins on h1 (top) and lead (bottom) split the leftover space,
-       so the title + paragraph block sits centred between the top eyebrow
-       and the bottom pillars strip. */
+    color: transparent;
+    -webkit-text-stroke: 2px #fff;
+    /* Combined with .summary's margin-top: auto, this centres the title +
+       lead block vertically between the eyebrow and the bottom summary. */
     margin-top: auto;
   }
-  .left .h1-outline .fill { color: #fff; -webkit-text-stroke: 0; }
-  .left .lead {
-    margin-top: 8px;
-    margin-bottom: auto;
-  }
-  .left .lead .lang {
-    display: block;
-    font-family: var(--font-mono);
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.22em;
-    color: rgba(255,255,255,.78);
-    margin-bottom: 12px;
-  }
-  .left .lead p {
-    margin: 0 0 14px;
+  .fc .left-blue .h1-outline .fill { color: #fff; -webkit-text-stroke: 0; }
+  .fc .left-blue .lead { margin-top: 4px; margin-bottom: auto; }
+  /* Title + paragraph sizes match 2.html's left blue. */
+  .fc .left-blue .lead p {
+    margin: 0;
     font-family: var(--font-sans);
     font-size: 17px;
     line-height: 1.6;
     color: #fff;
     max-width: 460px;
   }
-  .left .lead.el p { color: rgba(255,255,255,.78); font-size: 16px; }
-  .left .lead em { font-style: normal; color: #fff; font-weight: 600; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
-  .left .lead a { color: #fff; text-decoration: underline; text-decoration-color: rgba(255,255,255,.32); text-decoration-thickness: 1px; text-underline-offset: 3px; }
-  /* Reference appended inside the link — muted, inline-block so the underline
-     covers only the point and stops before the source (matches the right side). */
-  .left .lead a .src { color: rgba(255,255,255,.55); font-size: 13px; white-space: nowrap; margin-left: 5px; display: inline-block; }
-
-  /* Pillars block — structured to mirror 1.html's right-bottom strip:
-     1px top rule + 1px vertical dividers between cells, no gap, mono label
-     on top and big display value below. */
-  .left .pillars {
-    padding-top: 22px;
+  .fc .left-blue .summary {
+    margin-top: auto;
+    padding-top: 20px;
     border-top: 1px solid rgba(255,255,255,.32);
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 0;
-  }
-  .left .pillars > div {
-    padding-right: 28px;
-    border-right: 1px solid rgba(255,255,255,.32);
-  }
-  .left .pillars > div:nth-child(2) { padding-left: 28px; }
-  .left .pillars > div:last-child { padding-left: 28px; border-right: 0; }
-  .left .pillars .k {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     text-transform: uppercase;
-    letter-spacing: 0.14em;
-    white-space: nowrap;
-    color: rgba(255,255,255,.72);
-    margin-bottom: 8px;
+    letter-spacing: 0.18em;
+    color: rgba(255,255,255,.78);
+    line-height: 1.7;
   }
-  .left .pillars .v {
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 26px;
-    letter-spacing: -0.012em;
+  .fc .left-blue .summary b {
+    display: inline-block;
     color: #fff;
-    line-height: 1.1;
+    font-weight: 500;
+    margin-right: 6px;
   }
 
-  /* ─── RIGHT — Paper Content ────────────────────────────────── */
-  /* Vertically centered so the four items sit in the middle of the panel
-     once the top eyebrow strip is gone — matches 1.html's centred body.
-     Same static dot grid as 1.html's right side. */
-  .right {
+  /* Tier card setup */
+  .tcard {
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    padding: 26px 26px 22px;
+    display: flex; flex-direction: column; gap: 14px;
+    position: relative;
+    min-height: 0;
+  }
+  .tcard.featured {
+    background-color: var(--accent);
+    background-image: radial-gradient(circle, rgba(255,255,255,.18) 1.25px, transparent 1.25px);
+    background-size: 16px 16px;
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .tcard.ink {
+    background-color: var(--ink);
+    background-image: radial-gradient(circle, rgba(255,255,255,.14) 1.25px, transparent 1.25px);
+    background-size: 16px 16px;
+    color: #fff;
+    border-color: var(--ink);
+  }
+
+  .tcard .top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .tcard .rank { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-muted); }
+  .tcard.featured .rank, .tcard.ink .rank { color: rgba(255,255,255,.7); }
+  .tcard .slots { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink); padding: 3px 8px; border: 1px solid var(--border-strong); }
+  .tcard.featured .slots, .tcard.ink .slots { border-color: rgba(255,255,255,.42); color: #fff; }
+
+  .tcard .name { font-family: var(--font-display); font-weight: 600; font-size: 44px; line-height: 0.95; letter-spacing: -0.025em; color: var(--ink); }
+  .tcard.featured .name, .tcard.ink .name { color: #fff; }
+  .tcard .name small { display: block; font-family: var(--font-display); font-weight: 500; font-size: 18px; letter-spacing: -0.01em; color: var(--ink-muted); margin-top: 4px; }
+  .tcard.featured .name small, .tcard.ink .name small { color: rgba(255,255,255,.65); }
+
+  .tcard .price { font-family: var(--font-display); font-weight: 600; font-size: 64px; line-height: 1; letter-spacing: -0.035em; color: var(--ink); }
+  .tcard.featured .price, .tcard.ink .price { color: #fff; }
+  .tcard .price-suffix { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--ink-muted); margin-top: 4px; }
+  .tcard.featured .price-suffix, .tcard.ink .price-suffix { color: rgba(255,255,255,.65); }
+
+  .tcard .pitch { font-family: var(--font-sans); font-size: 14.5px; line-height: 1.5; color: var(--ink-muted); margin: 0; }
+  .tcard.featured .pitch, .tcard.ink .pitch { color: rgba(255,255,255,.82); }
+  .tcard hr { border: 0; border-top: 2px solid var(--border); margin: 0; }
+  .tcard.featured hr, .tcard.ink hr { border-top-color: rgba(255,255,255,.24); }
+
+  .tcard ul.benefits { list-style: none; margin: 0; padding: 0; font-family: var(--font-sans); font-size: 14.5px; line-height: 1.5; color: var(--ink); }
+  .tcard ul.benefits li { position: relative; padding: 5px 0 5px 22px; line-height: 1; }
+  /* Body text keeps the roomy 1.5 line-height via the wrapper span, while the
+     li itself has a tight line-height (strut) — so a wrapped line that holds
+     only the small muted note sits shorter and closer than a body-text line. */
+  .tcard ul.benefits li > span { line-height: 1.5; }
+  /* "+" pinned to the first line (absolute + hanging indent, like 6.html);
+     line-height matches the body text so it sits centred on that first line. */
+  .tcard ul.benefits li::before { content: "+"; position: absolute; left: 0; top: 5px; font-family: var(--font-mono); color: var(--accent); font-weight: 600; font-size: inherit; line-height: 1.5; }
+  .tcard.featured ul.benefits, .tcard.ink ul.benefits { color: rgba(255,255,255,.94); }
+  .tcard.featured ul.benefits li::before, .tcard.ink ul.benefits li::before { color: #fff; }
+
+  /* ─── Metallic tier accents — the card keeps its original background
+     (Diamond blue, Gold black, Silver/Bronze white). The tier colour is
+     applied to the outline and the "inside" accents (name, hairline and
+     bullet markers). The "/0x TIER" label and body copy stay muted so the
+     label reads the same on every card. The four metal tiers share a 3px
+     outline; Custom and In-kind use 2px. ─── */
+  .tcard.tier { border-color: var(--tier); }
+  .tcard.tier .name { color: var(--tier); }
+  .tcard.tier hr { border-top-color: color-mix(in oklab, var(--tier) 55%, transparent); }
+  .tcard.tier ul.benefits li::before { color: var(--tier); }
+
+  /* Per-bullet tier colour — add a b-<tier> class to any <li> to tint its
+     "+" marker that tier's colour (e.g. a Bronze perk listed inside Gold),
+     so it's easy to tell apart. Overrides the card's own tier colour. */
+  .tcard ul.benefits li.b-diamond::before { color: var(--c-diamond); }
+  .tcard ul.benefits li.b-gold::before    { color: var(--c-gold); }
+  .tcard ul.benefits li.b-silver::before  { color: var(--c-silver); }
+  .tcard ul.benefits li.b-bronze::before  { color: var(--c-bronze); }
+
+  .tcard ul.benefits li .muted-note {
+    color: var(--ink-muted);
+    font-size: 10px;
+    /* Give the note's line box the SAME leading as a body line, so a wrapped
+       muted-only line spaces exactly like a body line (even gaps everywhere).
+       Body line = 14.5px × 1.5 = 21.75px → 7.25px leading; 10px + 7.25 = 17.25px. */
+    line-height: 17.25px;
+  }
+  /* On the dark cards the note follows the pitch/description colour so it
+     stays legible (plain --ink-muted vanishes on blue/black). */
+  .tcard.featured ul.benefits li .muted-note,
+  .tcard.ink ul.benefits li .muted-note { color: rgba(255,255,255,.82); }
+  /* 5.html-style hatched frame — uniform 2px outer border in the sponsor
+     colour + a diagonal-hatch ring, with an inset plate the content sits on
+     (bottom stays open per the .tcard rule). --fill = card background,
+     --stripe = hatch colour, --tier = border colour. */
+  .tcard.framed {
+    position: relative;
+    border-top-width: 2px; border-left-width: 2px; border-right-width: 2px;
+    border-color: var(--tier);
+    background-color: var(--fill);
+    background-image: linear-gradient(135deg, var(--stripe) 25%, transparent 25%, transparent 50%, var(--stripe) 50%, var(--stripe) 75%, transparent 75%, transparent);
+    background-size: 12px 12px;
+  }
+  .tcard.framed::before { content: ''; position: absolute; inset: 8px 8px 0 8px; background: var(--fill); z-index: 0; }
+  .tcard.framed > * { position: relative; z-index: 1; }
+
+  .tcard.tier-diamond { --tier: var(--c-diamond); --fill: var(--accent); --stripe: color-mix(in oklab, var(--c-diamond) 60%, transparent); border-top-width: 3px; border-left-width: 3px; border-right-width: 3px; }
+  .tcard.tier-gold    { --tier: #E5C55B; --fill: var(--ink);    --stripe: color-mix(in oklab, #E5C55B 55%, transparent); border-top-width: 3px; border-left-width: 3px; border-right-width: 3px; }
+  .tcard.tier-silver  { --tier: #8C929B; --fill: var(--paper);  --stripe: color-mix(in oklab, #8C929B 55%, transparent); border-top-width: 3px; border-left-width: 3px; border-right-width: 3px; }
+  .tcard.tier-bronze  { --tier: #B87333; --fill: var(--paper);  --stripe: color-mix(in oklab, #B87333 50%, transparent); border-top-width: 3px; border-left-width: 3px; border-right-width: 3px; }
+  .tcard.tier-custom  { --tier: var(--accent); --fill: var(--accent); --stripe: rgba(255,255,255,.28); border-color: transparent; border-top-width: 3px; border-left-width: 3px; border-right-width: 3px; }
+  .tcard.tier-inkind  { --tier: var(--ink);    --fill: var(--ink);    --stripe: rgba(255,255,255,.22); border-color: transparent; border-top-width: 3px; border-left-width: 3px; border-right-width: 3px; }
+
+  /* Custom keeps its hatch on the bottom too (closed box); In-kind and the
+     metal tiers open at the bottom. Inset is 5px (not 8px) so the hatch — 5px
+     of plate gap + the 3px transparent border it bleeds through — reads 8px
+     wide, matching the metal tiers' hatch, but with no visible border line. */
+  .tcard.framed.tier-custom::before { inset: 5px 5px 8px 5px; }
+  .tcard.framed.tier-inkind::before { inset: 5px 5px 0 5px; }
+
+  /* Dotted inner plate on the blue/black filled cards — restores the texture. */
+  .tcard.tier-diamond::before, .tcard.tier-custom::before { background-image: radial-gradient(circle, rgba(255,255,255,.18) 1.25px, transparent 1.25px); background-size: 16px 16px; }
+  .tcard.tier-gold::before, .tcard.tier-inkind::before { background-image: radial-gradient(circle, rgba(255,255,255,.14) 1.25px, transparent 1.25px); background-size: 16px 16px; }
+
+  /* Bottom border removed so cards "open" at the page's bottom edge — matches
+     4.html, so Diamond/Gold frame on 3 sides like Silver/Bronze instead of
+     showing a tinted bottom line. */
+  .tcard { border-bottom: 0; }
+
+  .tcard .ribbon { position: absolute; top: 16px; right: -10px; font-family: var(--font-mono); font-weight: 600; font-size: 18px; letter-spacing: 0.22em; text-transform: uppercase; background: #fff; color: var(--accent); padding: 10px 20px; border: 1px solid #fff; }
+
+  /* Spec-tall layout specific tweaks */
+  .tcard.spec { padding: 36px 36px 30px; gap: 16px; }
+  .tcard.spec .name { font-size: 44px; }
+  .tcard.spec .name small { font-size: 22px; }
+  .tcard.spec .price { font-size: 64px; }
+  .tcard.spec .pitch { font-size: 14.5px; max-width: 480px; }
+  .tcard.spec ul.benefits { font-size: 14.5px; line-height: 1.5; }
+
+  /* Right side wrapper — static dot grid background (matches 1.html). */
+  .fc .right-paper {
+    position: relative;
     background-color: var(--paper);
     background-image: radial-gradient(circle, var(--border) 1.25px, transparent 1.25px);
     background-size: 16px 16px;
-    padding: 56px 64px 56px 64px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 0;
   }
 
-  /* Variant A Specific Styles */
-  /* Hairline rules at the top AND bottom of the points list — first item
-     keeps its own border-top, last item gets a border-bottom, and the
-     stacked border-top on every other item handles the in-between lines. */
-  .va .item {
-    border-top: 1px solid var(--border);
-    padding: 14px 0;
-    display: grid;
-    grid-template-columns: 60px 1fr;
-    column-gap: 22px;
-    row-gap: 8px;
+  /* Layout container — no top or bottom padding so cards sit flush against
+     both the top and bottom edges of the page (within their height %). */
+  .layout-c-right {
+    padding: 0 56px;
+    height: 100%;
+    display: flex; flex-direction: column;
+    gap: 22px;
+    overflow: hidden;
   }
-  .va .item:last-of-type { border-bottom: 1px solid var(--border); }
-  .va .item .num {
+  /* Equal-width columns; cards anchored to the bottom of the row.
+     Platinum height = 9/10 of the available row height. Gold = 9/10 of 9/10
+     (= 81/100 of the row), i.e. one-tenth shorter than Platinum.
+     Inter-card gap matches the left/right padding (56px) for a square grid. */
+  .layout-c-right .pair {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    align-items: end;
+    gap: 56px;
+    min-height: 0;
+  }
+  .layout-c-right .pair > .tcard:nth-child(1) { height: 90%; }
+  .layout-c-right .pair > .tcard:nth-child(2) { height: 81%; }
+
+  /* Mono tier enumeration above each card name — matches 2.html's /01 etc. */
+  .tcard .tier-num {
     font-family: var(--font-mono);
     font-weight: 600;
     font-size: 18px;
     letter-spacing: 0.22em;
-    color: var(--ink-muted);
-    padding-top: 4px;
-  }
-  .va .item .title-row {
-    display: flex; justify-content: space-between; align-items: flex-start; gap: 18px;
-    grid-column: 2 / 3;
-  }
-  /* Title is now a font-display EN/EL stack — matches 1.html's title pattern
-     (big English, smaller muted Greek directly underneath). */
-  .va .item .title {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .va .item .title .title-en {
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-size: 30px;
-    line-height: 1.0;
-    letter-spacing: -0.025em;
-    color: var(--ink);
-  }
-  .va .item .title .title-el {
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-size: 18px;
-    line-height: 1.25;
-    letter-spacing: -0.025em;
+    text-transform: uppercase;
     color: var(--ink-muted);
   }
-  .va .item .split {
-    grid-column: 2 / 3;
-    display: grid;
-    grid-template-columns: 360px 1fr;
-    gap: 36px;
-    align-items: start;
-  }
-  .va .item .para {
-    font-family: var(--font-sans);
-    font-size: 14px;
-    line-height: 1.5;
-    color: var(--ink);
-    margin: 0;
-  }
-  .va .item .para.el {
-    color: var(--ink-muted);
-    margin-top: 4px;
-  }
-  .va .item .bullets {
-    list-style: none; margin: 0; padding: 0;
-    font-family: var(--font-sans);
-    font-size: 13.5px;
-    line-height: 1.4;
-    color: var(--ink);
-  }
-  .va .item .bullets li {
-    padding: 4px 0 4px 22px;
-    position: relative;
-  }
-  .va .item .bullets li::before {
-    content: "+";
-    position: absolute; left: 0; top: 4px;
-    font-family: var(--font-mono);
-    color: var(--accent);
-    font-weight: 600;
-    font-size: 14px;
-  }
-  .va .item .bullets li .bullet-en { display: block; }
-  .va .item .bullets li .bullet-el {
-    display: block;
-    color: var(--ink-muted);
-    font-size: 12.5px;
-    margin-top: 1px;
-  }
-  /* Source citation appended to a bullet — muted and a touch smaller so the
-     claim reads first and the attribution sits quietly behind it. */
-  .va .item .bullets li .src { color: color-mix(in oklab, #0A0A0A 28%, transparent); font-size: 11.5px; white-space: nowrap; margin-left: 5px; display: inline-block; }
-  /* A sourced bullet whose whole line links out — claim ink, source muted,
-     with a very faint underline as a quiet clickable cue. */
-  .va .item .bullets li a {
-    color: inherit;
-    text-decoration: underline;
-    text-decoration-color: var(--border);
-    text-decoration-thickness: 1px;
-    text-underline-offset: 2px;
-  }
+  .tcard.featured .tier-num,
+  .tcard.ink .tier-num { color: rgba(255,255,255,.7); }
 </style>
 </head>
 <body>
 
-  <div class="fc">
-    
-    <div class="left">
-      <div class="eyebrow">01 / 05</div>
-
-      <h1 class="h1-outline">
-        <span class="fill">WHY<br/>
-        SPONSOR</span><br/>
-        US?
+  <div class="fc split">
+    <div class="left-blue">
+      <div class="eyebrow">02 / 04</div>
+      <h1 class="h1-outline" style="font-size: 110px;">
+        <span class="fill">BECOME</span><br/><span class="fill">OUR</span><br/>SPONSOR
       </h1>
-
       <div class="lead">
-        <p>Developers who choose and maintain open-source software are the most valuable audience in technology and the hardest one to reach. Their work sits inside almost everything and currently <a href="https://www.blackduck.com/content/dam/black-duck/en-us/reports/rep-ossra.pdf" target="_blank" rel="noopener">appears in 98% of all commercial codebases.<span class="src">Black Duck</span></a></p>
-        <p>To this audience, what you choose to fund says more than anything you could advertise. This community trusts what its own people vouch for. Back the work they value, and the message lands on its own.</p>
-      </div>
-
-      <div class="pillars">
-        <div>
-          <div class="k">Expected Attendees</div>
-          <div class="v">500+</div>
-        </div>
-        <div>
-          <div class="k">Presentations</div>
-          <div class="v">50+</div>
-        </div>
-        <div>
-          <div class="k">Communities</div>
-          <div class="v">30+</div>
-        </div>
+        <p>Every tier below is designed around a specific level of community integration. Ranging from a high-traffic physical footprint to lightweight digital visibility with zero logistical overhead, every package is structured clearly with defined benefits. Please note that sponsorships must be confirmed by September 30 to guarantee logo placement on physical event materials.</p>
       </div>
     </div>
 
-    <div class="right va">
+    <div class="right-paper">
+      <div class="layout-c-right">
+        <div class="pair">
+          <div class="tcard spec featured tier tier-diamond framed">
+            <div class="top">
+              <div class="tier-num">/01 TIER</div>
+              <div class="tier-num">Limited to 3 spots</div>
+            </div>
+            <div>
+              <div class="name">Diamond</div>
+            </div>
+            <div>
+              <div class="price">€2.000</div>
+            </div>
+            <p class="pitch">For sponsors who want be the face of our event and represent everything it stands for. You get everything. The most prominent presence and spotlight with your name everywhere it can appear, guaranteed foot traffic, direct access to the community's talent and the creative freedom to make your booth the center of attention.</p>
+            <hr/>
+            <ul class="benefits">
+              <li class="b-diamond"><span><span style="color: var(--c-diamond);">Floor space</span> in the main hall with an optional desk and chairs </span><span class="muted-note">(Custom booth, monitors and activities are welcome; location choosen by <span style="color: var(--c-diamond);">YOU</span>)</span>.</li>
+              <li class="b-diamond"><span><span style="color: var(--c-diamond);">Headline</span> logo placement on the website, kept permanently in the archive, on-site signage, on-screen sponsor slide, attendee badges, lanyards, t-shirts and talk recordings.</span></li>
+              <li class="b-diamond"><span>Featured in a "Thank You! <3" shared <span style="color: var(--c-diamond);">post</span> on our social media </span><span class="muted-note">(alongside all <span style="color: var(--c-diamond);">Diamond</span> sponsors)</span>.</span></li>
+              <li class="b-diamond tight"><span>Exclusive "<span style="color: var(--c-diamond);">Stamp Rally</span>" checkpoint at your booth </span><span class="muted-note">(attendees collect a stamp at your booth; a full set from every <span style="color: var(--c-diamond);">Diamond</span> booth enters them in a prize raffle; prizes are provided by us; you're more than welcome to add your own to the pool)</span>.</li>
+              <li class="b-diamond"><span>Live "<span style="color: var(--c-diamond);">Sponsor Spotlight</span>" interview </span><span class="muted-note">(on-site recorded interview based on community crowd-sourced questions; published on social media and on our website)</span>.</li>
+              <li class="b-diamond"><span>Open to <span style="color: var(--c-diamond);">collaboration</span> </span><span class="muted-note">(if you have more creative ideas that you want to be incorporated; we're open to making it happen)</span>.</li>
+              <li class="b-diamond"><span>First <span style="color: var(--c-diamond);">right of refusal</span> to return next year.</span></li>
+              <li class="b-gold"><span>Public "Thank You! <3" mention from the main stage during the opening and closing remarks.</span></li>
+              <li class="b-gold"><span>Access to our opt-in CV database </span><span class="muted-note">(GDPR-compliant list of attendees who explicitly shared their resumes during registration)</span>.</li>
+              <li class="b-bronze"><span>Permanent credit in the conference's open-source repository </span><span class="muted-note">(SPONSORS.md)</span>.</li>
+              <li class="b-bronze"><span>Right to feature open roles on the physical and digital job boards.</span></li>
+              <li class="b-bronze"><span>Dedicated mention in the official post-conference wrap-up email sent to all registered attendees.</span></li>
+            </ul>
+          </div>
 
-      <div class="item">
-        <div class="num">/01</div>
-        <div class="title-row">
-          <div class="title">
-            <span class="title-en">Hire FOSS talent</span>
+          <div class="tcard spec ink tier tier-gold framed">
+            <div class="tier-num">/02 TIER</div>
+            <div>
+              <div class="name">Gold</div>
+            </div>
+            <div>
+              <div class="price">€1.200</div>
+            </div>
+            <p class="pitch">For sponsors who want to stand out and recruit. You get a prominent custom presence, direct access to the community's talent and permanent digital credit.</p>
+            <hr/>
+              <ul class="benefits">
+                <li class="b-gold"><span><span style="color: var(--c-gold);">Floor space</span> in the main hall with an optional desk and chairs </span><span class="muted-note">(Custom booth, monitors and activities are welcome; location assigned by organizers)</span>.</li>
+                <li class="b-gold"><span><span style="color: var(--c-gold);">Large</span> logo placement on the website, kept permanently in the archive, on-site signage and on-screen sponsor slide.</span></li>              
+                <li class="b-gold"><span>Public "Thank You! <3" mention from the main stage during the <span style="color: var(--c-gold);">opening</span> and <span style="color: var(--c-gold);">closing</span> remarks.</span></li>
+                <li class="b-gold"><span>Featured in a "Thank You! <3" shared <span style="color: var(--c-gold);">post</span> on our social media </span><span class="muted-note">(alongside all <span style="color: var(--c-gold);">Gold</span> sponsors)</span>.</span></li>
+                <li class="b-gold"><span>Access to our opt-in <span style="color: var(--c-gold);">CV database</span> </span><span class="muted-note">(GDPR-compliant list of attendees who explicitly shared their resumes during registration)</span>.</li>
+                <li class="b-bronze"><span>Permanent credit in the conference's open-source repository </span><span class="muted-note">(SPONSORS.md)</span>.</li>
+                <li class="b-bronze"><span>Right to feature open roles on the physical and digital job boards.</span></li>
+                <li class="b-bronze"><span>Dedicated mention in the official post-conference wrap-up email sent to all registered attendees.</span></li>
+              </ul>
           </div>
-        </div>
-        <div class="split">
-          <div>
-            <p class="para">Recruiting engineers is one of tech's most expensive problems, and open-source talent is the scarcest of all. A single recruiter placement can cost more than your entire sponsorship. Here, you meet that talent in person, over two days.</p>
-          </div>
-          <ul class="bullets">
-            <li><a href="https://training.linuxfoundation.org/wp-content/uploads/2022/06/OpenSourceJobsReport2022_FINAL.pdf" target="_blank" rel="noopener">93% of employers struggle to find enough open-source talent.<span class="src"> Linux Foundation</span></a></li>
-            <li><a href="https://training.linuxfoundation.org/wp-content/uploads/2020/10/OpenSourceJobsReport_2020_Final-1.pdf" target="_blank" rel="noopener">63% of companies already contribute to open source just to recruit from it.<span class="src">  Linux Foundation</span></a></li>
-            <li>Meet students, graduates and contributors who already know your stack.</li>
-          </ul>
         </div>
       </div>
-      
-      <div class="item">
-        <div class="num">/02</div>
-        <div class="title-row">
-          <div class="title">
-            <span class="title-en">Community trust</span>
-          </div>
-        </div>
-        <div class="split">
-          <div>
-            <p class="para">These aren't just passive attendees, they're the engineers and team leads who choose what their organisations adopt and they're rarely all in one place. Two days at this event is direct access to them, as a name they associate with supporting the work they value.</p>
-          </div>
-          <ul class="bullets">
-            <li><a href="https://www.devopsdigest.com/the-growing-importance-of-developers-to-the-modern-enterprise" target="_blank" rel="noopener">~75% of developers have significant or complete influence over what their organisation buy. <span class="src"> IDC</span></a></li>
-            <li><a href="https://survey.stackoverflow.co/2024/work" target="_blank" rel="noopener">62% have a direct say in their company's technology purchases. <span class="src"> Stack Overflow</span></a></li>
-            <li>Seen as a trusted peer and a contributor to open source, rather than an advertiser interrupting it.</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="num">/03</div>
-        <div class="title-row">
-          <div class="title">
-            <span class="title-en">Targeted exposure</span>
-          </div>
-        </div>
-        <div class="split">
-          <div>
-            <p class="para">Your logo across the site, signage, broadcast, recordings and the archive that stays online for as long as the internet exists. Your name is in places this audience actually looks, that most advertising never touches.</p>
-          </div>
-          <ul class="bullets">
-            <li><a href="https://www.marketingtechnews.net/news/developers-use-adblockers-and-dont-engage-online-ads/" target="_blank" rel="noopener">72% of developers use an ad blocker regularly, versus 11% of internet users.<span class="src"> Stack Overflow</span></a></li>
-            <li><a href="https://www.marketingtechnews.net/news/developers-use-adblockers-and-dont-engage-online-ads/" target="_blank" rel="noopener">62% have stopped visiting a site because of its advertising.<span class="src"> Stack Overflow</span></a></li>
-            <li><a href="https://www.marketingtechnews.net/news/developers-use-adblockers-and-dont-engage-online-ads/" target="_blank" rel="noopener">48% of developers will research a product without ever clicking an ad.<span class="src"> Stack Overflow</span></a></li>
-            <li>Your name in a context this audience chooses to be in. Seen on their terms, in a setting where they're actually paying attention.</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="item">
-        <div class="num">/04</div>
-        <div class="title-row">
-          <div class="title">
-            <span class="title-en">Share your work</span>
-          </div>
-        </div>
-        <div class="split">
-          <div>
-            <p class="para">These are open-source engineers who actually want to dig into what you're building. Back the event and you're among people who'll dig into the substance and tell you what holds up and what doesn't. It's a community that notices who's genuinely invested in open source, whether you're sharing it across a table or from the stage.</p>
-          </div>
-          <ul class="bullets">
-            <li><a href="https://survey.stackoverflow.co/2025/work" target="_blank" rel="noopener">Developers adopt or reject technology on substance like security, pricing and quality, not marketing.<span class="src"> Stack Overflow</span></a></li>
-            <li>Get technical feedback straight from practitioners who'd actually use what you build.</li>
-            <li>Companies and organizations that actively support the open-source ecosystem are the ones we <span style="color: var(--accent);">most want to feature</span>.</li>
-          </ul>
-        </div>
-      </div>
-
     </div>
   </div>
 

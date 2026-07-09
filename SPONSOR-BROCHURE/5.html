@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>FOSSCOMM 2026 — Page 04 / Past Sponsors</title>
+<title>FOSSCOMM 2026 — Page 05 / Terms & conditions</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -43,18 +43,29 @@
   .fc * { box-sizing: border-box; }
   .fc.split { display: grid; grid-template-columns: 1fr 2fr; grid-template-rows: 1080px; }
 
-  /* ─── LEFT — Blue panel ─────────────────────────────────────── */
-  /* Padding + sizing match 3.html so the eyebrow / title / paragraph
-     sit at the same positions and scale across pages. */
+  .fc .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--ink-muted);
+  }
+  .fc .eyebrow .dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--accent);
+    margin-right: 12px;
+    vertical-align: middle;
+  }
+
+  /* Left blue panel — padding, gap, eyebrow and lead all match 5.html so
+     the page header sits in the same place across the deck. */
   .fc .left-blue {
     background: var(--accent);
     color: #fff;
     padding: 40px 48px;
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-    position: relative;
-    overflow: hidden;
+    display: flex; flex-direction: column; gap: 28px;
+    position: relative; overflow: hidden;
   }
   .fc .left-blue .eyebrow {
     font-family: var(--font-mono);
@@ -73,9 +84,9 @@
     margin: 0;
     color: transparent;
     -webkit-text-stroke: 2px #fff;
-    /* Auto margins on h1 (top) and lead (bottom) split the leftover space,
-       so title + paragraph block sits centred between the top eyebrow
-       and the bottom summary strip. */
+    /* Auto margins on h1 (top) and lead (bottom) split the leftover space
+       so the title + paragraph sit centred between the top eyebrow and
+       the bottom edge of the panel. */
     margin-top: auto;
   }
   .fc .left-blue .h1-outline .fill { color: #fff; -webkit-text-stroke: 0; }
@@ -89,157 +100,90 @@
     max-width: 460px;
   }
 
-  /* Bottom summary strip — mirrors 2.html's pillars block but with 2
-     sections instead of 3 (border-top + a 1px vertical divider between). */
-  .fc .left-blue .summary {
-    padding-top: 22px;
-    border-top: 1px solid rgba(255,255,255,.32);
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-  }
-  .fc .left-blue .summary > div {
-    padding-right: 28px;
-    border-right: 1px solid rgba(255,255,255,.32);
-  }
-  .fc .left-blue .summary > div:last-child {
-    padding-left: 28px;
-    padding-right: 0;
-    border-right: 0;
-  }
-  .fc .left-blue .summary .k {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.22em;
-    color: rgba(255,255,255,.72);
-    margin-bottom: 8px;
-  }
-  .fc .left-blue .summary .v {
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 26px;
-    letter-spacing: -0.012em;
-    color: #fff;
-    line-height: 1.1;
-  }
-
-  /* ─── RIGHT — Paper Content ────────────────────────────────── */
+  /* Right paper — dot grid background, matches other pages. */
   .fc .right-paper {
     position: relative;
     background-color: var(--paper);
     background-image: radial-gradient(circle, var(--border) 1.25px, transparent 1.25px);
     background-size: 16px 16px;
   }
-  .fc .right-paper .body {
-    padding: 56px 56px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 32px;
-    overflow: hidden;
+
+  /* Card grid container */
+  .layout-c {
+    height: 100%; display: flex; flex-direction: column;
+    padding: 56px 56px; gap: 18px; overflow: hidden;
+  }
+  .layout-c .grid {
+    flex: 1; min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 18px;
   }
 
-  /* Generic Logo Container — coloured frame (border + hatched ring) with a
-     clean inner plate the logo sits on, so every logo stays legible no
-     matter what colour its tier frame is. */
-  .logo-ph {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 5 / 2;
-    background-color: var(--paper);
-    background-image: linear-gradient(135deg, var(--ink-faint) 25%, transparent 25%, transparent 50%, var(--ink-faint) 50%, var(--ink-faint) 75%, transparent 75%, transparent);
-    background-size: 12px 12px;
+  /* Key Term Individual Cards — all paper / white */
+  .layout-c .kt {
     border: 1.5px solid var(--ink);
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
-  }
-  .logo-ph::before {
-    content: '';
-    position: absolute;
-    inset: 6px;
+    padding: 22px 24px;
+    display: flex; flex-direction: column;
+    gap: 12px;
+    min-height: 0;
     background: var(--paper);
-    z-index: 1;
   }
-  .logo-ph img {
-    position: relative;
-    z-index: 2;
-    max-width: 82%;
-    max-height: 64%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    display: block;
+  .layout-c .kt .top {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
   }
-
-  /* Filled colour variants — the frame stays accent/ink; the inner plate is
-     inherited (paper) so logos read against it. */
-  .logo-ph.blue {
-    background-color: var(--accent);
-    background-image: linear-gradient(135deg, rgba(255,255,255,.28) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.28) 50%, rgba(255,255,255,.28) 75%, transparent 75%, transparent);
-    border-color: var(--accent);
-  }
-  .logo-ph.blue::before {
-    background-color: var(--accent);
-    background-image: radial-gradient(circle, rgba(255,255,255,.22) 1.25px, transparent 1.25px);
-    background-size: 16px 16px;
-  }
-  .logo-ph.dark {
-    background-color: var(--ink);
-    background-image: linear-gradient(135deg, rgba(255,255,255,.28) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.28) 50%, rgba(255,255,255,.28) 75%, transparent 75%, transparent);
-    border-color: var(--ink);
-  }
-  .logo-ph.dark::before {
-    background-color: var(--ink);
-    background-image: radial-gradient(circle, rgba(255,255,255,.18) 1.25px, transparent 1.25px);
-    background-size: 16px 16px;
-  }
-
-  /* Logo card — shared between feature row and year sections. */
-  .logo-card { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-  .logo-card .date {
+  .layout-c .kt .num {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--ink-muted);
-    line-height: 1.4;
   }
-  .logo-card .date .yr {
-    color: var(--ink);
+  .layout-c .kt .title {
     font-family: var(--font-display);
-    font-size: 18px;
     font-weight: 600;
-    letter-spacing: -0.015em;
-    text-transform: none;
-    display: block;
-    margin-bottom: 2px;
+    font-size: 25px;
+    line-height: 1.0;
+    letter-spacing: -0.018em;
+    color: var(--ink);
   }
-
-  /* Large feature row */
-  .feature-row {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-  }
-
-  /* Year sections — separated by hairline rules in the 2.html style:
-     1px var(--border) border-top on every section. The year for each row is
-     shown on the date label under each logo. */
-  .year-section {
+  .layout-c .kt hr {
+    border: 0;
     border-top: 1px solid var(--border);
-    padding: 22px 0;
+    margin: 0;
   }
-  .year-section .small-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 18px;
+
+  /* Bullets — matches 4.html sponsor card bullets pattern. */
+  .layout-c .kt ul.benefits {
+    list-style: none; margin: 0; padding: 0;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--ink);
   }
-  .year-section.four .small-grid { grid-template-columns: repeat(4, 1fr); }
-  .year-section .logo-card { gap: 10px; }
-  .year-section .logo-card .date { font-size: 10px; }
-  .year-section .logo-card .date .yr { font-size: 14px; margin-bottom: 0; }
+  .layout-c .kt ul.benefits li {
+    padding: 4px 0 4px 22px;
+    position: relative;
+  }
+  .layout-c .kt ul.benefits li::before {
+    content: "+";
+    position: absolute;
+    left: 0; top: 4px;
+    font-family: var(--font-mono);
+    color: var(--accent);
+    font-weight: 600;
+    /* inherit size + line-height so the "+" centres on the first line
+       (matches 3.html / 4.html) */
+    font-size: inherit;
+    line-height: inherit;
+  }
+  /* Legal-reference links — plain blue text, no underline (matches the
+     "most want to feature" accent span in 2.html); the link is just clickable. */
+  .layout-c .kt ul.benefits a {
+    color: var(--accent);
+    text-decoration: none;
+  }
 </style>
 
 </head>
@@ -247,119 +191,113 @@
 
   <div class="fc split">
     <div class="left-blue">
-      <div class="eyebrow">03 / 05</div>
-      <h1 class="h1-outline" style="font-size: 110px;">
-        <span class="fill">PAST</span>
-        SPONSORS<br/>
+      <div class="eyebrow">04 / 04</div>
+
+      <h1 class="h1-outline" style="font-size: 105px;">
+        <span class="fill">TERMS AND</span>
+        CONDITIONS
       </h1>
+
       <div class="lead">
-        <p>A selection of the companies, institutions and open-source foundations that have sponsored FOSSCOMM since 2008.</p>
-      </div>
-      <div class="summary">
-        <div>
-          <div class="k">Editions</div>
-          <div class="v">18</div>
-        </div>
-        <div>
-          <div class="k">Organisations</div>
-          <div class="v">50+</div>
-        </div>
+        <p>The terms below govern sponsorship of FOSSCOMM 2026, organized by the University of West Attica (UniWA) and the Open Technologies Alliance (GFOSS), collectively the "Organizer". By confirming a sponsorship, the sponsor accepts these terms and conditions.</p>
       </div>
     </div>
 
     <div class="right-paper">
-      <div class="body">
+      <div class="layout-c">
+        <div class="grid">
 
-        <!-- Large feature row (blue) -->
-        <div class="feature-row">
-          <div class="logo-card">
-            <div class="logo-ph lg blue"><img src="logos/skroutz.png" alt="Skroutz" style="transform: translateY(-7px);"></div>
-            <div class="date"><span class="yr">2024, 2025</span></div>
+          <div class="kt">
+            <div class="top">
+              <div class="num">/ 01</div>
+            </div>
+            <div>
+              <div class="title">Eligibility &amp; Conduct</div>
+            </div>
+            <hr/>
+            <ul class="benefits">
+              <li>Applications are reviewed at the Organizer's discretion. We may decline any that don't align with FOSSCOMM's mission and values. Sponsors are expected to be committed to FOSS.</li>
+              <li>Sponsors and their on-site staff must follow the conference <a href="https://2026.fosscomm.gr/coc/" target="_blank" rel="noopener">Code of Conduct</a>. The Organizer may approve or decline sponsor materials and booth content, and may remove any sponsor in breach of these terms or the Code without refund.</li>
+              <li>The sponsor may not transfer or assign its sponsorship to another party without the Organizer's written consent.</li>
+            </ul>
           </div>
-          <div class="logo-card">
-            <div class="logo-ph lg blue"><img src="logos/viva.png" alt="Viva"></div>
-            <div class="date"><span class="yr">2017</span></div>
+
+          <div class="kt">
+            <div class="top">
+              <div class="num">/ 02</div>
+            </div>
+            <div>
+              <div class="title">Confirmation &amp; Payment</div>
+            </div>
+            <hr/>
+            <ul class="benefits">
+              <li>On written acceptance, the sponsor provides payment, branding assets in the required format, and its legal name and any trademarks, by the stated deadlines. A formal Sponsorship Agreement can be signed on request, but is not required.</li>
+              <li>Sponsorship fees are quoted in full. Any applicable taxes are shown on the invoice. Branding assets received after the deadline may be left out of already-finalised materials, with no refund.</li>
+              <li>Sponsorships are not confirmed or activated until payment is received in full.</li>
+            </ul>
           </div>
-          <div class="logo-card">
-            <div class="logo-ph lg blue"><img src="logos/deloitte.png" alt="Deloitte"></div>
-            <div class="date"><span class="yr">2024</span></div>
+
+          <div class="kt">
+            <div class="top">
+              <div class="num">/ 03</div>
+            </div>
+            <div>
+              <div class="title">Branding &amp; Promotion</div>
+            </div>
+            <hr/>
+            <ul class="benefits">
+              <li>The sponsor grants the Organizer permission to use the sponsor's name and logo for event promotion and recognition. Sponsorship does not imply the Organizer's endorsement of the sponsor's products or services.</li>
+              <li>The sponsor provides its own banners, signage and promotional materials. These are not produced by the Organizer. Booth space, where included, is allocated at the Organizer's discretion.</li>
+              <li>All other intellectual property remains with its owner. Sponsorship grants no rights beyond those stated, and no category or other exclusivity unless expressly agreed in the Sponsorship Agreement.</li>
+            </ul>
           </div>
+
+          <div class="kt">
+            <div class="top">
+              <div class="num">/ 04</div>
+            </div>
+            <div>
+              <div class="title">Liability &amp; Data Protection</div>
+            </div>
+            <hr/>
+            <ul class="benefits">
+              <li>Each party complies with applicable data protection legislation (<a href="https://eur-lex.europa.eu/eli/reg/2016/679/oj" target="_blank" rel="noopener">GDPR</a> & <a href="https://www.dpa.gr/sites/default/files/2020-08/LAW%204624_2019_EN_TRANSLATED%20BY%20THE%20HDPA.PDF" target="_blank" rel="noopener">Law 4624/2019</a>). Any personal information the Organizer collects is gathered with explicit consent and used only for FOSSCOMM-related purposes. Information attendees choose to share directly with a sponsor is that sponsor's responsibility to handle accordingly.</li>
+              <li>The Organizer's total liability is limited to the sponsorship fee paid, except in cases of gross negligence, willful misconduct, or any liability that cannot be limited under applicable law. The sponsor indemnifies the Organizer against third-party claims arising from its own activities, staff or materials.</li>
+              <li>The Organizer is not liable for loss of or damage to sponsor property by theft, accident, fire or other causes beyond its control. Sponsors insure their own staff and property.</li>
+            </ul>
+          </div>
+
+          <div class="kt">
+            <div class="top">
+              <div class="num">/ 05</div>
+            </div>
+            <div>
+              <div class="title">Funds &amp; Cancellation</div>
+            </div>
+            <hr/>
+            <ul class="benefits">
+              <li>If the event is cancelled, fees are refunded less any non-recoverable costs already incurred. Sponsorships cancelled by the sponsor after acceptance are non-refundable.</li>
+              <li>If circumstances beyond the Organizer's control require the event to move online or to new dates, sponsorship carries over and agreed benefits are adapted accordingly.</li>
+              <li>FOSSCOMM is a non-profit, volunteer-run event. Sponsorships cover the cost of running it and any surplus is allocated at the Organizer's discretion.</li>
+            </ul>
+          </div>
+
+          <div class="kt">
+            <div class="top">
+              <div class="num">/ 06</div>
+            </div>
+            <div>
+              <div class="title">Agreement &amp; Governing Law</div>
+            </div>
+            <hr/>
+            <ul class="benefits">
+              <li>These terms, together with the Organizer's written acceptance, govern the sponsorship. Where a Sponsorship Agreement is signed, it and its schedule are binding and prevail over any inconsistency.</li>
+              <li>The Organizer may make reasonable changes to the program, venue or format without that constituting a breach, and does not guarantee specific attendance or outcomes.</li>
+              <li>Governed by Greek law. Any dispute the parties cannot resolve together falls under the jurisdiction of the courts of Athens. If any clause is invalid, the rest stays in force.</li>
+            </ul>
+          </div>
+
         </div>
-
-        <!-- 4 dark logos -->
-        <div class="year-section four">
-          <div class="small-grid">
-            <div class="logo-card">
-              <div class="logo-ph sm dark"><img src="logos/meta.png" alt="Meta"></div>
-              <div class="date"><span class="yr">2018</span></div>
-            </div>
-            <div class="logo-card">
-              <div class="logo-ph sm dark"><img src="logos/jetbrains.png" alt="JetBrains"></div>
-              <div class="date"><span class="yr">2024</span></div>
-            </div>
-            <div class="logo-card">
-              <div class="logo-ph sm dark"><img src="logos/nbg.png" alt="National Bank of Greece"></div>
-              <div class="date"><span class="yr">2017</span></div>
-            </div>
-            <div class="logo-card">
-              <div class="logo-ph sm dark"><img src="logos/wind.png" alt="Wind"></div>
-              <div class="date"><span class="yr">2017</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 5 logos -->
-        <div class="year-section">
-          <div class="small-grid">
-            <div class="logo-card">
-              <div class="logo-ph sm"><img src="logos/ey.png" alt="EY"></div>
-              <div class="date"><span class="yr">2024</span></div>
-            </div>
-            <div class="logo-card">
-              <div class="logo-ph sm"><img src="logos/enartia.png" alt="Enartia"></div>
-              <div class="date"><span class="yr">2018</span></div>
-            </div>
-            <div class="logo-card">
-              <div class="logo-ph sm"><img src="logos/collabora.png" alt="Collabora"></div>
-              <div class="date"><span class="yr">2018</span></div>
-            </div>
-            <div class="logo-card">
-              <div class="logo-ph sm"><img src="logos/htc.png" alt="HTC"></div>
-              <div class="date"><span class="yr">2011</span></div>
-            </div>
-            <div class="logo-card">
-              <div class="logo-ph sm"><img src="logos/onlyoffice.png" alt="OnlyOffice"></div>
-              <div class="date"><span class="yr">2022, 2024</span></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 5 logos -->
-        <div class="year-section">
-          <div class="small-grid">
-            <div class="logo-card">
-              <div class="logo-ph sm"><img src="logos/mozillafoundation.png" alt="Mozilla Foundation"></div>
-              <div class="date"><span class="yr">2012</span></div>
-            </div>
-            <div class="logo-card">
-              <div class="logo-ph sm"><img src="logos/redhat.png" alt="Red Hat"></div>
-              <div class="date"><span class="yr">2012</span></div>
-            </div>
-            <div class="logo-card">
-              <div class="logo-ph sm"><img src="logos/fedora.png" alt="Fedora"></div>
-              <div class="date"><span class="yr">2019</span></div>
-            </div>
-            <div class="logo-card">
-              <div class="logo-ph sm"><img src="logos/gitlab.png" alt="GitLab"></div>
-              <div class="date"><span class="yr">2018</span></div>
-            </div>
-            <div class="logo-card">
-              <div class="logo-ph sm"><img src="logos/geeko.png" alt="Geeko Foundation"></div>
-              <div class="date"><span class="yr">2024</span></div>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
   </div>

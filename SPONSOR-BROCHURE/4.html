@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>FOSSCOMM 2026 — Page 03.B / Other Sponsorship Tiers</title>
+<title>FOSSCOMM 2026 — Page 04 / Past Sponsors</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +18,6 @@
     min-height: 100vh;
   }
 
-  /* FOSSCOMM theme tokens */
   .fc {
     --paper: #FAFAF7;
     --paper-2: #F2F0E9;
@@ -27,15 +26,8 @@
     --ink-faint: #C9C7BF;
     --accent: #0033FF;
     --accent-deep: #0023BB;
-    --red: #FF1E1E;
     --border: color-mix(in oklab, #0A0A0A 12%, transparent);
     --border-strong: color-mix(in oklab, #0A0A0A 24%, transparent);
-    /* Tier accent colours (mirror the .tcard.tier-* definitions) — reusable
-       for per-bullet colouring via the b-<tier> classes below. */
-    --c-diamond: #67E8F9;
-    --c-gold: #E5C55B;
-    --c-silver: #8C929B;
-    --c-bronze: #B87333;
     --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
     --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
@@ -49,49 +41,15 @@
     position: relative;
   }
   .fc * { box-sizing: border-box; }
+  .fc.split { display: grid; grid-template-columns: 1fr 2fr; grid-template-rows: 1080px; }
 
-  /* Single full-width layout — no left blue panel on this page.
-     Explicit grid row of 1080px so .right-paper actually fills the page
-     height (otherwise it collapses to content size and the "anchor to
-     bottom" cards sit near the top of the viewport). */
-  .fc.split {
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 1080px;
-  }
-
-  /* Status Bar */
-  .fc .status-bar {
-    position: absolute; top: 0; left: 0; right: 0;
-    height: 44px;
-    border-bottom: 1px solid var(--border);
-    background: rgba(250,250,247,.94);
-    padding: 0 56px;
-    display: flex; align-items: center; gap: 24px;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.18em;
-    color: var(--ink-muted);
-    z-index: 4;
-  }
-  .fc .status-bar .brand { color: var(--ink); font-weight: 500; }
-  .fc .status-bar .blip { width: 8px; height: 8px; background: var(--accent); display: inline-block; }
-  .fc .status-bar .spacer { flex: 1; }
-
-  .fc .micro {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.22em;
-    color: var(--ink-muted);
-  }
-
-  /* Left Blue Column Layout */
+  /* ─── LEFT — Blue panel ─────────────────────────────────────── */
+  /* Padding + sizing match 3.html so the eyebrow / title / paragraph
+     sit at the same positions and scale across pages. */
   .fc .left-blue {
     background: var(--accent);
     color: #fff;
-    padding: 80px 56px 56px 56px;
+    padding: 40px 48px;
     display: flex;
     flex-direction: column;
     gap: 28px;
@@ -100,296 +58,308 @@
   }
   .fc .left-blue .eyebrow {
     font-family: var(--font-mono);
-    font-size: 14px;
+    font-weight: 600;
+    font-size: 18px;
     text-transform: uppercase;
     letter-spacing: 0.22em;
-    color: rgba(255,255,255,.78);
+    color: rgba(255,255,255,.72);
     display: flex; align-items: center; gap: 12px;
   }
-  .fc .left-blue .eyebrow .dot { display: inline-block; width: 8px; height: 8px; background: #fff; }
-  .fc .left-blue .h1-outline { font-family: var(--font-display); font-weight: 700; line-height: 0.84; letter-spacing: -0.045em; margin: 0; color: transparent; -webkit-text-stroke: 2px #fff; }
+  .fc .left-blue .h1-outline {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 0.84;
+    letter-spacing: -0.045em;
+    margin: 0;
+    color: transparent;
+    -webkit-text-stroke: 2px #fff;
+    /* Auto margins on h1 (top) and lead (bottom) split the leftover space,
+       so title + paragraph block sits centred between the top eyebrow
+       and the bottom summary strip. */
+    margin-top: auto;
+  }
   .fc .left-blue .h1-outline .fill { color: #fff; -webkit-text-stroke: 0; }
-  .fc .left-blue .lead { margin-top: 4px; }
-  .fc .left-blue .lead p { margin: 0; font-family: var(--font-sans); font-size: 16px; line-height: 1.55; color: #fff; max-width: 480px; }
-  .fc .left-blue .summary { margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,.32); font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.18em; color: rgba(255,255,255,.78); line-height: 1.7; }
-  .fc .left-blue .summary b { display: inline-block; color: #fff; font-weight: 500; margin-right: 6px; }
-
-  /* Standard TCard definitions */
-  .tcard {
-    background: var(--paper);
-    border: 1.5px solid var(--ink);
-    padding: 36px 36px 22px;
-    display: flex; flex-direction: column; gap: 16px;
-    position: relative;
-    min-height: 0;
-  }
-  .tcard.ink {
-    background-color: var(--ink);
-    background-image: radial-gradient(circle, rgba(255,255,255,.14) 1.25px, transparent 1.25px);
-    background-size: 16px 16px;
+  .fc .left-blue .lead { margin-top: 4px; margin-bottom: auto; }
+  .fc .left-blue .lead p {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.6;
     color: #fff;
-    border-color: var(--ink);
+    max-width: 460px;
   }
-  .tcard.blue {
-    background-color: var(--accent);
-    background-image: radial-gradient(circle, rgba(255,255,255,.18) 1.25px, transparent 1.25px);
-    background-size: 16px 16px;
-    border-color: var(--accent);
+
+  /* Bottom summary strip — mirrors 2.html's pillars block but with 2
+     sections instead of 3 (border-top + a 1px vertical divider between). */
+  .fc .left-blue .summary {
+    padding-top: 22px;
+    border-top: 1px solid rgba(255,255,255,.32);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
   }
-  .tcard.faint { background: var(--paper-2); }
-
-  .tcard .top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-  .tcard .rank { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink-muted); }
-  .tcard.ink .rank { color: rgba(255,255,255,.7); }
-  .tcard .slots { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink); padding: 3px 8px; border: 1px solid var(--border-strong); }
-  .tcard.ink .slots { border-color: rgba(255,255,255,.42); color: #fff; }
-
-  .tcard .name { font-family: var(--font-display); font-weight: 600; font-size: 44px; line-height: 0.95; letter-spacing: -0.025em; color: var(--ink); }
-  .tcard.ink .name { color: #fff; }
-  .tcard .name small { display: block; font-family: var(--font-display); font-weight: 500; font-size: 18px; letter-spacing: -0.01em; color: var(--ink-muted); margin-top: 4px; }
-  .tcard.ink .name small { color: rgba(255,255,255,.65); }
-
-  .tcard .price { font-family: var(--font-display); font-weight: 600; font-size: 64px; line-height: 1; letter-spacing: -0.035em; color: var(--ink); }
-  .tcard.ink .price { color: #fff; }
-  .tcard .price-suffix { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--ink-muted); margin-top: 4px; }
-  .tcard.ink .price-suffix { color: rgba(255,255,255,.65); }
-
-  .tcard .pitch { font-family: var(--font-sans); font-size: 14.5px; line-height: 1.5; color: var(--ink-muted); margin: 0; }
-  .tcard.ink .pitch { color: rgba(255,255,255,.82); }
-  .tcard hr { border: 0; border-top: 2px solid var(--border); margin: 0; }
-  .tcard.ink hr { border-top-color: rgba(255,255,255,.24); }
-
-  .tcard ul.benefits { list-style: none; margin: 0; padding: 0; font-family: var(--font-sans); font-size: 14.5px; line-height: 1.5; color: var(--ink); }
-  .tcard ul.benefits li { position: relative; padding: 5px 0 5px 22px; line-height: 1; }
-  /* Body text keeps the roomy 1.5 line-height via the wrapper span, while the
-     li itself has a tight line-height (strut) — so a wrapped line that holds
-     only the small muted note sits shorter and closer than a body-text line. */
-  .tcard ul.benefits li > span { line-height: 1.5; }
-  /* "+" pinned to the first line (absolute + hanging indent, like 6.html);
-     line-height matches the body text so it sits centred on that first line. */
-  .tcard ul.benefits li::before { content: "+"; position: absolute; left: 0; top: 5px; font-family: var(--font-mono); color: var(--accent); font-weight: 600; font-size: inherit; line-height: 1.5; }
-  .tcard.ink ul.benefits { color: rgba(255,255,255,.94); }
-  .tcard.ink ul.benefits li::before { color: #fff; }
-
-  /* ─── Metallic tier accents — the card keeps its original background
-     (Diamond blue, Gold black, Silver/Bronze white). The tier colour is
-     applied to the outline and the "inside" accents (name, hairline and
-     bullet markers). The "/0x TIER" label and body copy stay muted so the
-     label reads the same on every card. The four metal tiers share a 3px
-     outline; Custom and In-kind use 2px. ─── */
-  .tcard.tier { border-color: var(--tier); }
-  .tcard.tier .name { color: var(--tier); }
-  .tcard.tier hr { border-top-color: color-mix(in oklab, var(--tier) 55%, transparent); }
-  .tcard.tier ul.benefits li::before { color: var(--tier); }
-
-  /* Per-bullet tier colour — add a b-<tier> class to any <li> to tint its
-     "+" marker that tier's colour (e.g. a Bronze perk listed inside Gold),
-     so it's easy to tell apart. Overrides the card's own tier colour. */
-  .tcard ul.benefits li.b-diamond::before { color: var(--c-diamond); }
-  .tcard ul.benefits li.b-gold::before    { color: var(--c-gold); }
-  .tcard ul.benefits li.b-silver::before  { color: var(--c-silver); }
-  .tcard ul.benefits li.b-bronze::before  { color: var(--c-bronze); }
-
-  .tcard ul.benefits li .muted-note {
-    color: var(--ink-muted);
-    font-size: 10px;
-    line-height: 1;
+  .fc .left-blue .summary > div {
+    padding-right: 28px;
+    border-right: 1px solid rgba(255,255,255,.32);
   }
-  /* On the dark cards the note follows the pitch/description colour so it
-     stays legible (plain --ink-muted vanishes on blue/black). */
-  .tcard.ink ul.benefits li .muted-note { color: rgba(255,255,255,.82); }
-  /* 5.html-style hatched frame — uniform 2px outer border in the sponsor
-     colour + a diagonal-hatch ring, with an inset plate the content sits on
-     (bottom stays open per the .tcard rule). --fill = card background,
-     --stripe = hatch colour, --tier = border colour. */
-  .tcard.framed {
-    position: relative;
-    border-top-width: 2px; border-left-width: 2px; border-right-width: 2px;
-    border-color: var(--tier);
-    background-color: var(--fill);
-    background-image: linear-gradient(135deg, var(--stripe) 25%, transparent 25%, transparent 50%, var(--stripe) 50%, var(--stripe) 75%, transparent 75%, transparent);
-    background-size: 12px 12px;
+  .fc .left-blue .summary > div:last-child {
+    padding-left: 28px;
+    padding-right: 0;
+    border-right: 0;
   }
-  .tcard.framed::before { content: ''; position: absolute; inset: 8px 8px 0 8px; background: var(--fill); z-index: 0; }
-  .tcard.framed > * { position: relative; z-index: 1; }
+  .fc .left-blue .summary .k {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: rgba(255,255,255,.72);
+    margin-bottom: 8px;
+  }
+  .fc .left-blue .summary .v {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.012em;
+    color: #fff;
+    line-height: 1.1;
+  }
 
-  .tcard.tier-diamond { --tier: var(--c-diamond); --fill: var(--accent); --stripe: color-mix(in oklab, var(--c-diamond) 60%, transparent); border-top-width: 3px; border-left-width: 3px; border-right-width: 3px; }
-  .tcard.tier-gold    { --tier: #E5C55B; --fill: var(--ink);    --stripe: color-mix(in oklab, #E5C55B 55%, transparent); border-top-width: 3px; border-left-width: 3px; border-right-width: 3px; }
-  .tcard.tier-silver  { --tier: #8C929B; --fill: var(--paper);  --stripe: color-mix(in oklab, #8C929B 55%, transparent); border-top-width: 3px; border-left-width: 3px; border-right-width: 3px; }
-  .tcard.tier-bronze  { --tier: #B87333; --fill: var(--paper);  --stripe: color-mix(in oklab, #B87333 50%, transparent); border-top-width: 3px; border-left-width: 3px; border-right-width: 3px; }
-  .tcard.tier-custom  { --tier: var(--accent); --fill: var(--accent); --stripe: rgba(255,255,255,.28); border-color: transparent; border-top-width: 3px; border-left-width: 3px; border-right-width: 3px; }
-  .tcard.tier-inkind  { --tier: var(--ink);    --fill: var(--ink);    --stripe: rgba(255,255,255,.22); border-color: transparent; border-top-width: 3px; border-left-width: 3px; border-right-width: 3px; }
-
-  /* Custom keeps its hatch on the bottom too (closed box); In-kind and the
-     metal tiers open at the bottom. Inset is 5px (not 8px) so the hatch — 5px
-     of plate gap + the 3px transparent border it bleeds through — reads 8px
-     wide, matching the metal tiers' hatch, but with no visible border line. */
-  .tcard.framed.tier-custom::before { inset: 5px 5px 8px 5px; }
-  .tcard.framed.tier-inkind::before { inset: 5px 5px 0 5px; }
-
-  /* Dotted inner plate on the blue/black filled cards — restores the texture. */
-  .tcard.tier-diamond::before, .tcard.tier-custom::before { background-image: radial-gradient(circle, rgba(255,255,255,.18) 1.25px, transparent 1.25px); background-size: 16px 16px; }
-  .tcard.tier-gold::before, .tcard.tier-inkind::before { background-image: radial-gradient(circle, rgba(255,255,255,.14) 1.25px, transparent 1.25px); background-size: 16px 16px; }
-
-  /* Right side wrapper — static dot grid (matches 1.html). */
+  /* ─── RIGHT — Paper Content ────────────────────────────────── */
   .fc .right-paper {
     position: relative;
     background-color: var(--paper);
     background-image: radial-gradient(circle, var(--border) 1.25px, transparent 1.25px);
     background-size: 16px 16px;
   }
-
-  /* Layout container — no top/bottom padding so cards sit flush against
-     both edges of the page. Side padding = 56px (matches 3.html). */
-  .layout-d-right {
-    padding: 0 56px;
-    height: 100%;
-    display: flex; flex-direction: column;
-    overflow: hidden;
-  }
-
-  /* 3-column grid — cards anchored to the bottom of the row.
-     Silver = 81%, Bronze = 72%, third column stacks Custom (top, fills
-     the remaining space) and In-kind (bottom, fixed at 30%).
-     Inter-card gap matches the left/right padding (56px). */
-  .layout-d-right .grid {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr;
-    align-items: end;
-    gap: 56px;
-    min-height: 0;
-  }
-  .layout-d-right .grid > .tcard:nth-child(1) { height: 72%; }
-  .layout-d-right .grid > .tcard:nth-child(2) { height: 63%; }
-  .layout-d-right .grid > .col-stack {
+  .fc .right-paper .body {
+    padding: 56px 56px;
     height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 56px;
-    min-width: 0;
+    justify-content: center;
+    gap: 32px;
+    overflow: hidden;
   }
-  /* Custom (first child, top): flex: 1 → takes all remaining vertical space.
-     margin-top mirrors the 56px gap between /06 and /05, so /06 has the same
-     breathing room above it as below.
-     In-kind (second child, bottom): each tier is N/10 of Platinum (90%) smaller,
-     so /05 = 90% − 4×9% = 54%. */
-  .layout-d-right .grid > .col-stack > .tcard:nth-child(1) { flex: 1; min-height: 0; margin-top: 56px; }
-  .layout-d-right .grid > .col-stack > .tcard:nth-child(2) { height: 54%; }
 
-  /* Bottom border removed from every card — the boxes "open" at the bottom,
-     blending into the page edge (or the gap to the next card). */
-  .tcard { border-bottom: 0; }
+  /* Generic Logo Container — coloured frame (border + hatched ring) with a
+     clean inner plate the logo sits on, so every logo stays legible no
+     matter what colour its tier frame is. */
+  .logo-ph {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 5 / 2;
+    background-color: var(--paper);
+    background-image: linear-gradient(135deg, var(--ink-faint) 25%, transparent 25%, transparent 50%, var(--ink-faint) 50%, var(--ink-faint) 75%, transparent 75%, transparent);
+    background-size: 12px 12px;
+    border: 1.5px solid var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .logo-ph::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    background: var(--paper);
+    z-index: 1;
+  }
+  .logo-ph img {
+    position: relative;
+    z-index: 2;
+    max-width: 82%;
+    max-height: 64%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+  }
 
-  /* Mono tier enumeration above each card name — matches 3.html's /01 etc. */
-  .tcard .tier-num {
+  /* Filled colour variants — the frame stays accent/ink; the inner plate is
+     inherited (paper) so logos read against it. */
+  .logo-ph.blue {
+    background-color: var(--accent);
+    background-image: linear-gradient(135deg, rgba(255,255,255,.28) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.28) 50%, rgba(255,255,255,.28) 75%, transparent 75%, transparent);
+    border-color: var(--accent);
+  }
+  .logo-ph.blue::before {
+    background-color: var(--accent);
+    background-image: radial-gradient(circle, rgba(255,255,255,.22) 1.25px, transparent 1.25px);
+    background-size: 16px 16px;
+  }
+  .logo-ph.dark {
+    background-color: var(--ink);
+    background-image: linear-gradient(135deg, rgba(255,255,255,.28) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.28) 50%, rgba(255,255,255,.28) 75%, transparent 75%, transparent);
+    border-color: var(--ink);
+  }
+  .logo-ph.dark::before {
+    background-color: var(--ink);
+    background-image: radial-gradient(circle, rgba(255,255,255,.18) 1.25px, transparent 1.25px);
+    background-size: 16px 16px;
+  }
+
+  /* Logo card — shared between feature row and year sections. */
+  .logo-card { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .logo-card .date {
     font-family: var(--font-mono);
-    font-weight: 600;
-    font-size: 18px;
+    font-size: 11px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--ink-muted);
+    line-height: 1.4;
   }
-  .tcard.ink .tier-num { color: rgba(255,255,255,.7); }
+  .logo-card .date .yr {
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    text-transform: none;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  /* Large feature row */
+  .feature-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  /* Year sections — separated by hairline rules in the 2.html style:
+     1px var(--border) border-top on every section. The year for each row is
+     shown on the date label under each logo. */
+  .year-section {
+    border-top: 1px solid var(--border);
+    padding: 22px 0;
+  }
+  .year-section .small-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 18px;
+  }
+  .year-section.four .small-grid { grid-template-columns: repeat(4, 1fr); }
+  .year-section .logo-card { gap: 10px; }
+  .year-section .logo-card .date { font-size: 10px; }
+  .year-section .logo-card .date .yr { font-size: 14px; margin-bottom: 0; }
 </style>
+
 </head>
 <body>
 
   <div class="fc split">
+    <div class="left-blue">
+      <div class="eyebrow">03 / 04</div>
+      <h1 class="h1-outline" style="font-size: 110px;">
+        <span class="fill">PAST</span>
+        SPONSORS<br/>
+      </h1>
+      <div class="lead">
+        <p>A selection of the companies, institutions and open-source foundations that have sponsored FOSSCOMM since 2008.</p>
+      </div>
+      <div class="summary">
+        <div>
+          <div class="k">Editions</div>
+          <div class="v">18</div>
+        </div>
+        <div>
+          <div class="k">Organisations</div>
+          <div class="v">50+</div>
+        </div>
+      </div>
+    </div>
+
     <div class="right-paper">
-      <div class="layout-d-right">
-        <div class="grid">
-          <div class="tcard tier tier-silver framed">
-            <div class="tier-num">/03 TIER</div>
-            <div>
-              <div class="name">Silver</div>
-            </div>
-            <div>
-              <div class="price">€800</div>
-            </div>
-            <p class="pitch">For sponsors who want to be in the room. You get a physical home base to talk to the community, plus permanent digital credit.</p>
-            <hr/>
-            <ul class="benefits">
-              <li class="b-silver"><span><span style="color: var(--c-silver);">Desk</span> and <span style="color: var(--c-silver);">chairs</span> in the main hall for promotional materials </span><span class="muted-note">(banner and tabletop items only; no displays, custom stands or activities; location assigned by organizers)</span>.</li>
-              <li class="b-silver"><span><span style="color: var(--c-silver);">Medium</span> logo placement on the website, kept permanently in the archive, on-site signage and on-screen sponsor slide.</span></li>              
-              <li class="b-silver"><span>Featured in a "Thank You! <3" shared <span style="color: var(--c-silver);">post</span> on our social media </span><span class="muted-note">(alongside all <span style="color: var(--c-silver);">Silver</span> sponsors)</span>.</span></li>
-              <li class="b-bronze"><span>Featured in the  "Thank You! <3" mentions from the main stage during the closing remarks.</span></li>
-              <li class="b-bronze"><span>Permanent credit in the conference's open-source repository </span><span class="muted-note">(SPONSORS.md)</span>.</li>
-              <li class="b-bronze"><span>Right to feature open roles on the physical and digital job boards.</span></li>
-              <li class="b-bronze"><span>Dedicated mention in the official post-conference wrap-up email sent to all registered attendees.</span></li>
-            </ul>
+      <div class="body">
+
+        <!-- Large feature row (blue) -->
+        <div class="feature-row">
+          <div class="logo-card">
+            <div class="logo-ph lg blue"><img src="logos/skroutz.png" alt="Skroutz" style="transform: translateY(-7px);"></div>
+            <div class="date"><span class="yr">2024, 2025</span></div>
           </div>
-
-          <div class="tcard tier tier-bronze framed">
-            <div class="tier-num">/04 TIER</div>
-            <div>
-              <div class="name">Bronze</div>
-            </div>
-            <div>
-              <div class="price">€500</div>
-            </div>
-            <p class="pitch">For sponsors who want to support from afar. You get permanent digital credit and community love with zero logistical overhead.</p>
-            <hr/>
-            <ul class="benefits">
-              <li class="b-bronze"><span>Placement of your promotional materials on the <span style="color: var(--c-bronze);">shared community table <span class="muted-note">(tabletop items only; no floor banners)</span>.</li>
-              <li class="b-bronze"><span><span style="color: var(--c-bronze);">Standard</span> logo placement on the website, kept permanently in the archive, on-site signage and on-screen sponsor slide.</span></li>              
-              <li class="b-bronze"><span>Featured in a "Thank You! <3" shared <span style="color: var(--c-bronze);">post</span> on our social media </span><span class="muted-note">(alongside all <span style="color: var(--c-bronze);">Bronze</span> sponsors)</span>.</span></li>
-              <li class="b-bronze"><span>Featured in the "Thank You! <3" mentions from the main stage during the <span style="color: var(--c-bronze);">closing</span> remarks.</span></li>
-              <li class="b-bronze"><span>Permanent <span style="color: var(--c-bronze);">credit</span> in the conference's open-source repository </span><span class="muted-note">(SPONSORS.md)</span>.</li>
-              <li class="b-bronze"><span>Right to feature open roles on the physical and digital <span style="color: var(--c-bronze);">job boards</span>.</span></li>
-              <li class="b-bronze"><span>Dedicated <span style="color: var(--c-bronze);">mention</span> in the official post-conference wrap-up email sent to all registered attendees.</span></li>
-            </ul>
+          <div class="logo-card">
+            <div class="logo-ph lg blue"><img src="logos/viva.png" alt="Viva"></div>
+            <div class="date"><span class="yr">2017</span></div>
           </div>
+          <div class="logo-card">
+            <div class="logo-ph lg blue"><img src="logos/deloitte.png" alt="Deloitte"></div>
+            <div class="date"><span class="yr">2024</span></div>
+          </div>
+        </div>
 
-          <div class="col-stack">
-            <div class="tcard ink blue framed tier-custom">
-              <div class="tier-num">/0X TIER</div>
-              <div>
-                <div class="name">Custom</div>
-              </div>
-              <div>
-                <div class="price">Let's talk</div>
-              </div>
-              <p class="pitch">Don't see what you're looking for? Have a unique idea? Want to sponsor something specific? Send us a quick email and let's figure it out together.</p>
-              <hr/>
-              <div style="flex: 1; display: flex; justify-content: center; align-items: center;">
-                <a href="mailto:info@fosscomm.gr" style="font-family: var(--font-display); font-weight: 600; font-size: 35px; letter-spacing: -0.015em; color: #fff; text-decoration: none; transition: opacity 0.2s;">
-                  info@fosscomm.gr
-                </a>
-              </div>
+        <!-- 4 dark logos -->
+        <div class="year-section four">
+          <div class="small-grid">
+            <div class="logo-card">
+              <div class="logo-ph sm dark"><img src="logos/meta.png" alt="Meta"></div>
+              <div class="date"><span class="yr">2018</span></div>
             </div>
-
-            <div class="tcard ink framed tier-inkind">
-              <div class="tier-num">/0X TIER</div>
-              <div>
-                <div class="name">In-kind</div>
-              </div>
-              <div>
-                <div class="price">Let's trade</div>
-              </div>
-              <p class="pitch">You don't just have to give money. We are more than happy to trade the actual things the conference needs to run for their equivalent value in sponsorship tiers.</p>
-              <hr/>
-                <ul class="benefits">
-                  <li>
-                    <span>Food & Beverage </span><span class="muted-note">(coffee, refreshments, catering, meals etc.)</span>.
-                  </li>
-                  <li>
-                    <span>Tech & Media </span><span class="muted-note">(live-streaming equipment, videography, photography etc.)</span>.
-                  </li>
-                  <li>
-                    <span>Swag & Print </span><span class="muted-note">(T-shirts, lanyards, badges, tote bags, stickers, signage etc.)</span>.
-                  </li>
-                  <li>
-                    <span>Travel & Logistics </span><span class="muted-note">(accommodations, flights, local transport etc.)</span>.
-                  </li>
-                  <li>
-                    <span>Other valuable contributions.</span>
-                  </li>
-                </ul>
+            <div class="logo-card">
+              <div class="logo-ph sm dark"><img src="logos/jetbrains.png" alt="JetBrains"></div>
+              <div class="date"><span class="yr">2024</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm dark"><img src="logos/nbg.png" alt="National Bank of Greece"></div>
+              <div class="date"><span class="yr">2017</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm dark"><img src="logos/wind.png" alt="Wind"></div>
+              <div class="date"><span class="yr">2017</span></div>
             </div>
           </div>
         </div>
+
+        <!-- 5 logos -->
+        <div class="year-section">
+          <div class="small-grid">
+            <div class="logo-card">
+              <div class="logo-ph sm"><img src="logos/ey.png" alt="EY"></div>
+              <div class="date"><span class="yr">2024</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm"><img src="logos/enartia.png" alt="Enartia"></div>
+              <div class="date"><span class="yr">2018</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm"><img src="logos/collabora.png" alt="Collabora"></div>
+              <div class="date"><span class="yr">2018</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm"><img src="logos/htc.png" alt="HTC"></div>
+              <div class="date"><span class="yr">2011</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm"><img src="logos/onlyoffice.png" alt="OnlyOffice"></div>
+              <div class="date"><span class="yr">2022, 2024</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5 logos -->
+        <div class="year-section">
+          <div class="small-grid">
+            <div class="logo-card">
+              <div class="logo-ph sm"><img src="logos/mozillafoundation.png" alt="Mozilla Foundation"></div>
+              <div class="date"><span class="yr">2012</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm"><img src="logos/redhat.png" alt="Red Hat"></div>
+              <div class="date"><span class="yr">2012</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm"><img src="logos/fedora.png" alt="Fedora"></div>
+              <div class="date"><span class="yr">2019</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm"><img src="logos/gitlab.png" alt="GitLab"></div>
+              <div class="date"><span class="yr">2018</span></div>
+            </div>
+            <div class="logo-card">
+              <div class="logo-ph sm"><img src="logos/geeko.png" alt="Geeko Foundation"></div>
+              <div class="date"><span class="yr">2024</span></div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
