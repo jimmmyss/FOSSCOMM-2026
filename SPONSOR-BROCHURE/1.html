@@ -56,22 +56,20 @@
     position: relative;
     overflow: hidden;
     display: flex; flex-direction: column;
-    justify-content: space-between;
+    /* Reserve 40px at the bottom to mirror the top stamp's 40px top padding,
+       so the wordmark's auto margins centre it between the stamp and the
+       bottom edge the same way 3.html centres its title. */
+    padding-bottom: 40px;
   }
   .cover .blue .top-stamp {
     padding: 40px 48px 0;
     font-family: var(--font-mono);
-    font-weight: 500;
-    font-size: 13px;
+    font-weight: 600;
+    font-size: 18px;
     text-transform: uppercase;
     letter-spacing: 0.22em;
     color: rgba(255,255,255,.72);
     display: flex; align-items: center; gap: 12px;
-  }
-  .cover .blue .top-stamp .blip {
-    display: inline-block;
-    width: 8px; height: 8px;
-    background: #fff;
   }
   .cover .blue .mark {
     padding: 0 40px;
@@ -81,6 +79,10 @@
     line-height: 0.84;
     letter-spacing: -0.05em;
     color: #fff;
+    /* Auto margins top and bottom centre the wordmark vertically between the
+       top stamp and the bottom edge — mirrors 2.html's centred blue panel. */
+    margin-top: auto;
+    margin-bottom: auto;
   }
   .cover .blue .mark .outline {
     -webkit-text-stroke: 2.5px #fff;
@@ -260,6 +262,12 @@
     margin-top: 4px;
     letter-spacing: 0;
   }
+  /* Strip links (e.g. the "Where" map link) inherit the ink colour and drop
+     the default underline so they read like the surrounding value text. */
+  .layout-b .strip .v a {
+    color: inherit;
+    text-decoration: none;
+  }
 </style>
 </head>
 <body>
@@ -269,16 +277,12 @@
       
       <div class="blue">
         <div class="top-stamp">
-          <span class="blip"></span>
-          <span>1 of 5</span>
+          <span>00 / 05</span>
         </div>
         <div class="mark">
           FOSS<br/>
           COMM<br/>
           <span class="outline">/26</span>
-        </div>
-        <div class="foot">
-          Sponsorship prospectus
         </div>
       </div>
 
@@ -307,7 +311,7 @@
             </div>
             <div>
               <div class="k">Where</div>
-              <div class="v">University of West Attica<small>Athens, Greece</small></div>
+              <div class="v"><a href="https://maps.app.goo.gl/dgg8PqUARwSNA8X86" target="_blank" rel="noopener">University of West Attica</a><small>Athens, Greece</small></div>
             </div>
             <div>
               <div class="k">How much</div>
