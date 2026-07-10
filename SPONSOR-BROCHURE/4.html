@@ -158,7 +158,9 @@
   .logo-ph::before {
     content: '';
     position: absolute;
-    inset: 6px;
+    /* 8px hatch ring, matching the tier cards' framed ring on pages 2-3
+       (which use plate inset 8px / 5px+border for the same 8px look). */
+    inset: 8px;
     background: var(--paper);
     z-index: 1;
   }
