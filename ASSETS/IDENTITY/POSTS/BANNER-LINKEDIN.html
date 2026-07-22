@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FOSSCOMM 2026 — LinkedIn company banner (4512×764)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css" rel="stylesheet">
+
+<style>
+  body {
+    margin: 0;
+    background: #0a0a0a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+
+  /* FOSSCOMM theme tokens */
+  .fc {
+    --paper: #FAFAF7;
+    --ink: #0A0A0A;
+    --ink-muted: #6B6B66;
+    --accent: #0033FF;
+    --border-on-blue: color-mix(in oklab, white 22%, transparent);
+    /* ── Outline (/26 + UniWA) stroke weight — THE ONE KNOB ─────────────────────
+       In `em`, so it's proportional to the font-size: the outline keeps the SAME
+       relative weight no matter what px size you set the wordmark to. It equals the
+       theme's weight = 3px ÷ (the site's rendered wordmark px). The site font is
+       responsive (clamp 3rem→11rem), so the exact value tracks YOUR screen width:
+         ~1366px screen → 0.026   ·  ~1600px → 0.022  ·  ~1920px → 0.018  ·  ≥2070px → 0.017
+       Pick the one for the screen you compare on. */
+    --outline-stroke: 0.020em;
+    --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    font-family: var(--font-sans);
+    color: #fff;
+    -webkit-font-smoothing: antialiased;
+    font-variant-numeric: tabular-nums;
+    /* LinkedIn COMPANY-PAGE cover, authored at 4512×764. The whole layout below
+       is built natively at this size — type, margins, dot grid and globe are all
+       set from these numbers — so the export is a true render, never a resampled
+       copy of a differently-shaped master.
+       This size is 4× LinkedIn's 1128×191 rendered display box, exactly: 1128×4
+       = 4512, 191×4 = 764. That is the useful property here. It means the banner
+       is authored at the display box's true aspect (5.906:1) rather than the 6:1
+       the upload guides quote, so nothing is letterboxed or cropped to fit; and
+       it downsamples to the display size on a clean integer factor of 4, which
+       is the sharpest possible reduction — every output pixel is an exact
+       average of a 4×4 block, with no resampling blur.
+       (The personal-PROFILE cover is a different, much less wide shape —
+       1584×396, 4:1 — see banner-linkedin.html.) */
+    width: 4512px; height: 764px;
+    background-color: var(--accent);
+    /* Dot grid on blue — white at 22% opacity, 24px spacing.
+       24 is the closest sensible spacing that divides the WIDTH exactly:
+       4512/24 = 188 columns, so the grid tiles the long axis flush. It cannot
+       also divide the height — gcd(4512, 764) is only 4, far too dense for a
+       dot field — so the vertical leaves a 20px remainder. background-position
+       pulls the tiling up 2px so that leftover is split evenly: the first row of
+       dots sits 10px from the top and the last sits 10px from the bottom,
+       instead of 12px and 8px. Symmetric either way you look at it. */
+    background-image: radial-gradient(circle, var(--border-on-blue) 2px, transparent 2px);
+    background-size: 24px 24px;
+    background-position: 0 -2px;   /* centres the 20px vertical remainder → dots at 10 + 24k */
+    display: block;             /* was a 2-column grid; the left column is gone (see below) */
+    overflow: hidden;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.4);
+    position: relative;
+  }
+  .fc * { box-sizing: border-box; }
+
+  /* ─── LEFT — the FOSSCOMM/26 wordmark ────────────────────────────────────
+     Built to mirror .right .stack exactly: same font-size, same line-height,
+     same 93px margin, same three-line block. Because both blocks are three
+     lines at the same size, their ink heights are identical (577px), so setting
+     the same top offset on each makes them share a top AND a bottom edge without
+     any extra alignment work — the two columns read as one band of type.
+     The only thing that differs is the horizontal correction. On the right the
+     negative letter-spacing makes the ink OVERHANG its box, so the offset is
+     padded outward; on the left there is no trailing letter-spacing in play and
+     the ink instead sits INSIDE the box by the first glyph's left side bearing,
+     so the offset is pulled back by --ink-left-inset. Different sign, different
+     magnitude, same purpose: make the 93px land on the ink.
+     Heads up: the LinkedIn page logo is drawn ON TOP of the cover's lower-left
+     corner. It overlaps roughly the first ~160px here, which clears this
+     wordmark's 93px start only because the logo sits low — check it against the
+     live page before treating this as final. */
+  .left {
+    position: absolute;
+    inset: 0;
+    z-index: 2;                      /* above the globe layer, same as .right */
+  }
+  .left .mark {
+    position: absolute;
+    --margin: 93px;
+    --ink-top-inset: 0.0487em;       /* same font metric as the right stack */
+    /* MEASURED, and it came out NEGATIVE — the ink overhangs its box to the
+       left rather than sitting inside it. Two things push it out: the "/" of
+       /26 carries almost no left side bearing, and that line is stroked, so
+       -webkit-text-stroke paints half its width outboard of the glyph outline.
+       So this pads the offset outward, same as the right stack's overhang. */
+    --ink-left-inset: -0.0263em;
+    top: calc(var(--margin) - var(--ink-top-inset));
+    left: calc(var(--margin) - var(--ink-left-inset));
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 239.3px;              /* MUST match .right .stack */
+    line-height: 0.84;
+    letter-spacing: -0.05em;
+    color: #fff;
+    text-align: left;
+  }
+  .left .mark .outline {
+    -webkit-text-stroke: var(--outline-stroke) #fff;
+    color: transparent;
+    font-weight: 700;
+  }
+
+  /* ─── RIGHT — the 3-line date / venue stack ── */
+  .right {
+    position: absolute;
+    inset: 0;                        /* was a grid column; now spans the banner so the stack's % offsets resolve against the FULL 396px height */
+    z-index: 2;                      /* keep the date stack above the globe layer */
+  }
+  .right .stack {
+    position: absolute;
+    /* EQUAL OPTICAL MARGIN top and right — the type's INK sits 48px from both
+       edges. Neither axis is a plain `48px` offset, because CSS offsets measure
+       to the LINE BOX and the ink sits inside it by a different amount on each
+       axis:
+         · top   — the first line's box is taller than the cap height, so part of
+                   the leading sits above the "3" as invisible padding, putting
+                   the ink 5px lower than the offset says.
+         · right — letter-spacing applies after EVERY character including the
+                   last, and it is negative (-0.05em), so the line box ends short
+                   of where the final glyph's ink actually stops and the type
+                   overhangs its own box by 4px.
+       Both corrections were MEASURED off the rendered PNG with _measure-geom.ps1
+       (which scans for the outermost lit pixel), not guessed. They are in `em`
+       because both scale with the type: the top inset is a font-metric fraction
+       of the size, and the overhang is the letter-spacing minus the last glyph's
+       side bearing. So font-size can change without re-truing them. */
+    --margin: 93px;
+    --ink-top-inset: 0.0487em;
+    --ink-right-overhang: 0.0421em;
+    top: calc(var(--margin) - var(--ink-top-inset));
+    right: calc(var(--margin) + var(--ink-right-overhang));
+    font-family: var(--font-display);
+    font-weight: 700;
+    /* 239.5px, and this number is DERIVED, not chosen. The stack has to sit the
+       same 93px from the top, the bottom AND the right, so its ink height is
+       fixed: 763 - 93 - 93 = 577px (763, not 764, because a gap is measured to
+       the last pixel row, exactly as the right gap is measured to the last
+       pixel column). Measuring a render gives this face's ink height as
+       2.4093 × font-size for three lines at line-height 0.84, so:
+           577 / 2.4093 = 239.5px
+       Change --margin and this must be recomputed, or the block stops being
+       vertically centred. The ink then runs y=93 → y=670.
+
+       The globe is not a constraint on this side. Its crest is at the banner's
+       centre and the sphere has curved below the bottom edge well before this
+       stack begins, so the type sits over plain blue for its whole height even
+       though it hangs far below the crest. */
+    font-size: 239.3px;
+    line-height: 0.84;
+    letter-spacing: -0.05em;
+    color: #fff;
+    text-align: right;
+  }
+  /* No inter-line gap — the theme's hero spaces its lines by line-height:0.84
+     alone, so the date stack does too. (Was margin-top:14px.) */
+  .right .stack .outline {
+    -webkit-text-stroke: var(--outline-stroke) #fff;   /* proportional → same relative weight at any font-size; tune via --outline-stroke */
+    color: transparent;
+    font-weight: 700;
+  }
+
+  /* ─── BOTTOM — venue globe (the actual FOSSCOMM theme MapLibre globe) ──
+     This is assets/venue-map.js (the theme's live line-art globe: paper-white
+     continents, grey coastlines/sea) — not a static image. On the banner it is
+     run in `data-fc-transparent` mode so the atmosphere/paper backdrop is
+     dropped and only the disc is drawn; the blue dotted banner shows through
+     around it. The globe is framed LOW (its centre pushed below the banner's
+     bottom edge) so only the top of the sphere crests up across the tiles, and
+     it's rotated (data-fc-rest-lat) so Greece rides up to that crest. The map's
+     accent pin sits on Athens 2026. */
+  .globe-wrap {
+    /* The render surface must be TALLER than the globe disc, never shorter.
+       That is the whole trick: the disc floats inside the surface with
+       transparent (blue-showing) margin above it, so sliding the surface with
+       --globe-y moves the disc without ever bringing a surface edge up against
+       the opaque globe — no cut, at any offset.
+
+       VERTICALLY the surface is ~6200px for the ~5500px disc at data-fc-zoom
+       5.45, so the crest has clear margin above it. HORIZONTALLY the surface is
+       only as wide as the banner (4512px), which is NARROWER than the disc —
+       that is deliberate and safe here: the sphere's own limb comes to rest well
+       inside the banner, so the canvas never actually cuts painted globe. The
+       left/right clip lands on empty transparent margin.
+
+       Two knobs: data-fc-zoom sets the disc SIZE, --globe-y sets its POSITION in
+       banner pixels. The size ceiling is the GPU's max renderbuffer (8192px on
+       most drivers): the surface has to be TALLER than the disc, so a disc past
+       ~8000px cannot be given a surface that contains it and starts cutting for
+       real. 5450px leaves plenty of headroom. */
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4512px;
+    height: 6200px;                  /* taller than the ~5500px disc → transparent margin above the crest */
+    z-index: 1;                      /* above the dotted bg, below the date text */
+    pointer-events: none;            /* purely visual on the banner */
+
+    /* MEASURED, not predicted: the disc's on-screen diameter is NOT a clean
+       power of two in data-fc-zoom, so it has to be read off a render.
+       Banner crest = (surface height - disc diameter)/2 + --globe-y.
+       Re-measure with _measure-geom.ps1 after touching data-fc-zoom or the
+       surface height, and re-derive --globe-y from what it reports.
+
+       A higher crest also means a WIDER arc, because the chord the banner's
+       bottom edge cuts through the sphere gets longer — that is what stops the
+       globe reading as a small dome marooned in a very long strip.
+
+       As rendered: crest at y=404, and the sphere meets the bottom edge at
+       x=897 and x=3615 — 60% of the width, with a midpoint of 2256, which is the
+       banner's centre to the pixel.
+
+       The right-hand limit is what keeps the date stack clear: the sphere has to
+       drop below the bottom edge before the type's left edge, so raising the
+       globe too far would eventually walk the arc into "UniWA". Current nearest
+       approach is 311px, so there is room to move.
+
+       When re-measuring, note that the globe must be detected by its RED channel
+       (sea is #C9C7BF — its BLUE channel is only 191, so an all-channels test
+       silently measures the continents instead of the sphere).
+       NEGATIVE = up, POSITIVE = down. */
+    --globe-y: 160px;
+    transform: translateY(var(--globe-y));
+  }
+  /* Static banner: hide the map's +/−/⌂ controls and attribution chrome. */
+  .globe-wrap .maplibregl-control-container,
+  .globe-wrap [data-fc-island="venue-map"] button { display: none !important; }
+  /* Let the disc bleed past the island box instead of being clipped by it —
+     the banner's own .fc overflow:hidden does the framing. */
+  .globe-wrap [data-fc-island="venue-map"],
+  .globe-wrap [data-fc-island="venue-map"] > div { overflow: visible !important; background: transparent !important; }
+  .globe-wrap .maplibregl-map { background: transparent !important; }
+</style>
+</head>
+<body>
+
+  <div class="fc">
+
+    <div class="left">
+      <div class="mark">
+        FOSS<br/>
+        COMM<br/>
+        <span class="outline">/26</span>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="stack">
+        <div>31.10</div>
+        <div>1.11</div>
+        <div class="outline">UniWA</div>
+      </div>
+    </div>
+
+    <!-- CENTER: venue globe — the theme's MapLibre line-art globe.
+         Self-mounts via assets/venue-map.js on [data-fc-island="venue-map"].
+         Banner knobs (see the patched copy in assets/venue-map.js):
+           data-fc-transparent   — drop paper backdrop + atmosphere (blue shows through)
+           data-fc-aspect        — the island box aspect (square, so the sphere isn't clipped by it)
+           data-fc-zoom          — globe size
+           data-fc-bottom-hidden — 0: globe centred in its box (banner .fc does the low framing)
+           data-fc-rest-lat      — camera latitude; low value rolls Greece up to the crest -->
+    <div class="globe-wrap" aria-hidden="true">
+      <div data-fc-island="venue-map"
+           data-fc-transparent
+           data-fc-no-pins
+           data-fc-aspect="0.728 / 1"
+           data-fc-zoom="5.45"
+           data-fc-bottom-hidden="0"
+           data-fc-cluster-zoom="24"
+           data-fc-rest-lat="-15"
+           data-fc-venue-lat="37.9838"
+           data-fc-venue-lon="23.7275"
+           data-fc-cluster-label="FOSSCOMM"
+           data-fc-editions='[{"year":2008,"city":"Athens","lat":"37.9838","lon":"23.7275","url":""},{"year":2009,"city":"Larissa","lat":"39.6390","lon":"22.4191","url":""},{"year":2010,"city":"Thessaloniki","lat":"40.6401","lon":"22.9444","url":""},{"year":2011,"city":"Patras","lat":"38.2466","lon":"21.7346","url":""},{"year":2012,"city":"Athens","lat":"37.9838","lon":"23.7275","url":""},{"year":2013,"city":"Heraklion","lat":"35.3387","lon":"25.1442","url":""},{"year":2014,"city":"Lamia","lat":"38.8991","lon":"22.4340","url":""},{"year":2015,"city":"Athens","lat":"37.9838","lon":"23.7275","url":""},{"year":2016,"city":"Thessaloniki","lat":"40.6401","lon":"22.9444","url":""},{"year":2017,"city":"Syros","lat":"37.4438","lon":"24.9211","url":""},{"year":2018,"city":"Heraklion","lat":"35.3387","lon":"25.1442","url":""},{"year":2019,"city":"Lamia","lat":"38.8991","lon":"22.4340","url":""},{"year":2020,"city":"Online","lat":"37.9838","lon":"23.7275","url":""},{"year":2021,"city":"Online","lat":"37.9838","lon":"23.7275","url":""},{"year":2022,"city":"Athens","lat":"37.9838","lon":"23.7275","url":""},{"year":2023,"city":"Heraklion","lat":"35.3387","lon":"25.1442","url":""},{"year":2024,"city":"Piraeus","lat":"37.9475","lon":"23.6469","url":"https://2024.fosscomm.gr"},{"year":2025,"city":"Thessaloniki","lat":"40.6401","lon":"22.9444","url":"https://2025.fosscomm.gr"},{"year":2026,"city":"Athens","lat":"37.9838","lon":"23.7275","url":"","current":true}]'></div>
+    </div>
+
+  </div>
+
+  <!-- Freeze the globe for a static banner: pretend the user prefers reduced
+       motion so venue-map.js skips the idle auto-rotation and the globe stays
+       put (rotated to Greece). The desktop/mobile breakpoint query is passed
+       through untouched. Must run BEFORE venue-map.js (which reads it at load). -->
+  <script>
+  (function () {
+    var _mm = window.matchMedia ? window.matchMedia.bind(window) : null;
+    function stub(matches, q) {
+      return { matches: matches, media: q || '', onchange: null,
+        addEventListener: function () {}, removeEventListener: function () {},
+        addListener: function () {}, removeListener: function () {},
+        dispatchEvent: function () { return false; } };
+    }
+    window.matchMedia = function (q) {
+      if (/prefers-reduced-motion/.test(q)) return stub(true, q);
+      return _mm ? _mm(q) : stub(false, q);
+    };
+  })();
+  </script>
+  <script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+  <script>
+  /* ── assets/venue-map.js inlined here so 8.3.html is a single standalone file ──
+     (the theme MapLibre globe, patched with the banner data-* knobs). MapLibre,
+     the fonts and the OpenFreeMap tiles remain remote URLs — a live map needs a
+     network at render time regardless. */
+/* FOSSCOMM 2026 — Venue map island (replaces the old ASCII globe).
+ *
+ * MapLibre GL JS v5 + OpenFreeMap (positron) vector tiles, recoloured to the
+ * paper/ink/blue palette and shown on a rotating globe. Editions become map
+ * pins via a hard zoom switch (no pixel clustering): ALL editions are ONE
+ * date-less sprite pin (the whole-Greece dot) below CLUSTER_UNTIL_ZOOM, then at
+ * or above that threshold the dot gives way and every VENUE shows as its own
+ * pin — no in-between regional clusters. Editions sharing a venue (identical
+ * coords — Athens hosted 7, Thessaloniki/Heraklion 3…) collapse into ONE marker
+ * (groupColocated) rather than stacking or fanning out: a venue is a single pin
+ * no matter how many years it hosted, and hovering it lights up ALL of that
+ * venue's editions in the sidebar at once. The custom +/−/⌂
+ * controls match the old globe's buttons. The editions sidebar (desktop panel +
+ * mobile bar in template-parts/sections/venue.php) drives the map: hover moves
+ * + highlights, click opens the archive in a new tab (or a sass message when an
+ * edition has no link). On mobile (no hover) the leftmost item under the bar's
+ * scroll is auto-highlighted.
+ *
+ * Self-mounts on every [data-fc-island="venue-map"]; safe to load anywhere.
+ */
+(function () {
+    'use strict';
+    if (typeof maplibregl === 'undefined') return;
+
+    var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var mqMobile = window.matchMedia && window.matchMedia('(max-width: 1023.98px)');
+    function isMobile() { return !!(mqMobile && mqMobile.matches); }
+
+    // Palette (literals — setPaintProperty can't resolve CSS vars).
+    // Line-art look: paper-white continents (they blend into the page). Their
+    // coastline and the country borders inside them are drawn with the SAME grey
+    // line (CONT) so they look identical, on an outline-grey sea.
+    var PAPER  = '#FAFAF7';   // site paper — the area around the globe
+    var LAND   = '#FAFAF7';   // continents — paper white (same as the page; CONT lines define their shape)
+    var CONT   = '#B6B3A9';   // coastline + landuse + country borders — one consistent grey line
+    var WATER  = '#C9C7BF';   // sea — the theme's outline grey
+    var INK    = '#0A0A0A';
+    var INK_MUTED = '#6B6B66';
+    var ACCENT = '#0033FF';
+
+    var STYLE_URL = 'https://tiles.openfreemap.org/styles/positron';
+
+    var mounts = document.querySelectorAll('[data-fc-island="venue-map"]');
+    Array.prototype.forEach.call(mounts, initMap);
+
+    function initMap(mount) {
+        var editions = [];
+        try { editions = JSON.parse(mount.getAttribute('data-fc-editions') || '[]') || []; } catch (e) { editions = []; }
+
+        var spriteUrl   = mount.getAttribute('data-fc-pin-sprite') || '';
+        var venueLat    = parseFloat(mount.getAttribute('data-fc-venue-lat'));
+        var venueLon    = parseFloat(mount.getAttribute('data-fc-venue-lon'));
+
+        // ── Banner overrides (social/8.3.html) ────────────────────────────────
+        // Optional data-* knobs so the same globe can be reframed for the static
+        // Instagram banner without forking the component. TRANSPARENT drops the
+        // paper backdrop + atmosphere so the blue dotted banner shows through
+        // around the globe (on the site these default to the paper page bg).
+        function _num(attr, dflt) { var v = parseFloat(mount.getAttribute(attr)); return isNaN(v) ? dflt : v; }
+        var TRANSPARENT = mount.hasAttribute('data-fc-transparent');
+        var BG_FILL     = TRANSPARENT ? 'transparent' : '#FAFAF7';
+        var NO_PINS     = mount.hasAttribute('data-fc-no-pins');   // banner: draw the bare globe, no location dot
+
+        // Pins = editions with usable coordinates.
+        var pins = editions.filter(function (ed) {
+            var la = parseFloat(ed.lat), lo = parseFloat(ed.lon);
+            return !isNaN(la) && !isNaN(lo);
+        }).map(function (ed) {
+            return {
+                year:    parseInt(ed.year, 10) || 0,
+                city:    String(ed.city || ''),
+                lat:     parseFloat(ed.lat),
+                lon:     parseFloat(ed.lon),
+                url:     String(ed.url || ''),
+                current: !!ed.current
+            };
+        });
+
+        var defaultCenter = computeCenter(pins, venueLat, venueLon);
+        // ── Resting-view tweakables (the home / ⌂ button returns here) ─────────
+        //   DEFAULT_ZOOM       — resting zoom. Lower = globe smaller / more zoomed out.
+        //   BOTTOM_HIDDEN      — fraction of the box the globe's BOTTOM is clipped by.
+        //   MIN_ZOOM           — zoom-OUT threshold (can't zoom out past this).
+        //   MAX_ZOOM           — zoom-IN threshold (can't zoom in past this).
+        //   CLUSTER_UNTIL_ZOOM — single-pin threshold. BELOW it all editions are one
+        //                        dot (the whole-Greece pin); at/above it that dot is
+        //                        replaced by every individual edition pin. Raise to
+        //                        keep the one dot longer, lower to reveal the pins
+        //                        sooner.
+        //   REST_LAT           — the LATITUDE the globe is centred on at rest (⌂ /
+        //                        home view). This is the "rotate the globe" knob:
+        //                        LOWER it to roll the globe down so Greece rides up
+        //                        toward the top with Africa/Arabia filling the view;
+        //                        set it to the venue's own latitude (~38) to put
+        //                        Greece back in the middle. The pins always use the
+        //                        venue coords, so they stay on Greece regardless.
+        var DEFAULT_ZOOM       = _num('data-fc-zoom', 2.1);
+        var BOTTOM_HIDDEN      = _num('data-fc-bottom-hidden', 0.50);
+        var MIN_ZOOM           = _num('data-fc-min-zoom', DEFAULT_ZOOM);
+        var MAX_ZOOM           = 14;
+        var CLUSTER_UNTIL_ZOOM = _num('data-fc-cluster-zoom', 3);
+        var REST_LAT           = _num('data-fc-rest-lat', 25);   // ~North-Africa latitude → Greece sits high (photo 2). Use ~38 to centre Greece (photo 1). Lower still → Greece rides to the top crest (banner).
+        var restZoom           = DEFAULT_ZOOM;   // ACTUAL settled resting zoom (set on load); used as the zoom-out floor
+
+        // Resting camera target: the venue's longitude (keeps Greece horizontally
+        // centred) but aimed at REST_LAT, so the globe shows the orientation above
+        // without moving the editions pins (those stay on defaultCenter).
+        var restCenter = [defaultCenter[0], REST_LAT];
+
+        // Editions that shared a venue have IDENTICAL coords (Athens hosted 7,
+        // Thessaloniki/Heraklion 3, Lamia 2). Rather than stack overlapping pins
+        // (or fan them into a ring), collapse each same-place group into ONE
+        // marker that remembers every edition it holds, so the map shows a single
+        // pin per venue and hovering it lights up ALL of that venue's editions in
+        // the sidebar. `pins` keeps the full per-edition list — the sidebar,
+        // fly-to and the zoomed-out "all editions" dot still need it.
+        var markers = groupColocated(pins);
+
+        // ---- DOM: aspect-boxed map + custom controls ----
+        mount.innerHTML = '';
+        mount.style.position = 'relative';
+
+        var box = document.createElement('div');
+        box.style.position = 'relative';
+        box.style.width = '100%';
+        box.style.aspectRatio = mount.getAttribute('data-fc-aspect') || '10 / 7';
+        box.style.overflow = 'hidden';
+        box.style.background = BG_FILL;
+        mount.appendChild(box);
+
+        var mapEl = document.createElement('div');
+        mapEl.style.position = 'absolute';
+        mapEl.style.inset = '0';
+        mapEl.style.background = BG_FILL;
+        box.appendChild(mapEl);
+
+        // The render surface is TALL (so the globe can slide up a long way before its
+        // bottom edge shows). A tall surface × devicePixelRatio can blow past the
+        // (software-)WebGL max drawing-buffer size, which makes the globe silently
+        // fail to draw. So cap pixelRatio to keep the backing store under the budget
+        // below — lowered only as far as needed.
+        //
+        // The budget is 40 MP here, raised from the 12 MP the 4:1 banners use. The
+        // company-page surface is 4512×6200 = 28.0 MP, and at the old 12 MP cap this
+        // resolved to pixelRatio 0.65 — the globe would have been drawn at 65% and
+        // then stretched back up, i.e. visibly soft, which is exactly the resampling
+        // this export exists to avoid. 40 MP lets it settle at a true 1.0, with
+        // enough headroom that a small surface change doesn't silently drop it back
+        // under 1. Both surface dimensions stay under the 8192px max renderbuffer,
+        // so this is still inside what the driver will allocate.
+        var _cw  = box.clientWidth || 4512;
+        var _asp = (function () { var p = String(mount.getAttribute('data-fc-aspect') || '10 / 7').split('/'); var a = parseFloat(p[0]), b = parseFloat(p[1]); return (a && b) ? a / b : 1.4; })();
+        var _ch  = _cw / _asp;
+        var PIXEL_RATIO = Math.min(window.devicePixelRatio || 1, Math.sqrt(40e6 / (_cw * _ch)) || 2, 2);
+
+        var map = new maplibregl.Map({
+            container: mapEl,
+            pixelRatio: PIXEL_RATIO,
+            style: STYLE_URL,
+            center: restCenter,
+            zoom: DEFAULT_ZOOM,
+            minZoom: MIN_ZOOM,
+            maxZoom: MAX_ZOOM,
+            dragRotate: false,
+            pitchWithRotate: false,
+            touchPitch: false,
+            // Banner: MSAA on the WebGL context so the globe's silhouette (the
+            // limb) is antialiased. Without the atmosphere/fog to soften it, the
+            // bare sphere edge would otherwise be a hard aliased step against the
+            // transparent background. (v5 key; `antialias:true` is the v4 alias.)
+            canvasContextAttributes: { antialias: true },
+            antialias: true,
+            attributionControl: { compact: true }
+        });
+        try { if (map.setPixelRatio) map.setPixelRatio(PIXEL_RATIO); } catch (e) {}   // belt-and-suspenders if the constructor option is ignored
+
+        // Custom controls — same look as the old globe's buttons (now bottom-left).
+        buildControls(box, map, defaultCenter, DEFAULT_ZOOM, resetView);
+
+        var highlightedYears = [];     // edition years currently lit up in the sidebar
+        var highlightKey = '';         // dedup key so repeated hovers don't re-apply
+
+        map.on('load', function () {
+            try { map.setProjection({ type: 'globe' }); } catch (e) {}
+            // Banner: strip the globe's atmosphere/space halo so nothing but the
+            // disc is drawn — the blue dotted banner shows through around it.
+            if (TRANSPARENT) {
+                try { map.setSky({ 'atmosphere-blend': 0 }); } catch (e) {}
+                try { map.setFog({ 'color': 'rgba(0,0,0,0)', 'high-color': 'rgba(0,0,0,0)', 'space-color': 'rgba(0,0,0,0)', 'horizon-blend': 0, 'star-intensity': 0 }); } catch (e) {}
+            }
+            recolor();
+            frameView();
+            // The framing padding (camPad) makes MapLibre settle the rest at a
+            // slightly HIGHER zoom than DEFAULT_ZOOM. Pin the zoom-out floor to
+            // that ACTUAL resting zoom so you can't zoom out past the rest state.
+            restZoom = map.getZoom();
+            map.setMinZoom(restZoom);
+
+            if (!NO_PINS) { addDefaultImages(); setupLayers(); wireMapInteractions(); }
+            wireSidebar();
+            startSpin();
+            watchSectionLeave();
+
+            // Swap in the admin pixel sprite once it loads (keeps the default
+            // pin visible meanwhile). Same ids → layers refresh automatically.
+            if (spriteUrl) {
+                var img = new Image();
+                img.onload = function () {
+                    ['fc-pin', 'fc-pin-current'].forEach(function (id) {
+                        try {
+                            if (map.hasImage(id)) map.removeImage(id);
+                            map.addImage(id, img, { pixelRatio: 2 });
+                        } catch (e) {}
+                    });
+                };
+                img.src = spriteUrl;
+            }
+        });
+
+        // Re-fit + re-frame on container resize (the 30% bottom is height-based).
+        if ('ResizeObserver' in window) new ResizeObserver(function () {
+            map.resize();
+            try { frameView(); } catch (e) {}   // re-apply base framing + the shift pan
+        }).observe(box);
+
+        // ---- map recolour ----
+        function recolor() {
+            var layers;
+            try { layers = (map.getStyle() && map.getStyle().layers) || []; } catch (e) { return; }
+            var waterSource = null, waterSourceLayer = null;   // for the coastline line
+            var borderWidth = null, borderOpacity = null;      // copied off the country-border lines
+            layers.forEach(function (ly) {
+                try {
+                    if (ly.type === 'symbol') {
+                        // No place / road / water names anywhere — keep it label-free.
+                        map.setLayoutProperty(ly.id, 'visibility', 'none');
+                    } else if (ly.type === 'background') {
+                        map.setPaintProperty(ly.id, 'background-color', LAND);          // land = paper white (the sphere's base; space around it is the atmosphere, made transparent for the banner)
+                    } else if (/water|ocean|sea|river|lake|bay/i.test(ly.id)) {
+                        if (ly.type === 'fill') {
+                            // Only the OCEAN stays grey. Every INLAND water body
+                            // (OpenMapTiles class ≠ 'ocean': lakes, rivers, ponds,
+                            // reservoirs…) is painted the paper LAND colour so it
+                            // vanishes into the white continents instead of dotting
+                            // them with grey. Evaluated per-feature, so the one fill
+                            // layer serves both the sea and the lakes.
+                            map.setPaintProperty(ly.id, 'fill-color',
+                                ['match', ['get', 'class'], 'ocean', WATER, LAND]);
+                            if (ly['source-layer'] && !waterSourceLayer) {
+                                waterSource      = ly.source;
+                                waterSourceLayer = ly['source-layer'];
+                            }
+                        } else if (ly.type === 'line') {
+                            map.setPaintProperty(ly.id, 'line-color', LAND);            // waterway/river lines → white, so they disappear into the land too
+                        }
+                    } else if (ly.type === 'fill' && /(landcover|landuse|park|wood|forest|grass|green|residential|built|sand|rock)/i.test(ly.id)) {
+                        map.setPaintProperty(ly.id, 'fill-color', LAND);               // in-continent fills (landuse/landcover) → white to match the continent
+                    } else if (ly.type === 'line' && /(boundary|admin|border)/i.test(ly.id)) {
+                        map.setPaintProperty(ly.id, 'line-color', CONT);               // country borders = the "inside" outline
+                        if (borderWidth === null) {
+                            try { borderWidth   = map.getPaintProperty(ly.id, 'line-width'); }   catch (e) {}
+                            try { borderOpacity = map.getPaintProperty(ly.id, 'line-opacity'); } catch (e) {}
+                        }
+                    }
+                } catch (e) {}
+            });
+
+            // Continent outline (coastline): a LINE drawn on the water polygons,
+            // styled IDENTICALLY to the country-border lines above — same colour
+            // (CONT), same width/opacity copied off them, normal line antialiasing
+            // — so the outline of the continents looks the same as the outlines
+            // inside them.
+            if (waterSourceLayer && !map.getLayer('fc-coastline')) {
+                var paint = { 'line-color': CONT };
+                paint['line-width'] = (borderWidth != null) ? borderWidth : 0.8;
+                if (borderOpacity != null) paint['line-opacity'] = borderOpacity;
+                try {
+                    map.addLayer({
+                        id: 'fc-coastline',
+                        type: 'line',
+                        source: waterSource,
+                        'source-layer': waterSourceLayer,
+                        // Outline the OCEAN only — otherwise every lake we just
+                        // whitened would keep a grey shore ring and the whiten-out
+                        // would be undone. The continent coastline is the edge of
+                        // the ocean polygon, so this still draws it.
+                        filter: ['==', ['get', 'class'], 'ocean'],
+                        layout: { 'line-join': 'round', 'line-cap': 'round' },
+                        paint: paint
+                    });
+                } catch (e) {}
+            }
+        }
+
+        // ---- pin images ----
+        function makeDot(fill) {
+            var s = 40, c = document.createElement('canvas');
+            c.width = s; c.height = s;
+            var ctx = c.getContext('2d');
+            var cx = s / 2, cy = s / 2, r = s / 2 - 7;
+            ctx.beginPath(); ctx.arc(cx, cy, r + 3, 0, Math.PI * 2); ctx.fillStyle = PAPER; ctx.fill();
+            ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fillStyle = fill; ctx.fill();
+            return ctx.getImageData(0, 0, s, s);
+        }
+        function addDefaultImages() {
+            try {
+                if (!map.hasImage('fc-pin'))         map.addImage('fc-pin',         makeDot(INK),    { pixelRatio: 2 });
+                if (!map.hasImage('fc-pin-current')) map.addImage('fc-pin-current', makeDot(ACCENT), { pixelRatio: 2 });
+            } catch (e) {}
+        }
+
+        // ---- source + layers ----
+        function setupLayers() {
+            var features = markers.map(function (m) {
+                return {
+                    type: 'Feature',
+                    id: m.id,
+                    geometry: { type: 'Point', coordinates: [m.lon, m.lat] },
+                    // `years` is the comma-joined list of every edition at this
+                    // venue. MapLibre flattens array/object feature properties, so
+                    // we keep a string and split it back in the hover/click handlers.
+                    properties: { years: m.years.join(','), city: m.city, url: m.url, current: m.current }
+                };
+            });
+
+            // No pixel clustering (supercluster's grouping is unpredictable here —
+            // a huge radius still split Greece into 2-3 blobs mid-zoom, and the
+            // cluster centroid sat on empty map so zooming in lost the pins). A hard
+            // zoom switch is exact instead:
+            //   • zoom <  CLUSTER_UNTIL_ZOOM → ONE dot for everything (fc-all-pin).
+            //   • zoom >= CLUSTER_UNTIL_ZOOM → that dot is gone and EVERY edition is
+            //     its own pin (fc-points) — no in-between regional clusters.
+            // The handoff is each layer's native maxzoom/minzoom, so exactly one
+            // layer is ever on screen and a pin can never vanish into a gap.
+            map.addSource('editions', {
+                type: 'geojson',
+                data: { type: 'FeatureCollection', features: features }
+            });
+
+            // The single "all editions" dot, shown only when zoomed out. Pinned to
+            // the map's resting centre (the venue) so zooming into it lands right on
+            // the editions rather than an empty patch of map.
+            map.addSource('editions-all', {
+                type: 'geojson',
+                data: { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: defaultCenter } }
+            });
+            map.addLayer({
+                id: 'fc-all-pin',
+                type: 'symbol',
+                source: 'editions-all',
+                maxzoom: CLUSTER_UNTIL_ZOOM,   // hidden the moment you pass the threshold
+                layout: {
+                    'icon-image': 'fc-pin',
+                    'icon-size': 1.25,
+                    'icon-anchor': 'bottom',   // base of the pin/flag sits on the point
+                    'icon-allow-overlap': true,
+                    'icon-ignore-placement': true
+                }
+            });
+
+            // Individual pins — the SAME flag + size as the zoomed-out fc-all-pin
+            // ('fc-pin' at 1.25), so a city splitting into its editions just looks
+            // like more of the same pin. Shown only from CLUSTER_UNTIL_ZOOM up —
+            // below that the single fc-all-pin stands in, so these vanish the moment
+            // you zoom back out.
+            //
+            // NB: icon-size MUST stay a constant here. It's a LAYOUT property, and
+            // MapLibre does NOT support `feature-state` in layout — a
+            // `['feature-state', …]` size evaluates to null ("Expected value to be of
+            // type number, but found null") and the whole layer silently stops
+            // rendering. That was the long-standing reason individual pins never
+            // appeared. Pin hover/selection feedback now lives on the sidebar (CSS)
+            // instead of resizing the sprite.
+            map.addLayer({
+                id: 'fc-points',
+                type: 'symbol',
+                source: 'editions',
+                minzoom: CLUSTER_UNTIL_ZOOM,
+                layout: {
+                    'icon-image': 'fc-pin',
+                    'icon-anchor': 'bottom',   // base of the pin/flag sits on the exact coordinate
+                    'icon-allow-overlap': true,
+                    'icon-ignore-placement': true,
+                    'icon-size': 1.25
+                }
+            });
+        }
+
+        // ---- map ↔ sidebar interactions ----
+        function wireMapInteractions() {
+            map.on('mouseenter', 'fc-points', function (e) {
+                map.getCanvas().style.cursor = 'pointer';
+                if (isMobile()) return;
+                var f = e.features && e.features[0];
+                if (f) highlightYears(yearsOf(f), false);   // one venue pin lights up ALL its editions
+            });
+            map.on('mouseleave', 'fc-points', function () {
+                map.getCanvas().style.cursor = '';
+                if (isMobile()) return;
+                clearHighlight();
+            });
+            map.on('click', 'fc-points', function (e) {
+                var f = e.features && e.features[0];
+                if (!f) return;
+                var url = f.properties && f.properties.url;
+                if (url) { window.open(url, '_blank', 'noopener'); return; }
+                yearsOf(f).forEach(sassAtYear);   // no archive for this venue — sass every edition
+            });
+
+            // The single zoomed-out dot stands in for every edition: hovering it
+            // lights them ALL up in the sidebar; clicking zooms past the threshold
+            // so the individual pins take over.
+            map.on('mouseenter', 'fc-all-pin', function () {
+                map.getCanvas().style.cursor = 'pointer';
+                if (isMobile()) return;
+                highlightYears(pins.map(function (p) { return p.year; }), false);
+            });
+            map.on('mouseleave', 'fc-all-pin', function () {
+                map.getCanvas().style.cursor = '';
+                if (isMobile()) return;
+                clearHighlight();
+            });
+            map.on('click', 'fc-all-pin', function () {
+                map.easeTo({ center: defaultCenter, zoom: CLUSTER_UNTIL_ZOOM + 1, padding: camPad() });
+            });
+        }
+
+        function setState(year, state, on) {
+            if (year == null) return;
+            try { map.setFeatureState({ source: 'editions', id: year }, fcState(state, on)); } catch (e) {}
+        }
+        function fcState(state, on) { var o = {}; o[state] = on; return o; }
+
+        // Light up one OR many editions in the sidebar (a cluster pin lights up all
+        // of its co-located editions). Only flies the map when exactly one year is
+        // highlighted (hovering/scrolling a single edition).
+        function highlightYears(years, fly) {
+            var arr = (years || []).map(Number).filter(function (y) { return !isNaN(y); });
+            var key = arr.slice().sort(function (a, b) { return a - b; }).join(',');
+            if (key === highlightKey) { if (fly && arr.length === 1) flyToYear(arr[0]); return; }
+            clearHighlight();
+            highlightKey = key;
+            highlightedYears = arr;
+            arr.forEach(function (year) {
+                setState(year, 'hover', true);
+                document.querySelectorAll('[data-fc-edition-year="' + year + '"]').forEach(function (b) {
+                    b.classList.add('is-hovered');
+                });
+            });
+            if (fly && arr.length === 1) flyToYear(arr[0]);
+        }
+        function highlightYear(year, fly) { highlightYears([year], fly); }
+        function clearHighlight() {
+            if (!highlightedYears.length) return;
+            highlightedYears.forEach(function (year) {
+                setState(year, 'hover', false);
+                document.querySelectorAll('[data-fc-edition-year="' + year + '"]').forEach(function (b) {
+                    b.classList.remove('is-hovered');
+                });
+            });
+            highlightedYears = [];
+            highlightKey = '';
+        }
+        function flyToYear(year) {
+            var p = pinByYear(year);
+            if (!p) return;
+            map.flyTo({ center: [p.lon, p.lat], zoom: 8, speed: 4, padding: camPad() });
+        }
+        function pinByYear(year) {
+            for (var i = 0; i < pins.length; i++) if (pins[i].year === year) return pins[i];
+            return null;
+        }
+        // Parse a venue pin's comma-joined `years` property back into numbers.
+        function yearsOf(f) {
+            var raw = f && f.properties && f.properties.years;
+            if (raw == null) return [];
+            return String(raw).split(',').map(Number).filter(function (y) { return !isNaN(y); });
+        }
+
+        // Camera padding — the BASE vertical framing only (BOTTOM_HIDDEN). Reserving
+        // top padding pushes the globe DOWN so its BOTTOM (~BOTTOM_HIDDEN of the box)
+        // is clipped. The fine up/down move is NOT done here: padding saturates at the
+        // viewport height (that's exactly what capped the old data-fc-shift-y). The
+        // move is a real camera pan in applyShiftY() instead, which has no ceiling.
+        function camPad() {
+            var h = box.clientHeight || Math.round(box.clientWidth * 0.7) || 0;
+            return { top: Math.round(h * BOTTOM_HIDDEN), right: 0, bottom: 0, left: 0 };
+        }
+        function frameView() {
+            map.jumpTo({ center: restCenter, zoom: DEFAULT_ZOOM, padding: camPad() });
+        }
+        function resetView() {
+            clearHighlight();
+            map.flyTo({ center: restCenter, zoom: DEFAULT_ZOOM, bearing: 0, pitch: 0, padding: camPad(), speed: 1.2 });
+        }
+
+        // ---- editions sidebar (desktop panel + mobile bar) ----
+        var SASS = ['(Nope)', '(Boop)', '(So?)', '(Again)', '(Crickets)', '(Missed)'];
+        function nextSass(cur) {
+            var pool = cur ? SASS.filter(function (m) { return m !== cur; }) : SASS;
+            return pool[Math.floor(Math.random() * pool.length)];
+        }
+        function sassAtYear(year) {
+            document.querySelectorAll('[data-fc-edition-year="' + year + '"]').forEach(function (b) {
+                var txt = b.querySelector('.fc-edition-text');
+                if (!txt) return;
+                if (!txt.getAttribute('data-fc-label')) txt.setAttribute('data-fc-label', txt.textContent);
+                var msg = nextSass(txt.getAttribute('data-fc-sass') || '');
+                txt.setAttribute('data-fc-sass', msg);
+                txt.textContent = msg;
+                clearTimeout(b._sassT);
+                b._sassT = setTimeout(function () { txt.textContent = txt.getAttribute('data-fc-label'); }, 1400);
+            });
+        }
+
+        function wireSidebar() {
+            document.querySelectorAll('[data-fc-edition-year]').forEach(function (btn) {
+                var year = parseInt(btn.getAttribute('data-fc-edition-year'), 10);
+                var url  = btn.getAttribute('data-fc-edition-url') || '';
+
+                btn.addEventListener('mouseenter', function () {
+                    if (isMobile()) return;
+                    highlightYear(year, true);
+                });
+                btn.addEventListener('mouseleave', function () {
+                    if (isMobile()) return;
+                    clearHighlight();
+                });
+                // <a> rows (with a URL) navigate natively in a new tab. Only the
+                // link-less <button> rows need the sass reply on click/tap.
+                if (btn.tagName !== 'A') {
+                    btn.addEventListener('click', function () {
+                        if (url) { window.open(url, '_blank', 'noopener'); return; }
+                        sassAtYear(year);
+                    });
+                }
+            });
+
+            // Mobile bar: no hover — the leftmost item under the scroll is the
+            // "hovered" one. Updates as you scroll; a trailing spacer (added in
+            // the template) lets the last item reach the highlight edge.
+            var bar = document.querySelector('[data-fc-editions-mobile]');
+            if (bar) {
+                var raf = null;
+                bar.addEventListener('scroll', function () {
+                    if (!isMobile()) return;
+                    if (raf) return;
+                    raf = requestAnimationFrame(function () {
+                        raf = null;
+                        selectLeftmost(bar);
+                    });
+                }, { passive: true });
+            }
+        }
+        function selectLeftmost(bar) {
+            var label = bar.querySelector('.fc-editions-label');
+            var refX = bar.getBoundingClientRect().left + (label ? label.getBoundingClientRect().width : 0) + 8;
+            var best = null, bestDx = Infinity;
+            bar.querySelectorAll('[data-fc-edition-year]').forEach(function (b) {
+                var r = b.getBoundingClientRect();
+                var dx = Math.abs(r.left - refX);
+                if (r.right > refX - 4 && dx < bestDx) { bestDx = dx; best = b; }
+            });
+            if (best) {
+                var year = parseInt(best.getAttribute('data-fc-edition-year'), 10);
+                highlightYear(year, true);
+            }
+        }
+
+        // ---- idle auto-rotation (globe spin) ----
+        var lastInteraction = performance.now();
+        ['mousedown', 'wheel', 'touchstart', 'dragstart'].forEach(function (ev) {
+            map.on(ev, function () { lastInteraction = performance.now(); });
+        });
+        var visible = true;
+        if ('IntersectionObserver' in window) {
+            new IntersectionObserver(function (entries) { visible = entries[0].isIntersecting; }, { rootMargin: '80px' }).observe(box);
+        }
+        function startSpin() {
+            if (reducedMotion) return;
+            var IDLE_MS = 2500, STEP = 0.06;
+            (function spin() {
+                requestAnimationFrame(spin);
+                if (!visible) return;
+                var now = performance.now();
+                if (now - lastInteraction < IDLE_MS) return;
+                if (Math.abs(map.getZoom() - restZoom) > 0.35) return;
+                if (map.isMoving() || map.isZooming()) return;
+                // Normal Earth-axis spin: pan the centre longitude so the globe
+                // turns on the equator/meridian like a real planet. The editions
+                // (all in Greece) rotate to the back for part of each turn and
+                // return — the intended true-globe behaviour.
+                var c = map.getCenter();
+                map.setCenter([c.lng + STEP, c.lat]);
+            })();
+        }
+
+        // ---- auto-reset when the venue section leaves the active threshold ----
+        function watchSectionLeave() {
+            var sectionEl = box.closest('section');
+            if (!sectionEl) return;
+            var THRESH = 0.35, wasActive = null;
+            function venueActive() {
+                var secs = document.querySelectorAll('section');
+                if (!secs.length) return false;
+                var trigger = window.scrollY + window.innerHeight * THRESH;
+                var activeId = null;
+                secs.forEach(function (s) {
+                    var top = s.getBoundingClientRect().top + window.scrollY;
+                    if (top <= trigger) activeId = s.id;
+                });
+                return activeId === sectionEl.id;
+            }
+            function check() {
+                var a = venueActive();
+                if (wasActive === null) { wasActive = a; return; }
+                if (wasActive && !a) resetView();
+                wasActive = a;
+            }
+            window.addEventListener('scroll', check, { passive: true });
+            window.addEventListener('resize', check);
+            check();
+        }
+    }
+
+    function computeCenter(pins, venueLat, venueLon) {
+        if (!isNaN(venueLat) && !isNaN(venueLon)) return [venueLon, venueLat];
+        var cur = null, i;
+        for (i = 0; i < pins.length; i++) if (pins[i].current) { cur = pins[i]; break; }
+        if (cur) return [cur.lon, cur.lat];
+        if (pins.length) {
+            var la = 0, lo = 0;
+            for (i = 0; i < pins.length; i++) { la += pins[i].lat; lo += pins[i].lon; }
+            return [lo / pins.length, la / pins.length];
+        }
+        return [23.73, 37.98]; // Athens fallback
+    }
+
+    // Collapse editions that share a venue into ONE marker per venue, so the map
+    // shows a single pin no matter how many years a city hosted. Grouping is by
+    // EXACT coordinate equality: only editions whose lat AND lon match to the last
+    // digit merge (the admin stores them as the same decimal string, so identical
+    // venues parse to identical numbers). Two distinct spots in the same city —
+    // even a few metres apart — stay separate pins. Each marker keeps:
+    //   • years   — every edition year at this venue, so a hover can light them
+    //               ALL up in the sidebar at once (see yearsOf / highlightYears);
+    //   • lat/lon — the shared coordinate (identical → exactly that point);
+    //   • url     — a representative archive link (the most recent edition that
+    //               has one) for a click on the merged pin;
+    //   • id      — the venue's latest year: unique per venue and stable across
+    //               reloads, used as the GeoJSON feature id.
+    // Groups of one (Patras, Syros, Larissa, Piraeus…) become a one-year marker.
+    // Does NOT mutate pins (it returns a fresh markers array), so fly-to and the
+    // sidebar keep working off the original per-edition coordinates.
+    function groupColocated(pins) {
+        var groups = [];
+        pins.forEach(function (p) {
+            for (var i = 0; i < groups.length; i++) {
+                var a = groups[i][0];
+                if (p.lat === a.lat && p.lon === a.lon) { groups[i].push(p); return; }
+            }
+            groups.push([p]);
+        });
+        return groups.map(function (g) {
+            g.sort(function (x, y) { return x.year - y.year; });
+            var n = g.length, current = false, url = '', k;
+            for (k = 0; k < n; k++) {
+                if (g[k].current) current = true;
+            }
+            // Click target for the merged pin: the most recent edition that
+            // actually has an archive link.
+            for (k = n - 1; k >= 0; k--) { if (g[k].url) { url = g[k].url; break; } }
+            return {
+                lat:     g[0].lat,          // identical across the group by definition
+                lon:     g[0].lon,
+                years:   g.map(function (p) { return p.year; }),
+                city:    g[n - 1].city,
+                url:     url,
+                current: current,
+                id:      g[n - 1].year      // unique, stable marker id (the venue's latest year)
+            };
+        });
+    }
+
+    function buildControls(box, map, defaultCenter, defaultZoom, resetView) {
+        var ctrlGap = 'clamp(8px, 1.5vw, 16px)';
+        var controls = document.createElement('div');
+        controls.style.position = 'absolute';
+        controls.style.left = ctrlGap;
+        controls.style.bottom = ctrlGap;
+        controls.style.display = 'flex';
+        controls.style.flexDirection = 'row';
+        controls.style.gap = '4px';
+        controls.style.alignItems = 'center';
+        controls.style.zIndex = '2';
+        controls.style.fontFamily = 'JetBrains Mono, ui-monospace, monospace';
+        controls.style.fontSize = '14px';
+        var btnStyle = 'border:1px solid var(--ink-faint);background:#FAFAF7;color:var(--ink);width:28px;height:28px;line-height:1;cursor:pointer;padding:0;font-family:inherit;font-size:inherit;';
+        function mk(label, aria, fn) {
+            var b = document.createElement('button');
+            b.type = 'button';
+            b.setAttribute('style', btnStyle);
+            b.setAttribute('aria-label', aria);
+            b.textContent = label;
+            b.addEventListener('click', fn);
+            controls.appendChild(b);
+            return b;
+        }
+        mk('+', 'Zoom in', function () { map.zoomIn(); });
+        mk('−', 'Zoom out', function () { map.zoomOut(); });
+        mk('⌂', 'Reset view', function () { resetView(); });
+        box.appendChild(controls);
+    }
+})();
+
+</script>
+
+</body>
+</html>
