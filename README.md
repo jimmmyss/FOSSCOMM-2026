@@ -2,4 +2,9 @@
 
 *\~Bad time to be here, everyone is slacking.\~*
 
--Made by humans
+-Made by those humans:
+
+Dimitris Athanasopoulos
+Thanasis Giannoulakis
+Nikolas Pissas
+Nikos Tsekos
