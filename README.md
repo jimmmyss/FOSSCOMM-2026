@@ -8,3 +8,7 @@
 - Thanasis Giannoulakis
 - Nikolas Pissas
 - Nikos Tsekos
+
+### Donation:
+
+<img src="ASSETS/DONATION-QR.png" width="64
