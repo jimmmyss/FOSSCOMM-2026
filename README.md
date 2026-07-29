@@ -11,4 +11,4 @@
 
 ### Donation:
 
-<img src="ASSETS/DONATION-QR.png" width="64
+<img src="ASSETS/DONATION-QR.png" width="64">
