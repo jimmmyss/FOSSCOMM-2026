@@ -16,7 +16,6 @@ require_once FC_THEME_DIR . '/inc/seed.php';
 require_once FC_THEME_DIR . '/inc/news.php';
 require_once FC_THEME_DIR . '/inc/conduct.php';
 require_once FC_THEME_DIR . '/assets/pet/pet.php';
-require_once FC_THEME_DIR . '/assets/mascot/mascot.php';
 
 if (is_admin()) {
     require_once FC_THEME_DIR . '/inc/admin/menu.php';
