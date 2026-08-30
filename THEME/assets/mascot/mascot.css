@@ -1,0 +1,124 @@
+/**
+ * Mascot presentation.
+ *
+ * Everything positional is written by view.js as a transform — this file only
+ * establishes the stacking context, the pixel-art rendering, and the pointer
+ * rules. There are no keyframes and no state selectors: an animation is frames
+ * of a sheet, not CSS, so nothing here needs to know which state he is in.
+ */
+
+#fosscomm-mascot {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;   /* the layer is inert… */
+    overflow: visible;
+}
+
+/* …only the sprite itself is grabbable. */
+#fosscomm-mascot .fcm-sprite {
+    pointer-events: auto;
+
+    /* `none`, so a finger that lands on him is HIS — picked up instantly, with
+       no press-and-hold and no chance of the scroller stealing the gesture
+       halfway through a throw. The cost is that a swipe starting exactly on him
+       won't scroll the page; he is a small sprite in a corner, and needing to
+       hold a finger down to pick him up was the worse trade. */
+    touch-action: none;
+}
+
+/* The open hand appears only over his DRAWN pixels. input.js sets data-fcm-hot
+   from the same hit test that decides whether a click grabs him, so the cursor
+   can never promise a handle that a click then refuses. */
+#fosscomm-mascot[data-fcm-hot] .fcm-sprite {
+    cursor: grab;
+}
+
+/* view.js mirrors the current state onto the mount, so the held pose gets the
+   closed-hand cursor without any JS here. The html[] half covers the whole drag
+   even when the pointer outruns the sprite. */
+#fosscomm-mascot[data-state="held"] .fcm-sprite,
+html[data-fc-grabbing] #fosscomm-mascot .fcm-sprite {
+    cursor: grabbing;
+}
+
+#fosscomm-mascot .fcm-body,
+#fosscomm-mascot .fcm-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    will-change: transform;
+}
+
+#fosscomm-mascot .fcm-body {
+    /* Rotation is about his middle: a pendulum pivots at the point you hold, and
+       holding him by the centre of mass is what makes the spin read as a spin
+       rather than a wobble around his feet. */
+    transform-origin: 50% 50%;
+}
+
+/* Deliberately NOT scoped to #fosscomm-mascot. These two class names are ours
+   and appear wherever a sheet is drawn — including wp-admin's per-animation
+   previews, which sit outside the mount and were being smoothed into a blur
+   because this rule couldn't reach them. */
+.fcm-sprite,
+.fcm-particle {
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;   /* Firefox fallback */
+}
+
+#fosscomm-mascot .fcm-sprite {
+    /* Fills .fcm-body exactly — that element is sized to the sprite, and the
+       bottom-centre alignment against the collision box happens in the body's
+       transform. Nothing overflows, so nothing is rasterised at the wrong scale. */
+    position: absolute;
+    left: 0;
+    top: 0;
+
+    /* Squash is applied here rather than on .fcm-body so it stays aligned to the
+       floor while he is rotated — a squash that rotates with him reads as shear. */
+    transform-origin: 50% 100%;
+}
+
+#fosscomm-mascot .fcm-particles {
+    /* Not rotated with the body, so an orbit stays level and a rising particle
+       keeps rising while he spins underneath it. */
+    width: 0;
+    height: 0;
+}
+
+/* Every sheet, stacked as backgrounds so the browser has decoded all of them
+   before any animation needs one. It must stay painted — `display: none` or
+   `visibility: hidden` would let the browser skip the work this exists to do —
+   so it is a single transparent pixel instead. */
+#fosscomm-mascot .fcm-preload {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    opacity: 0.001;
+    pointer-events: none;
+    background-repeat: no-repeat;
+    background-size: 1px 1px;
+    contain: strict;
+}
+
+#fosscomm-mascot .fcm-particle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 50% 50%;
+    pointer-events: none;
+    /* Centring is done in the transform particles.js writes, not with a margin:
+       a percentage margin resolves against the parent's width, and this parent
+       is a zero-width point, so -50% would resolve to 0. */
+}
+
+/* He is decoration. A screen reader announcing a mascot mid-article is noise,
+   and `aria-hidden` on the mount is the other half of this. */
+#fosscomm-mascot {
+    user-select: none;
+    -webkit-user-select: none;
+}

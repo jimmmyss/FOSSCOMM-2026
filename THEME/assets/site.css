@@ -176,6 +176,30 @@ html, body {
 .fc-accent.fc-accent {
     color: var(--color-accent, #0033FF);
     font-family: "Qaroxe", var(--font-display, "Space Grotesk"), ui-sans-serif, system-ui, sans-serif !important;
+
+    /* Stops a highlighted word making its line taller than the others.
+     *
+     * The @font-face overrides at the top of this file were the first attempt and
+     * they are not enough, because line-box height does not depend on how TALL a
+     * font is — both inline boxes are exactly line-height tall either way. It
+     * depends on where the baseline sits inside that box, which is set by the
+     * ASYMMETRY (ascent − descent). Two boxes of equal height with baselines at
+     * different depths, stacked on a shared baseline, span more than one box:
+     *
+     *     line grows by |δ_display − δ_accent| / 2,  where δ = ascent − descent
+     *
+     * Qaroxe is overridden to 80/20, so δ = 60%; Space Grotesk is about 71%. An
+     * 11-point gap is a ~5% taller line — invisible on one line, obvious the
+     * moment a title wraps and only some lines contain a highlight.
+     *
+     * Matching the two δ values would need Space Grotesk's exact metrics and
+     * would break against any fallback face. Zero side-steps the whole thing: a
+     * zero-height inline box cannot stretch the line whatever font wins. The
+     * glyphs are unaffected — they sit on the baseline, which line-height does
+     * not move — and wrapping inside a multi-word highlight is safe, because the
+     * block's own strut sets a floor under EVERY line box regardless.
+     */
+    line-height: 0;
 }
 
 /* Global %fine print% aside applied by fc_format(): wrap any segment in %…% in an
@@ -229,7 +253,10 @@ html, body {
    class for specificity over Tailwind's matching rule. */
 .fc-nav-link.fc-nav-link:hover,
 .fc-nav-link.fc-nav-link:focus-visible { color: var(--accent); outline: none; }
-.fc-topbar-brand { cursor: pointer; }
+/* var(), not a bare `pointer`: FOSSCOMM → Cursor can replace the pointer, and a
+   hardcoded value here would show the system hand on this one element while the
+   rest of the site showed the custom one. Falls back cleanly when none is set. */
+.fc-topbar-brand { cursor: var(--fc-cur-pointer, pointer); }
 .fc-topbar-brand:hover,
 .fc-topbar-brand:focus-visible { color: var(--accent); outline: none; }
 

@@ -53,7 +53,14 @@
             var daySel   = root.querySelector('[data-fc-filter="day"]');
             var roomSel  = root.querySelector('[data-fc-filter="room"]');
             var trackSel = root.querySelector('[data-fc-filter="track"]');
-            function val(sel) { return sel ? sel.value : 'all'; }
+            // A select that isn't in the DOM means that axis has nothing to
+            // filter by (the schedule template drops empty segments), so it has
+            // to read as the no-filter value — '' — exactly like the
+            // placeholder option. The old 'all' default was a leftover from
+            // markup that carried an explicit "all" option: every comparison
+            // below tests the value for truthiness, so 'all' matched nothing and
+            // hid every day-list and every session instead of none of them.
+            function val(sel) { return sel ? sel.value : ''; }
 
             function applyFilters() {
                 // Empty value = the placeholder label (DAY/ROOM/CATEGORY) = no filter.

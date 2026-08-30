@@ -261,7 +261,10 @@ $eyebrow     = fc_section_eyebrow($section);
    scroll-select) turns the item accent and shows the pointer cursor. Rows with
    an archive URL are <a target="_blank">; link-less rows are <button>s that
    show a sass message on click (assets/venue-map.js). */
-.fc-year-btn { cursor: pointer; }
+/* var(), not a bare `pointer` — see the note in inc/bootstrap.php: this <style>
+   is printed inside the body, so it outranks the custom-cursor CSS on document
+   order and a literal value here would beat it. */
+.fc-year-btn { cursor: var(--fc-cur-pointer, pointer); }
 @media (hover: hover) {
     .fc-year-btn:hover { color: var(--accent) !important; }
 }
@@ -278,7 +281,7 @@ $eyebrow     = fc_section_eyebrow($section);
    `(max-width: 1023.98px)` mobile check) so touch viewports — including
    hybrid laptops and DevTools mobile mode that still report `(hover: hover)`
    — never trigger the scramble or colour change. Tap stays click-only. */
-.fc-venue-title-link { cursor: pointer; }
+.fc-venue-title-link { cursor: var(--fc-cur-pointer, pointer); }
 /* Subline that only exists to show the longitude on hover (no Greek title set).
    Reserve the visual space so the title doesn't shift when hover content appears,
    but keep it invisible until hover. */

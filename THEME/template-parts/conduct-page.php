@@ -13,12 +13,10 @@ $title = fc_bi($data, 'title');
 $body  = fc_bi($data, 'body');
 ?>
 <!-- Outer wrapper carries min-h-screen so the page still has full viewport
-     height on short content. The <section> inside is the pet's platform
-     (assets/pet/engine.js selects `section`); keeping it tight to the text
-     means the border-b — the line the pet walks on — sits right where the
-     content ends, instead of being pushed to the bottom of the viewport.
-     <section> stays inside <main class="lg:pl-[200px]"> so the pet's
-     horizontal range never crosses into the fixed sidebar. -->
+     height on short content. The <section> inside is what the sidebar nav and
+     the mascot's section reactions both read to decide which section you are
+     in (assets/section-nav.js and assets/mascot/js/sections.js, same 0.35
+     viewport trigger), so keep it wrapping the real content. -->
 <div class="min-h-screen">
 <section class="bg-paper border-t border-b border-border">
     <div class="max-w-[1200px] mx-auto px-4 md:px-8 py-24 md:py-32">

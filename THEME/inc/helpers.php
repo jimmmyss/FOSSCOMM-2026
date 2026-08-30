@@ -11,6 +11,78 @@ function fc_get_event_start_iso() {
     return $settings['event_start'] ?? '2026-10-17T09:00:00+03:00';
 }
 
+/** Option holding the speaker-card colours. Written by the Speakers admin page. */
+const FC_SPEAKERS_STYLE_OPTION = 'fc_speakers_style';
+
+/**
+ * The two outline colours for a speaker's cut-out photo: at rest, and on hover.
+ *
+ * Lives HERE rather than in inc/admin/pages/speakers.php because the admin
+ * directory is only required when is_admin() — the front end needs to read this
+ * on every landing-page render, and a reader that only exists in wp-admin is a
+ * fatal on the public site.
+ *
+ * sanitize_hex_color() returns null for anything that is not a valid hex colour,
+ * so a half-typed value in the box falls back rather than emitting broken CSS.
+ */
+function fc_speakers_style(): array {
+    $saved = get_option(FC_SPEAKERS_STYLE_OPTION, []);
+    if (!is_array($saved)) $saved = [];
+    $pick = static function ($value, string $fallback): string {
+        $hex = sanitize_hex_color((string) $value);
+        return $hex ? $hex : $fallback;
+    };
+    return [
+        // The portraits stand on the section's own paper, so the resting outline
+        // is the theme accent — a white one would be invisible against it.
+        'rim'       => $pick($saved['rim'] ?? '', '#0033FF'),
+        'rim_hover' => $pick($saved['rim_hover'] ?? '', '#FF6A2B'),
+    ];
+}
+
+/**
+ * Given the URL of a WordPress image derivative, return the original upload's
+ * URL. Anything else is handed straight back.
+ *
+ * The media picker stores whatever URL it was given, and its default is the
+ * "medium" size — 300px on the longest side out of the box. That is fine for a
+ * thumbnail and badly wrong for anything drawn large: a 300px file in a box
+ * 840 device pixels wide is a 2.8x upscale, which reads as a soft, mushy photo
+ * that no amount of filtering can rescue.
+ *
+ * The `-WxH` suffix is only a HINT that a URL might be a derivative — a file
+ * genuinely called `team-photo-1920x1080.png` matches it too. So the suffix
+ * merely decides whether to bother looking, and the answer comes from the media
+ * library: no attachment, no substitution.
+ */
+function fc_media_original_url(string $url): string {
+    if ($url === '') return $url;
+    if (!preg_match('/-\d+x\d+\.(?:jpe?g|png|gif|webp|avif)$/i', $url)) return $url;
+    if (!function_exists('attachment_url_to_postid')) return $url;
+
+    $id = attachment_url_to_postid($url);
+    if (!$id) return $url;
+
+    $full = function_exists('wp_get_original_image_url') ? wp_get_original_image_url($id) : '';
+    if (!$full) $full = wp_get_attachment_url($id);
+    return $full ? (string) $full : $url;
+}
+
+/**
+ * Split a multi-line admin field into trimmed, non-empty lines.
+ *
+ * One role per line is how a speaker's titles are entered — "Co-founder",
+ * "President / Valve" — and every one of them becomes its own line on the card.
+ */
+function fc_lines(string $text): array {
+    $out = [];
+    foreach (preg_split('/\R/u', $text) ?: [] as $line) {
+        $line = trim($line);
+        if ($line !== '') $out[] = $line;
+    }
+    return $out;
+}
+
 /**
  * True when the request is the landing page (front-page.php).
  * Used by the status bar's "FOSSCOMM" brand link and the section-nav links

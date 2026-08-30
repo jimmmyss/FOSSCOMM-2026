@@ -82,14 +82,33 @@ $eyebrow    = fc_section_eyebrow($section);
 // The first configured day is the one shown by default (others hidden until
 // the day filter selects them). Empty days list → no day blocks rendered at
 // all; we fall through to a single TBA below the title.
+//
+// The day <select> below is PRE-SELECTED to this key. That is load-bearing, not
+// cosmetic: fc.js runs applyFilters() on init, and it reads an empty day value
+// as "show every day" — so leaving the placeholder selected un-hid every other
+// day the moment the script booted, and again on any room/track change. Server
+// markup and filter state have to agree on what is showing. The placeholder
+// option remains as the explicit "all days" reset.
 $default_day_key = '';
 foreach ($days as $k => $_d) { $default_day_key = $k; break; }
+
+// Each segment only earns its place in the bar when it has something to filter
+// by. Nothing about the programme is seeded (see inc/seed.php), so before the
+// organisers fill it in all three lists are empty — and three dropdowns holding
+// only their own labels, sitting above a "to be announced", read as broken
+// chrome rather than as an unannounced schedule. $filter_count also drives the
+// `//` separators, which otherwise stack up around the segments that are gone.
+//
+// fc.js treats a select that isn't in the DOM as "no filter on this axis" (see
+// val() in assets/dist/fc.js), so dropping one narrows nothing.
+$filter_count = 0;
 ?>
 <section id="<?php echo esc_attr($id); ?>" class="bg-paper relative border-t border-border" <?php echo fc_island_attrs('schedule-filter'); ?>>
     <!-- Filter bar — same hooks (data-fc-filter / fc-sched-select) and same
          sticky offsets as the venue editions bar (top-10, h-[41px], 1px bleed
          into the section border). Don't rename the data attributes; fc.js binds
          to them by exact selector. -->
+    <?php if (!empty($days) || !empty($rooms) || !empty($track_label)) : ?>
     <nav
         aria-label="Schedule filters"
         class="
@@ -100,6 +119,7 @@ foreach ($days as $k => $_d) { $default_day_key = $k; break; }
             flex items-center gap-4 px-4
         "
     >
+        <?php if (!empty($days)) : $filter_count++; ?>
         <select data-fc-filter="day" class="fc-sched-select" aria-label="Day">
             <option value=""><?php echo esc_html(fc_t('filter_day')); ?></option>
             <?php foreach ($days as $dkey => $dmeta) :
@@ -111,24 +131,30 @@ foreach ($days as $k => $_d) { $default_day_key = $k; break; }
                 }
                 if ($label === '') continue;
                 ?>
-                <option value="<?php echo esc_attr($dkey); ?>"><?php echo esc_html($label); ?></option>
+                <option value="<?php echo esc_attr($dkey); ?>" <?php selected($dkey, $default_day_key); ?>><?php echo esc_html($label); ?></option>
             <?php endforeach; ?>
         </select>
-        <span class="opacity-50">//</span>
+        <?php endif; ?>
+        <?php if (!empty($rooms)) : ?>
+            <?php if ($filter_count) : ?><span class="opacity-50">//</span><?php endif; $filter_count++; ?>
         <select data-fc-filter="room" class="fc-sched-select" aria-label="Room">
             <option value=""><?php echo esc_html(fc_t('filter_room')); ?></option>
             <?php foreach ($rooms as $room_opt) : ?>
                 <option value="<?php echo esc_attr($room_opt); ?>"><?php echo esc_html($room_opt); ?></option>
             <?php endforeach; ?>
         </select>
-        <span class="opacity-50">//</span>
+        <?php endif; ?>
+        <?php if (!empty($track_label)) : ?>
+            <?php if ($filter_count) : ?><span class="opacity-50">//</span><?php endif; $filter_count++; ?>
         <select data-fc-filter="track" class="fc-sched-select" aria-label="Category">
             <option value=""><?php echo esc_html(fc_t('filter_category')); ?></option>
             <?php foreach ($track_label as $slug => $name) : ?>
                 <option value="<?php echo esc_attr($slug); ?>"><?php echo esc_html(fc_one($name)); ?></option>
             <?php endforeach; ?>
         </select>
+        <?php endif; ?>
     </nav>
+    <?php endif; ?>
 
     <div class="max-w-[1440px] mx-auto px-4 md:px-8 py-24 md:py-40">
         <?php if ($eyebrow !== '') : ?>
@@ -170,7 +196,10 @@ foreach ($days as $k => $_d) { $default_day_key = $k; break; }
 
                 <ul class="list-none p-0 m-0 border-t border-border">
                     <?php foreach ($rows as $s) :
-                        $title  = fc_bi($s, 'title');
+                        // NB: named $s_title, not $title — $title above holds the
+                        // section heading, and reusing it here clobbered it for
+                        // anything rendered after this loop.
+                        $s_title = fc_bi($s, 'title');
                         $prereq = fc_bi($s, 'prereq');
                         $time   = (string) ($s['time']    ?? '');
                         $speaker = (string) ($s['speaker'] ?? '');
@@ -195,7 +224,7 @@ foreach ($days as $k => $_d) { $default_day_key = $k; break; }
                                 </div>
                                 <!-- Title + speaker. -->
                                 <div class="col-span-9 md:col-span-7 min-w-0">
-                                    <?php $stitle = fc_one($title); ?>
+                                    <?php $stitle = fc_one($s_title); ?>
                                     <div class="font-display text-xl md:text-2xl leading-tight"><?php echo fc_format($stitle); ?></div>
                                     <?php if ($speaker !== '') : ?>
                                         <div class="mt-3 font-mono text-xs text-ink-muted"><?php echo fc_format($speaker); ?></div>
@@ -249,7 +278,9 @@ foreach ($days as $k => $_d) { $default_day_key = $k; break; }
     text-transform: uppercase;
     letter-spacing: inherit;
     color: var(--ink-muted);            /* grey, same as the other bars */
-    cursor: pointer;
+    /* var(), not a bare `pointer` — see the note in inc/bootstrap.php: this
+       <style> is inside the body and would otherwise outrank the custom cursor. */
+    cursor: var(--fc-cur-pointer, pointer);
     /* Shared bar-item hover speed — matches .fc-year-btn, .fc-nav-link, the
        topbar brand. Snappy (~80ms) so the colour change feels instantaneous
        without being a hard step. */

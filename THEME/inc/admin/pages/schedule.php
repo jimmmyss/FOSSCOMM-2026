@@ -17,32 +17,19 @@ function fc_admin_register_schedule() {
     add_submenu_page(FC_ADMIN_SLUG, 'Schedule', '— Schedule', FC_ADMIN_CAP, 'fc_section_schedule', 'fc_admin_page_schedule');
 }
 
-/**
- * Default days used on a fresh install / when the option is empty. Also the
- * shape the schedule template falls back to for any session whose day key
- * doesn't match a configured day.
- */
-function fc_schedule_default_days(): array {
-    return [
-        ['key' => 'sat', 'name_el' => 'Σάββατο', 'name_en' => 'Saturday', 'date' => '2026-10-17'],
-        ['key' => 'sun', 'name_el' => 'Κυριακή', 'name_en' => 'Sunday',   'date' => '2026-10-18'],
-    ];
-}
-
 function fc_admin_page_schedule() {
     $title_defaults = [
         'title_el' => 'Πρόγραμμα — δύο μέρες.',
         'title_en' => 'Two days. Four rooms. One weekend.',
     ];
 
+    // Days start EMPTY on a fresh install. There used to be a
+    // fc_schedule_default_days() pair here (Saturday/Sunday, 17–18 Oct 2026)
+    // filled in whenever the option had never been saved — but a guessed date
+    // that renders as a day header on the public schedule is announced
+    // programme, not a default, so the repeater now waits to be filled in.
     $days_raw_opt = get_option('fc_schedule_days');
-    // Only fall back to defaults when the option has never been saved (false/null).
-    // An empty array means the user deleted all days intentionally — respect that.
-    if ($days_raw_opt === false || $days_raw_opt === null) {
-        $days = fc_schedule_default_days();
-    } else {
-        $days = is_array($days_raw_opt) ? $days_raw_opt : [];
-    }
+    $days = is_array($days_raw_opt) ? $days_raw_opt : [];
     $day_options = [];
     foreach ($days as $d) {
         $key = (string) ($d['key'] ?? '');

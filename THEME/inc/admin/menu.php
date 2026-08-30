@@ -143,7 +143,14 @@ function fc_admin_inline_js(): string {
                 });
                 frame.on('select', function() {
                     var att = frame.state().get('selection').first().toJSON();
-                    var url = (isImage && att.sizes && att.sizes.medium) ? att.sizes.medium.url : att.url;
+                    // data-fc-media-full forces the ORIGINAL upload instead of the
+                    // "medium" derivative. Essential for pixel art: WordPress
+                    // resamples its derivatives, which both blurs the pixels and
+                    // changes the width the sprite-sheet cell arithmetic depends on.
+                    var wantFull = !!$wrap.data('fc-media-full');
+                    var url = (isImage && !wantFull && att.sizes && att.sizes.medium)
+                        ? att.sizes.medium.url
+                        : att.url;
                     $input.val(url);
                     if (isImage) {
                         $wrap.find('.fc-media-preview').html('<img src="' + url + '" alt="">');

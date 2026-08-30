@@ -196,8 +196,14 @@ function fc_repeater_field_input(string $name_prefix, string $fkey, string $type
         case 'media':
             $val = (string) ($values[$fkey] ?? '');
             $field_name = $name_prefix . '[' . $fkey . ']';
+            // 'full' => true keeps the ORIGINAL upload instead of WordPress's
+            // "medium" derivative, which the picker takes by default and which is
+            // 300px on its longest side out of the box. Anything drawn larger
+            // than 300px needs this or it is an upscale — see the note in
+            // fc_admin_inline_js().
+            $full = !empty($fdef['full']);
             ?>
-            <div class="fc-media">
+            <div class="fc-media"<?php echo $full ? ' data-fc-media-full="1"' : ''; ?>>
                 <input type="hidden" class="fc-media-input" name="<?php echo esc_attr($field_name); ?>" value="<?php echo esc_attr($val); ?>">
                 <div class="fc-media-preview"><?php if ($val !== '') : ?><img src="<?php echo esc_url($val); ?>" alt=""><?php endif; ?></div>
                 <button type="button" class="button fc-media-pick"><?php echo $val !== '' ? 'Replace image' : 'Select image'; ?></button>

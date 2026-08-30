@@ -40,6 +40,30 @@
 
     var STYLE_URL = 'https://tiles.openfreemap.org/styles/positron';
 
+    /**
+     * The site's custom pointer cursor, as a ready-to-assign CSS value.
+     *
+     * The grab/grabbing pair over the globe is plain CSS (fc_build_cursor_css()
+     * in inc/bootstrap.php targets MapLibre's own canvas-container classes), but
+     * pin hover has to be written as an inline style on the canvas — and an
+     * inline style outranks every stylesheet rule, so hard-coding 'pointer' here
+     * is what would pin the system arrow-hand over the pins while the rest of
+     * the site used the custom one. Reading the variable the same CSS publishes
+     * keeps them in step; unset, it resolves to '' and we fall back to 'pointer'.
+     */
+    var pointerCursor = null;
+    function hoverCursor() {
+        if (pointerCursor === null) {
+            var v = '';
+            try {
+                v = getComputedStyle(document.documentElement)
+                        .getPropertyValue('--fc-cur-pointer').trim();
+            } catch (e) { v = ''; }
+            pointerCursor = v ? v + ', pointer' : 'pointer';
+        }
+        return pointerCursor;
+    }
+
     var mounts = document.querySelectorAll('[data-fc-island="venue-map"]');
     Array.prototype.forEach.call(mounts, initMap);
 
@@ -405,7 +429,7 @@
         // ---- map ↔ sidebar interactions ----
         function wireMapInteractions() {
             map.on('mouseenter', 'fc-points', function (e) {
-                map.getCanvas().style.cursor = 'pointer';
+                map.getCanvas().style.cursor = hoverCursor();
                 if (isMobile()) return;
                 var f = e.features && e.features[0];
                 if (f) highlightYears(yearsOf(f), false);   // one venue pin lights up ALL its editions
@@ -427,7 +451,7 @@
             // lights them ALL up in the sidebar; clicking zooms past the threshold
             // so the individual pins take over.
             map.on('mouseenter', 'fc-all-pin', function () {
-                map.getCanvas().style.cursor = 'pointer';
+                map.getCanvas().style.cursor = hoverCursor();
                 if (isMobile()) return;
                 highlightYears(pins.map(function (p) { return p.year; }), false);
             });
@@ -645,8 +669,18 @@
                 if (wasActive && !a) resetView();
                 wasActive = a;
             }
-            window.addEventListener('scroll', check, { passive: true });
-            window.addEventListener('resize', check);
+            // rAF-throttled: check() walks every <section> and measures it, and
+            // iOS fires scroll far more often than it paints — so unthrottled
+            // this measured the whole page many times per frame, on the same
+            // page as the mascot's own loop and the top bar's. Once per frame is
+            // all a "have we left the venue section" test can ever need.
+            var raf = 0;
+            function onScroll() {
+                if (raf) return;
+                raf = requestAnimationFrame(function () { raf = 0; check(); });
+            }
+            window.addEventListener('scroll', onScroll, { passive: true });
+            window.addEventListener('resize', onScroll);
             check();
         }
     }
@@ -723,7 +757,11 @@
         controls.style.zIndex = '2';
         controls.style.fontFamily = 'JetBrains Mono, ui-monospace, monospace';
         controls.style.fontSize = '14px';
-        var btnStyle = 'border:1px solid var(--ink-faint);background:#FAFAF7;color:var(--ink);width:28px;height:28px;line-height:1;cursor:pointer;padding:0;font-family:inherit;font-size:inherit;';
+        // cursor uses the custom-pointer variable rather than a literal
+        // `pointer`: this is an INLINE style, which outranks every stylesheet,
+        // so a literal here would pin the system hand onto the map controls no
+        // matter what FOSSCOMM → Cursor is set to.
+        var btnStyle = 'border:1px solid var(--ink-faint);background:#FAFAF7;color:var(--ink);width:28px;height:28px;line-height:1;cursor:var(--fc-cur-pointer, pointer);padding:0;font-family:inherit;font-size:inherit;';
         function mk(label, aria, fn) {
             var b = document.createElement('button');
             b.type = 'button';

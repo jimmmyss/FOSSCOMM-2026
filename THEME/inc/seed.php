@@ -74,94 +74,21 @@ function fc_seed_initial_content() {
         'title_en' => 'Reasonable questions, plain answers.',
     ]);
 
-    // Schedule days — previously hard-coded sat/sun in the template; now a
-    // user-editable repeater. Seed with the same two days so existing
-    // installs migrating up keep their schedule rendering exactly as it did.
-    // Inlined (not calling fc_schedule_default_days()) so the seed has no
-    // dependency on admin-only files.
-    fc_seed_if_empty('fc_schedule_days', [
-        ['key' => 'sat', 'name_el' => 'Σάββατο', 'name_en' => 'Saturday', 'date' => '2026-10-17'],
-        ['key' => 'sun', 'name_el' => 'Κυριακή', 'name_en' => 'Sunday',   'date' => '2026-10-18'],
-    ]);
-
-    fc_seed_if_empty('fc_tracks', [
-        ['slug' => 'open-hardware',     'name_el' => 'Open Hardware',         'name_en' => 'Open Hardware'],
-        ['slug' => 'machine-learning',  'name_el' => 'Μηχανική Μάθηση / AI',  'name_en' => 'Machine Learning / AI'],
-        ['slug' => 'cloud-edge',        'name_el' => 'Cloud & Edge',          'name_en' => 'Cloud & Edge'],
-        ['slug' => 'embedded',          'name_el' => 'Embedded / IoT',        'name_en' => 'Embedded / IoT'],
-        ['slug' => 'security',          'name_el' => 'Ασφάλεια',              'name_en' => 'Security'],
-        ['slug' => 'legal',             'name_el' => 'Άδειες & Νομικά',       'name_en' => 'Legal & Licensing'],
-        ['slug' => 'web',               'name_el' => 'Web',                   'name_en' => 'Web'],
-        ['slug' => 'mobile',            'name_el' => 'Mobile',                'name_en' => 'Mobile'],
-        ['slug' => 'e-gov',             'name_el' => 'Ηλ. Διακυβέρνηση',      'name_en' => 'e-Government'],
-        ['slug' => 'e-health',          'name_el' => 'Ηλ. Υγεία',             'name_en' => 'e-Health'],
-        ['slug' => 'blockchain',        'name_el' => 'Blockchain',            'name_en' => 'Blockchain'],
-        ['slug' => 'linux-distros',     'name_el' => 'Linux & Διανομές',      'name_en' => 'Linux & Distros'],
-        ['slug' => 'devops',            'name_el' => 'DevOps',                'name_en' => 'DevOps'],
-        ['slug' => 'documentation',     'name_el' => 'Τεκμηρίωση',            'name_en' => 'Documentation'],
-        ['slug' => 'accessibility',     'name_el' => 'Προσβασιμότητα',        'name_en' => 'Accessibility'],
-        ['slug' => 'design-ux',         'name_el' => 'Design / UX στο FOSS',  'name_en' => 'Design / UX in FOSS'],
-        ['slug' => 'education',         'name_el' => 'Εκπαίδευση',            'name_en' => 'Education'],
-        ['slug' => 'networking',        'name_el' => 'Δίκτυα',                'name_en' => 'Networking'],
-        ['slug' => 'privacy',           'name_el' => 'Ιδιωτικότητα',          'name_en' => 'Privacy'],
-        ['slug' => 'community',         'name_el' => 'Κοινότητα & Διακυβέρνηση', 'name_en' => 'Community & Governance'],
-    ]);
-
-    fc_seed_if_empty('fc_speakers', [
-        ['name' => 'Maria Papadopoulou', 'photo' => '',
-         'role_el' => 'Συντηρήτρια',           'role_en' => 'Maintainer',
-         'affiliation_el' => 'GFOSS',           'affiliation_en' => 'GFOSS',
-         'bio_el' => 'Σε κάθε FOSSCOMM από το 2009. Τεκμηριώνει αυτό που χτίζουν οι άλλοι.',
-         'bio_en' => 'Has been on every FOSSCOMM since 2009. Documents what others build.', 'url' => ''],
-        ['name' => 'Kostas Antoniou', 'photo' => '',
-         'role_el' => 'Μηχανικός Ασφάλειας',   'role_en' => 'Security Engineer',
-         'affiliation_el' => 'Independent',     'affiliation_en' => 'Independent',
-         'bio_el' => 'Reproducible builds, supply chain, και πού και πού ένα zine.',
-         'bio_en' => 'Reproducible builds, supply chain, and the occasional zine.', 'url' => ''],
-        ['name' => 'Eleni Vasileiou', 'photo' => '',
-         'role_el' => 'Ερευνήτρια',             'role_en' => 'Researcher',
-         'affiliation_el' => 'DemRG',           'affiliation_en' => 'DemRG',
-         'bio_el' => 'Local-first, CRDTs, και λογισμικό που σέβεται τα νοικοκυριά.',
-         'bio_en' => 'Local-first, CRDTs, and software that respects households.', 'url' => ''],
-        ['name' => 'Dimitris Stavrou', 'photo' => '',
-         'role_el' => 'SysAdmin',               'role_en' => 'SysAdmin',
-         'affiliation_el' => 'Πανεπιστήμιο Κρήτης', 'affiliation_en' => 'University of Crete',
-         'bio_el' => 'Τρέχει περισσότερες Mastodon instances απ\'όσες είναι λογικό.',
-         'bio_en' => 'Runs more Mastodon instances than is reasonable.', 'url' => ''],
-        ['name' => 'Nikos Karras', 'photo' => '',
-         'role_el' => 'Μηχανικός ML',           'role_en' => 'ML Engineer',
-         'affiliation_el' => 'Ε.Κ. «Αθηνά»',    'affiliation_en' => 'Athena RC',
-         'bio_el' => 'Differential privacy, federated learning, slow conferences.',
-         'bio_en' => 'Differential privacy, federated learning, slow conferences.', 'url' => ''],
-        ['name' => 'Alexandra Lefteris', 'photo' => '',
-         'role_el' => 'Συγγραφέας & Developer', 'role_en' => 'Author & Developer',
-         'affiliation_el' => '',                'affiliation_en' => '',
-         'bio_el' => 'Γράφει ένα βιβλίο για την πολιτική των dependency graphs.',
-         'bio_en' => 'Writing a book about the politics of dependency graphs.', 'url' => ''],
-        ['name' => 'Yiannis Mavridis', 'photo' => '',
-         'role_el' => 'Hardware Hacker',        'role_en' => 'Hardware Hacker',
-         'affiliation_el' => 'hsgr',            'affiliation_en' => 'hsgr',
-         'bio_el' => 'Κολλάει στα διαλείμματα. Έχει γνώμη για το RISC-V.',
-         'bio_en' => 'Solders during Q&A. Has opinions about RISC-V.', 'url' => ''],
-        ['name' => 'Sofia Anagnostou', 'photo' => '',
-         'role_el' => 'Νομική Σύμβουλος',       'role_en' => 'Legal Counsel',
-         'affiliation_el' => 'OW2',             'affiliation_en' => 'OW2',
-         'bio_el' => 'Μεταφράζει licenses στα Ελληνικά και πίσω σε λογική.',
-         'bio_en' => 'Translates licenses into Greek and back into reason.', 'url' => ''],
-    ]);
-
-    fc_seed_if_empty('fc_sessions', [
-        ['day' => 'sat', 'time' => '10:00', 'title_el' => 'Έναρξη · Καλώς ήρθατε στο FOSSCOMM 2026', 'title_en' => 'Opening · Welcome to FOSSCOMM 2026', 'speaker' => 'Organizing Committee', 'room' => 'Room 1', 'tracks' => ['community'], 'lang' => 'GR'],
-        ['day' => 'sat', 'time' => '10:30', 'title_el' => 'Είκοσι χρόνια ελληνικού FOSS, σε είκοσι λεπτά', 'title_en' => 'Twenty Years of Greek FOSS, in Twenty Minutes', 'speaker' => 'M. Papadopoulou', 'room' => 'Room 1', 'tracks' => ['community'], 'lang' => 'GR'],
-        ['day' => 'sat', 'time' => '11:00', 'title_el' => 'Επαναπαραγωγή builds, επαναπαραγωγή εμπιστοσύνης', 'title_en' => 'Reproducible Builds, Reproducible Trust', 'speaker' => 'K. Antoniou', 'room' => 'Room 2', 'tracks' => ['security', 'devops'], 'lang' => 'EN', 'prereq_el' => 'Laptop με Docker + git ≥ 2.40.', 'prereq_en' => 'Laptop with Docker + git ≥ 2.40. Pre-pull ghcr.io/repro/builder:2026.'],
-        ['day' => 'sat', 'time' => '12:00', 'title_el' => 'Local-First Λογισμικό & το Συνεταιριστικό Cloud', 'title_en' => 'Local-First Software & the Cooperative Cloud', 'speaker' => 'E. Vasileiou', 'room' => 'Room 2', 'tracks' => ['cloud-edge'], 'lang' => 'EN'],
-        ['day' => 'sat', 'time' => '13:30', 'title_el' => 'Lightning Talks · Block I', 'title_en' => 'Lightning Talks · Block I', 'speaker' => '8 speakers · 5 min each', 'room' => 'Room 1', 'tracks' => ['community'], 'lang' => 'GR/EN'],
-        ['day' => 'sat', 'time' => '17:30', 'title_el' => 'Keynote · Η σιωπηλή πολιτική των package managers', 'title_en' => 'Keynote · The Quiet Politics of Package Managers', 'speaker' => 'A. Lefteris', 'room' => 'Room 1', 'tracks' => ['community', 'legal'], 'lang' => 'EN'],
-        ['day' => 'sun', 'time' => '10:00', 'title_el' => 'Ημέρα Δεύτερη · Καφές & κατάσταση κοινοτήτων', 'title_en' => 'Day Two · Coffee & State of the Communities', 'speaker' => 'Organising Committee', 'room' => 'Room 1', 'tracks' => ['community'], 'lang' => 'GR'],
-        ['day' => 'sun', 'time' => '10:30', 'title_el' => 'RISC-V στις ελληνικές αίθουσες — Ένας χρόνος μετά', 'title_en' => 'RISC-V in Greek Classrooms — A Year In', 'speaker' => 'Y. Mavridis', 'room' => 'Room 3', 'tracks' => ['open-hardware', 'education'], 'lang' => 'GR'],
-        ['day' => 'sun', 'time' => '13:30', 'title_el' => 'Lightning Talks · Block II', 'title_en' => 'Lightning Talks · Block II', 'speaker' => '8 speakers · 5 min each', 'room' => 'Room 1', 'tracks' => ['community'], 'lang' => 'GR/EN'],
-        ['day' => 'sun', 'time' => '16:00', 'title_el' => 'Closing Panel · Τα επόμενα δεκαοκτώ χρόνια', 'title_en' => 'Closing Panel · The Next Eighteen Years', 'speaker' => 'Past organisers, in conversation', 'room' => 'Room 1', 'tracks' => ['community'], 'lang' => 'GR'],
-    ]);
+    // NOTE: nothing about the programme is seeded — not fc_speakers, not
+    // fc_sessions, and not fc_schedule_days / fc_tracks either.
+    //
+    // The speakers and sessions used to ship eight invented speakers and ten
+    // invented talks as demo content, which went live verbatim on a fresh
+    // install. Days and tracks were kept a while longer on the grounds that
+    // they were structural configuration rather than content — two dates and a
+    // CfP taxonomy. That didn't hold up: both surface directly to visitors (the
+    // day headers, and every entry in the schedule's DAY and CATEGORY filters),
+    // so twenty guessed categories and two guessed dates read exactly like an
+    // announced programme to anyone who can't tell them apart from real ones.
+    //
+    // All four are entered in FOSSCOMM -> Speakers / Schedule. Until then the
+    // schedule renders a single TBA and its filter bar stays out of the way,
+    // which is the correct thing for an unannounced programme to say.
 
     fc_seed_if_empty('fc_section_venue', [
         'title_el'   => 'Χώρος',
@@ -304,6 +231,41 @@ function fc_seed_initial_content() {
     fc_migrate_clear_default_signature();
     fc_migrate_volunteer_cards();
     fc_migrate_clear_default_colophon();
+    fc_migrate_speaker_photos_to_full();
+}
+
+/**
+ * One-time migration: point every saved speaker photo at its ORIGINAL upload.
+ *
+ * The media picker's default is WordPress's "medium" derivative — 300px on its
+ * longest side — and the portraits are drawn at up to 840 device pixels, so
+ * every photo picked before this was a ~2.8x upscale. The picker now asks for
+ * the original (see the `full` flag on the field), but that only helps photos
+ * picked from now on; this repairs the ones already saved so nobody has to go
+ * round re-picking them.
+ *
+ * Conservative by construction: fc_media_original_url() only substitutes a URL
+ * the media library actually recognises as a derivative, and a row it cannot
+ * resolve is left exactly as it was. Runs once, guarded by an option marker,
+ * because attachment_url_to_postid() is a meta query per photo.
+ */
+function fc_migrate_speaker_photos_to_full(): void {
+    if (get_option('fc_speakers_photo_full_v1') === '1') return;
+
+    $rows = get_option('fc_speakers', []);
+    if (is_array($rows)) {
+        $changed = false;
+        foreach ($rows as $i => $row) {
+            if (!is_array($row)) continue;
+            $was = (string) ($row['photo'] ?? '');
+            if ($was === '') continue;
+            $now = fc_media_original_url($was);
+            if ($now !== $was) { $rows[$i]['photo'] = $now; $changed = true; }
+        }
+        if ($changed) update_option('fc_speakers', $rows, false);
+    }
+
+    update_option('fc_speakers_photo_full_v1', '1', true);
 }
 
 /**
@@ -431,6 +393,111 @@ function fc_migrate_clear_default_signature(): void {
         update_option('fc_section_footer', $footer, false);
     }
 }
+
+/**
+ * One-time migration: clear the schedule days and tracks that earlier versions
+ * seeded (Saturday/Sunday 17–18 Oct 2026, and a twenty-entry track taxonomy).
+ * Both are now left empty for the organisers to fill in — see the note in
+ * fc_seed_initial_content().
+ *
+ * Fires ONLY while the stored rows are still the untouched seed, matched row by
+ * row. Add a day, rename a track, delete one of the twenty, and the fingerprint
+ * stops matching and nothing is touched — a curated list is real data even when
+ * it started life as a seed. Idempotent for the same reason: once cleared, the
+ * empty option no longer matches.
+ *
+ * Cleared to [] rather than deleted, which is the same "the organisers have no
+ * days configured" state as deleting every row in the admin repeater.
+ */
+function fc_migrate_drop_seeded_programme(): void {
+    // A session references its day by key and its tracks by slug. Clearing
+    // either out from under an entered programme would orphan every session —
+    // the template drops any session whose day key matches no configured day —
+    // and the schedule would render as if it were empty. So a single session
+    // anywhere means this install is in use and nothing here is a placeholder.
+    $sessions = get_option('fc_sessions', []);
+    if (is_array($sessions) && $sessions !== []) return;
+
+    $legacy_days = [
+        ['key' => 'sat', 'name_el' => 'Σάββατο', 'name_en' => 'Saturday', 'date' => '2026-10-17'],
+        ['key' => 'sun', 'name_el' => 'Κυριακή', 'name_en' => 'Sunday',   'date' => '2026-10-18'],
+    ];
+    $legacy_tracks = [
+        ['slug' => 'open-hardware',     'name_el' => 'Open Hardware',         'name_en' => 'Open Hardware'],
+        ['slug' => 'machine-learning',  'name_el' => 'Μηχανική Μάθηση / AI',  'name_en' => 'Machine Learning / AI'],
+        ['slug' => 'cloud-edge',        'name_el' => 'Cloud & Edge',          'name_en' => 'Cloud & Edge'],
+        ['slug' => 'embedded',          'name_el' => 'Embedded / IoT',        'name_en' => 'Embedded / IoT'],
+        ['slug' => 'security',          'name_el' => 'Ασφάλεια',              'name_en' => 'Security'],
+        ['slug' => 'legal',             'name_el' => 'Άδειες & Νομικά',       'name_en' => 'Legal & Licensing'],
+        ['slug' => 'web',               'name_el' => 'Web',                   'name_en' => 'Web'],
+        ['slug' => 'mobile',            'name_el' => 'Mobile',                'name_en' => 'Mobile'],
+        ['slug' => 'e-gov',             'name_el' => 'Ηλ. Διακυβέρνηση',      'name_en' => 'e-Government'],
+        ['slug' => 'e-health',          'name_el' => 'Ηλ. Υγεία',             'name_en' => 'e-Health'],
+        ['slug' => 'blockchain',        'name_el' => 'Blockchain',            'name_en' => 'Blockchain'],
+        ['slug' => 'linux-distros',     'name_el' => 'Linux & Διανομές',      'name_en' => 'Linux & Distros'],
+        ['slug' => 'devops',            'name_el' => 'DevOps',                'name_en' => 'DevOps'],
+        ['slug' => 'documentation',     'name_el' => 'Τεκμηρίωση',            'name_en' => 'Documentation'],
+        ['slug' => 'accessibility',     'name_el' => 'Προσβασιμότητα',        'name_en' => 'Accessibility'],
+        ['slug' => 'design-ux',         'name_el' => 'Design / UX στο FOSS',  'name_en' => 'Design / UX in FOSS'],
+        ['slug' => 'education',         'name_el' => 'Εκπαίδευση',            'name_en' => 'Education'],
+        ['slug' => 'networking',        'name_el' => 'Δίκτυα',                'name_en' => 'Networking'],
+        ['slug' => 'privacy',           'name_el' => 'Ιδιωτικότητα',          'name_en' => 'Privacy'],
+        ['slug' => 'community',         'name_el' => 'Κοινότητα & Διακυβέρνηση', 'name_en' => 'Community & Governance'],
+    ];
+
+    $days = get_option('fc_schedule_days', null);
+    if (is_array($days) && $days !== [] && fc_rows_are_seed($days, $legacy_days)) {
+        update_option('fc_schedule_days', [], false);
+    }
+
+    $tracks = get_option('fc_tracks', null);
+    if (is_array($tracks) && $tracks !== [] && fc_rows_are_seed($tracks, $legacy_tracks)) {
+        update_option('fc_tracks', [], false);
+    }
+}
+
+/**
+ * True when $rows still carries exactly the seeded $expected rows, in order.
+ *
+ * Only the fields the seed set are compared, so a row that has since grown a
+ * field (a later schema addition) still counts as untouched. Values are
+ * compared as strings because a re-save round-trips everything through the
+ * admin form.
+ */
+function fc_rows_are_seed(array $rows, array $expected): bool {
+    $rows = array_values($rows);
+    if (count($rows) !== count($expected)) return false;
+    foreach ($expected as $i => $want) {
+        if (!is_array($rows[$i])) return false;
+        foreach ($want as $k => $v) {
+            if ((string) ($rows[$i][$k] ?? '') !== (string) $v) return false;
+        }
+    }
+    return true;
+}
+
+/**
+ * The migrations in fc_seed_initial_content() only run on theme (re)activation,
+ * which an install that is already live never does again — so this one gets its
+ * own trigger on the next admin request. The flag is autoloaded, so every later
+ * request pays nothing; fc_migrate_drop_seeded_programme() is idempotent anyway,
+ * the flag just keeps it from re-querying two non-autoloaded options forever.
+ */
+add_action('admin_init', 'fc_maybe_drop_seeded_programme');
+function fc_maybe_drop_seeded_programme(): void {
+    if (get_option('fc_programme_seed_dropped')) return;
+    update_option('fc_programme_seed_dropped', 1, true);
+    fc_migrate_drop_seeded_programme();
+}
+
+/**
+ * Same reason as above: an install that is already live never re-activates the
+ * theme, so the speaker-photo repair needs its own trigger or it would only
+ * ever help a fresh install — which is exactly the install that does not have
+ * the problem. Its own guard is inside, so this costs one autoloaded option
+ * read per admin request and nothing else.
+ */
+add_action('admin_init', 'fc_migrate_speaker_photos_to_full');
 
 function fc_seed_if_empty(string $option_key, $default_value): void {
     $existing = get_option($option_key, null);

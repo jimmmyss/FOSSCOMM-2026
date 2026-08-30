@@ -1,12 +1,13 @@
 // Highlights the active sidebar link and (on mobile) scrolls the nav so the active
-// item sits at the left edge. Uses the same threshold the pet uses (0.35 viewport).
+// item sits at the left edge. Uses the same threshold the mascot uses (0.35 viewport),
+// so the highlight and the mascot move between sections on the same beat.
 
 // ---------- Page-load scroll hygiene ----------
 // Two competing requirements:
 //   a. Hero/footer/sponsor CTAs with hrefs like `#sponsors` (and external links
 //      to https://…/#sponsors) MUST actually land the user at that section.
 //   b. The browser keeps re-anchor-jumping to the URL hash as Tailwind CDN,
-//      images, and the ASCII pet mount cause layout shifts. If we leave the
+//      images, and the mascot mount cause layout shifts. If we leave the
 //      hash in the URL, the user gets "pulled back" each time content above
 //      the target reflows.
 //
@@ -121,15 +122,35 @@ function init() {
     return key ? document.getElementById(key) : null
   }
 
+  // Section offsets in DOCUMENT coordinates, measured once rather than on every
+  // scroll event. They only move when the page reflows, and scrollHeight is a
+  // one-read tripwire for that — against one getBoundingClientRect PER SECTION,
+  // per event, which is what this used to cost while scrolling.
+  let tops = null
+  let measuredH = 0
+  let measuredW = 0
+
+  function measureTops() {
+    const scrollY = window.scrollY
+    tops = []
+    document.querySelectorAll('section').forEach((sec) => {
+      if (sec.id) tops.push({ id: sec.id, top: sec.getBoundingClientRect().top + scrollY })
+    })
+    measuredH = document.documentElement.scrollHeight
+    measuredW = window.innerWidth
+  }
+
   function computeActiveKey() {
-    const sections = document.querySelectorAll('section')
-    if (sections.length === 0) return null
+    if (!tops || measuredW !== window.innerWidth
+        || document.documentElement.scrollHeight !== measuredH) {
+      measureTops()
+    }
+    if (tops.length === 0) return null
     const trigger = window.scrollY + window.innerHeight * THRESHOLD
     let activeId = null
-    sections.forEach((sec) => {
-      const top = sec.getBoundingClientRect().top + window.scrollY
-      if (top <= trigger) activeId = sec.id
-    })
+    for (const row of tops) {
+      if (row.top <= trigger) activeId = row.id
+    }
     return activeId
   }
 
@@ -165,18 +186,31 @@ function init() {
   //     line reaches it.
   const statusBar = document.querySelector('[data-fc-island="status-bar"]')
   const isLanding = document.body.classList.contains('fc-landing')
+
+  // NB: the phone's browser chrome is NOT touched here. It is a constant blue,
+  // set once by the theme-color meta tag in header.php, and stays blue whatever
+  // this bar does — so nothing below should start writing to that tag.
+  // Writes are guarded against re-setting the value they already hold. The bar
+  // is composited, and assigning the same transform string every frame keeps
+  // dirtying it for no change — which on a phone is the difference between the
+  // compositor carrying the bar and the main thread re-doing it.
+  let lastTransform = null
   function chrome() {
     if (!isLanding || !statusBar) return
     const hero = document.getElementById('hero')
     const barH = statusBar.offsetHeight || 40
     const heroBottom = hero ? hero.getBoundingClientRect().bottom : -barH
+    let want = ''
     if (isMobileNav()) {
       const offset = Math.max(-barH, Math.min(0, heroBottom - barH))
-      statusBar.style.transform = 'translateY(' + offset + 'px)'
+      want = 'translateY(' + offset + 'px)'
       statusBar.classList.add('fc-topbar-blue')        // stays blue; it slides away
     } else {
-      statusBar.style.transform = ''
       statusBar.classList.toggle('fc-topbar-blue', heroBottom > barH)  // white once past the line
+    }
+    if (want !== lastTransform) {
+      lastTransform = want
+      statusBar.style.transform = want
     }
   }
 
@@ -205,13 +239,35 @@ function init() {
     }
   }
 
-  window.addEventListener('scroll', tick, { passive: true })
-  window.addEventListener('resize', tick)
-  tick()
+  // ONE frame-synced pass for both, instead of two handlers firing on every
+  // scroll event. iOS fires scroll far more often than it paints, and each of
+  // those calls read layout and then wrote style — so the next event's read had
+  // to force a synchronous layout of the whole document. That is what made the
+  // top bar feel a step behind the page rather than attached to it.
+  //
+  // A schedule filter bar has none of this because it is position:sticky, which
+  // the compositor handles without JavaScript at all. This is as close as the
+  // hero-driven bar gets while it is still position:fixed — see the note in
+  // template-parts/partials/status-bar.php.
+  let pending = 0
+  function onScroll() {
+    if (pending) return
+    pending = requestAnimationFrame(() => {
+      pending = 0
+      tick()      // reads
+      chrome()    // reads, then one guarded write
+    })
+  }
 
-  window.addEventListener('scroll', chrome, { passive: true })
-  window.addEventListener('resize', chrome)
-  window.addEventListener('load', chrome)
+  function onResize() {
+    tops = null   // offsets are width-dependent; re-measure before the next pass
+    onScroll()
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true })
+  window.addEventListener('resize', onResize)
+  window.addEventListener('load', onResize)
+  tick()
   chrome()
 
   measureSectionsEnd()

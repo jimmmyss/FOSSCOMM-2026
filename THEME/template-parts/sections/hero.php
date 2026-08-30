@@ -173,19 +173,20 @@ $eyebrow = fc_section_eyebrow($section);
             <?php endif; ?>
 
             <?php if ($has_bottom_right) : ?>
-                <!-- email + socials, pinned to the panel's bottom corners on every
-                     breakpoint (absolute → out of the flex flow), so only the info
-                     + CTA blocks share the even spacing above. Same font + edge
-                     distance as the 19th-Panhellenic label on the blue panel. -->
-                <div class="absolute inset-x-0 bottom-10 lg:bottom-12 px-8 sm:px-12 lg:px-12 flex items-end justify-between gap-4 font-mono text-[11px] sm:text-[13px] uppercase tracking-[0.22em] text-ink-muted leading-[1.6]">
-                    <div class="min-w-0">
-                        <?php if ($email !== '') : ?>
-                            <a href="<?php echo esc_url('mailto:' . $email); ?>"
-                               class="text-ink hover:text-accent transition-colors no-underline break-all"><?php echo esc_html($email); ?></a>
-                        <?php endif; ?>
-                    </div>
+                <!-- email with the socials stacked UNDER it, pinned to the panel's
+                     bottom-left corner on every breakpoint (absolute → out of the
+                     flex flow), so only the info + CTA blocks share the even
+                     spacing above. The stack is bottom-anchored, so adding or
+                     removing a social link grows the block upward and the email
+                     never shifts off its baseline. Same font + edge distance as the
+                     19th-Panhellenic label on the blue panel. -->
+                <div class="absolute inset-x-0 bottom-10 lg:bottom-12 px-8 sm:px-12 lg:px-12 flex flex-col items-start gap-1 font-mono text-[11px] sm:text-[13px] uppercase tracking-[0.22em] text-ink-muted leading-[1.6]">
+                    <?php if ($email !== '') : ?>
+                        <a href="<?php echo esc_url('mailto:' . $email); ?>"
+                           class="max-w-full text-ink hover:text-accent transition-colors no-underline break-all"><?php echo esc_html($email); ?></a>
+                    <?php endif; ?>
                     <?php if (!empty($socials)) : ?>
-                        <div class="flex flex-wrap justify-end gap-x-4 gap-y-1">
+                        <div class="flex flex-wrap gap-x-4 gap-y-1">
                             <?php foreach ($socials as $s) :
                                 $label = (string) ($s['label'] ?? '');
                                 $url   = (string) ($s['url']   ?? '');

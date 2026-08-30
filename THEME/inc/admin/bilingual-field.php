@@ -92,6 +92,69 @@ function fc_bilingual_field_input(string $type, string $id, string $name, string
 }
 
 /**
+ * Standalone media-picker field, for use outside a repeater.
+ *
+ * fc_repeater() has had a 'media' field type from the start, but nothing
+ * exposed the same widget to a plain section page, so the markup got hand-
+ * copied per page instead. The behaviour is the delegated jQuery in
+ * inc/admin/menu.php, which binds on .fc-media-pick / .fc-media-clear and reads
+ * the two data attributes below — so this only has to emit the markup that
+ * script already expects.
+ *
+ * @param string $name   Field key. Outputs name="{prefix}[{name}]".
+ * @param array  $values Current values for the page.
+ * @param array  $args   label, help, type (media-library filter, default
+ *                       "image"), full (use the ORIGINAL upload rather than
+ *                       WordPress's resampled "medium" derivative).
+ */
+function fc_media_field(string $name, $values, array $args = []): void {
+    $args = array_merge([
+        'label'       => '',
+        'help'        => '',
+        'type'        => 'image',
+        'full'        => false,
+        'name_prefix' => 'fc_field',
+    ], $args);
+
+    $value  = is_array($values) ? (string) ($values[$name] ?? '') : '';
+    $prefix = (string) $args['name_prefix'];
+    $input  = $prefix !== '' ? $prefix . '[' . $name . ']' : $name;
+    $is_img = ((string) $args['type'] === 'image');
+    $has    = ($value !== '');
+    ?>
+    <div class="fc-field">
+        <?php if ($args['label']) : ?>
+            <label><?php echo esc_html((string) $args['label']); ?></label>
+        <?php endif; ?>
+        <?php if ($args['help']) : ?>
+            <p class="description"><?php echo wp_kses_post((string) $args['help']); ?></p>
+        <?php endif; ?>
+        <div class="fc-media" data-fc-media-type="<?php echo esc_attr((string) $args['type']); ?>"<?php
+            echo !empty($args['full']) ? ' data-fc-media-full="1"' : ''; ?>>
+            <input type="hidden" class="fc-media-input" name="<?php echo esc_attr($input); ?>"
+                   value="<?php echo esc_attr($value); ?>">
+            <div class="fc-media-preview">
+                <?php if ($has && $is_img) : ?>
+                    <img src="<?php echo esc_url($value); ?>" alt="">
+                <?php elseif ($has) : ?>
+                    <span class="fc-media-file"><?php
+                        echo esc_html(basename((string) (parse_url($value, PHP_URL_PATH) ?: $value)));
+                    ?></span>
+                <?php endif; ?>
+            </div>
+            <button type="button" class="button fc-media-pick"><?php
+                echo esc_html($has
+                    ? ($is_img ? 'Replace image' : 'Replace file')
+                    : ($is_img ? 'Select image' : 'Select file'));
+            ?></button>
+            <button type="button" class="button fc-media-clear"<?php
+                echo $has ? '' : ' style="display:none"'; ?>>Remove</button>
+        </div>
+    </div>
+    <?php
+}
+
+/**
  * Sanitize an inbound POST array down to declared bilingual+scalar keys.
  *
  * @param array $raw     The $_POST sub-array.
