@@ -73,13 +73,20 @@ $cards = [];
 foreach (array_values($speakers) as $sp) {
     $name = trim((string) ($sp['name'] ?? ''));
     if ($name === '') continue;
-    // One word per line. PREG_SPLIT_NO_EMPTY so a double space does not become
-    // a blank line, and the whole name is the fallback if the split yields
-    // nothing at all.
-    $words = preg_split('/\s+/u', $name, -1, PREG_SPLIT_NO_EMPTY);
-    $words = $words ?: [$name];
 
-    foreach ($words as $word) {
+    // One word per line, and the *starred* words drawn hollow.
+    //
+    // It used to be the LAST word, automatically. Marking it is better for the
+    // reason every automatic rule here turned out to be worse: it has to guess.
+    // "Richard *Stallman*" and "*Linus* Torvalds" are both reasonable, and only
+    // the person writing the name knows which. Same convention as the venue
+    // name, the CFP heading and the manifesto's stat numbers now.
+    $words = fc_hollow_split($name, '/\s+/u');
+    if (!$words) $words = [esc_html($name)];
+
+    // Measured on the PLAIN text: the asterisks are markup, and counting them
+    // would set a marked name smaller than an unmarked one saying the same.
+    foreach (preg_split('/\s+/u', fc_hollow_plain($name), -1, PREG_SPLIT_NO_EMPTY) ?: [$name] as $word) {
         $len = function_exists('mb_strlen') ? mb_strlen($word, 'UTF-8') : strlen($word);
         // The longest word ACROSS THE WHOLE SECTION, not per speaker.
         //
@@ -92,8 +99,10 @@ foreach (array_values($speakers) as $sp) {
     }
 
     $cards[] = [
-        'name'  => $name,
-        'words' => $words,
+        // Plain, for the aria-label and the alt text: the asterisks are markup.
+        'name'   => fc_hollow_plain($name),
+        'words'  => $words,
+        'online' => !empty($sp['online']),
         'photo' => (string) ($sp['photo'] ?? ''),
         'roles' => fc_lines(fc_one(fc_bi($sp, 'roles'))),
         'url'   => (string) ($sp['url'] ?? ''),
@@ -157,28 +166,37 @@ fc_section_open($section, array_merge($meta, ['class' => $section_class]));
          *     size the portrait is drawn.
          */
         ?>
-        <svg class="fc-spk-defs" width="0" height="0" aria-hidden="true" focusable="false">
-            <defs>
-                <?php foreach (['rest' => $style['rim'], 'hot' => $style['rim_hover']] as $key => $colour) : ?>
-                    <filter id="fc-spk-rim-<?php echo esc_attr($key); ?>"
-                            x="-10%" y="-10%" width="120%" height="120%"
-                            color-interpolation-filters="sRGB">
-                        <feGaussianBlur in="SourceAlpha" stdDeviation="<?php echo esc_attr($rim_sigma); ?>" result="spread"/>
-                        <feComponentTransfer in="spread" result="ring">
-                            <feFuncA type="linear"
-                                     slope="<?php echo esc_attr($rim_slope); ?>"
-                                     intercept="<?php echo esc_attr($rim_intercept); ?>"/>
-                        </feComponentTransfer>
-                        <feFlood flood-color="<?php echo esc_attr($colour); ?>" result="paint"/>
-                        <feComposite in="paint" in2="ring" operator="in" result="outline"/>
-                        <feMerge>
-                            <feMergeNode in="outline"/>
-                            <feMergeNode in="SourceGraphic"/>
-                        </feMerge>
-                    </filter>
-                <?php endforeach; ?>
-            </defs>
-        </svg>
+        <?php
+        /* ONE filter PER CARD, rendered inside the card — not two shared ones.
+         *
+         * This is what lets the ring's colour ANIMATE, and it is the only thing
+         * that does. Before, hovering swapped `url(#fc-spk-rim-rest)` for
+         * `url(#fc-spk-rim-hot)`, and a filter reference cannot interpolate: the
+         * ring snapped while every other hollow heading on the site faded. The
+         * name could have been given a transition on its own, but then the name
+         * would fade while the photo it belongs to snapped — which is the exact
+         * mismatch that was reported here once already.
+         *
+         * The blocker was `flood-color`. It resolves against the <feFlood>
+         * element, NOT against whatever references the filter, so a filter parked
+         * in a shared <defs> can never read a per-card colour — hence two of them,
+         * one per colour. Moved inside the card, the feFlood inherits the card's
+         * own --fc-spk-rim, and animating that variable animates the ring.
+         *
+         * Which needs @property (below): an UNREGISTERED custom property is not
+         * interpolated, so `transition: --fc-spk-rim` on a plain variable does
+         * nothing at all — it would jump at the end of the duration.
+         *
+         * Cost: the filter re-renders while the colour moves. Only the one card
+         * being hovered or centred is animating, for 50ms, so it is a handful of
+         * frames on a single element rather than the whole row.
+         *
+         * The ids must be unique, and the carousel CLONES cards for the infinite
+         * belt — duplicate ids would make every copy resolve to the first card's
+         * filter and read the wrong card's colour. assets/speakers-carousel.js
+         * rewrites them on clone; see fixFilterIds() there.
+         */
+        ?>
 
         <div class="fc-spk-wrap" data-fc-speakers
              style="--fc-spk-rim: <?php echo esc_attr($style['rim']); ?>;
@@ -188,21 +206,94 @@ fc_section_open($section, array_merge($meta, ['class' => $section_class]));
             <div class="fc-spk-viewport" data-fc-spk-viewport>
                 <ol class="fc-spk-rail" data-fc-spk-rail>
                     <?php foreach ($cards as $i => $card) :
-                        $tag  = $card['url'] !== '' ? 'a' : 'div';
-                        $last = count($card['words']) - 1;
+                        $tag    = $card['url'] !== '' ? 'a' : 'div';
+                        $rim_id = 'fc-spk-rim-' . $i;
                         ?>
                         <li class="fc-spk">
+                            <?php /* data-fc-spk-index identifies the SPEAKER, and clones
+                                     inherit it. The carousel lights every copy of a
+                                     speaker at once, because the copy under the pointer
+                                     changes at each loop seam and moving the class
+                                     between elements restarts the colour transition —
+                                     which is visible as a flicker on whichever card sits
+                                     on the seam. See setHot() in speakers-carousel.js. */ ?>
                             <<?php echo $tag; ?> class="fc-spk-card"
+                                data-fc-spk-index="<?php echo (int) $i; ?>"
+                                <?php /* The ring filter's url() is a variable so the CSS
+                                         can name it once for every card while each card
+                                         points at its OWN filter. Putting url(#id)
+                                         directly in the CSS would need one rule per
+                                         card; putting it in the `filter` shorthand
+                                         inline would mean repeating the whole
+                                         grayscale/contrast chain, and the hover state
+                                         of it, in markup. */ ?>
+                                style="--fc-spk-ring: url(#<?php echo esc_attr($rim_id); ?>);"
                                 <?php if ($card['url'] !== '') : ?>
                                     href="<?php echo esc_url($card['url']); ?>"
                                 <?php endif; ?>>
+
+                                <?php /* This card's own ring filter. Width/height 0 and
+                                         absolutely positioned by CSS, so it takes no
+                                         space in the card's layout. */ ?>
+                                <svg class="fc-spk-defs" width="0" height="0" aria-hidden="true" focusable="false">
+                                    <filter id="<?php echo esc_attr($rim_id); ?>"
+                                            x="-10%" y="-10%" width="120%" height="120%"
+                                            color-interpolation-filters="sRGB">
+                                        <feGaussianBlur in="SourceAlpha" stdDeviation="<?php echo esc_attr($rim_sigma); ?>" result="spread"/>
+                                        <feComponentTransfer in="spread" result="ring">
+                                            <feFuncA type="linear"
+                                                     slope="<?php echo esc_attr($rim_slope); ?>"
+                                                     intercept="<?php echo esc_attr($rim_intercept); ?>"/>
+                                        </feComponentTransfer>
+                                        <?php /* No flood-color ATTRIBUTE. The CSS sets it from
+                                                 --fc-spk-rim, which this element inherits from the
+                                                 card — a presentation attribute would be overridden
+                                                 by that anyway, and leaving one here would only look
+                                                 like the colour came from PHP. */ ?>
+                                        <feFlood result="paint"/>
+                                        <feComposite in="paint" in2="ring" operator="in" result="outline"/>
+                                        <feMerge>
+                                            <feMergeNode in="outline"/>
+                                            <feMergeNode in="SourceGraphic"/>
+                                        </feMerge>
+                                    </filter>
+                                </svg>
+
+                                <?php if ($card['online']) : ?>
+                                    <?php /* ABOVE THE NAME, and outside .fc-spk-photo.
+                                             It was briefly inside that box, which carries
+                                             `filter: var(--fc-spk-ring)` — so the ring
+                                             filter was drawing a blurred blue outline
+                                             around the label's own letters. A filter
+                                             applies to everything in its element, not
+                                             just the image, and the label was in there
+                                             with it. */ ?>
+                                    <span class="fc-spk-online">
+                                        <i aria-hidden="true"></i><?php
+                                            /* The text is wrapped, not left loose. A bare text
+                                               node in a flex container becomes an ANONYMOUS flex
+                                               item whose box is the whole line box, and centring
+                                               the dot against that put it a pixel low against
+                                               all-caps type, which has no descenders to fill the
+                                               bottom of the line. A real element can be given a
+                                               line-height that hugs the glyphs. */
+                                            echo '<span>' . esc_html('[' . fc_t('speaker_online', 'online') . ']') . '</span>';
+                                        ?>
+                                    </span>
+                                <?php endif; ?>
+
                                 <?php // aria-label carries the whole name: split across
                                       // <span>s a screen reader would otherwise read it
                                       // as separate words on separate lines. ?>
                                 <h3 class="fc-spk-name" aria-label="<?php echo esc_attr($card['name']); ?>">
-                                    <?php foreach ($card['words'] as $wi => $word) : ?>
-                                        <span<?php echo $wi === $last ? ' class="is-outline"' : ''; ?>
-                                              aria-hidden="true"><?php echo esc_html($word); ?></span>
+                                    <?php // Each word is already HTML from
+                                          // fc_hollow_split(): escaped, with any
+                                          // *starred* part wrapped in
+                                          // .is-outline. Which word is hollow is
+                                          // the author's asterisks, not the last
+                                          // position. ?>
+                                    <?php foreach ($card['words'] as $word) : ?>
+                                        <span aria-hidden="true"><?php echo $word; ?></span>
                                     <?php endforeach; ?>
                                 </h3>
 
@@ -419,6 +510,14 @@ fc_section_close();
 .fc-spk-card {
     display: flex;
     flex-direction: column;
+    /* Positioned, so the card's own zero-size <svg class="fc-spk-defs"> anchors
+       HERE. It is `position: absolute`, and without a positioned ancestor on the
+       card it would resolve against whatever further-out element happens to be
+       positioned — different for a card in the rail than for one being measured,
+       and a thing that changes if the wrapper's positioning ever does. It has no
+       size, so this is about keeping it predictable rather than about where it
+       lands. */
+    position: relative;
     /* Every card exactly the same width, derived rather than measured.
      *
      * Cards used to be `max-content` — each as wide as its own photo — so a
@@ -489,7 +588,11 @@ fc_section_close();
        a name that is already entirely coloured. */
     color: var(--color-ink, #0A0A0A);
 }
-.fc-spk-name span {
+/* DIRECT children only. Each word is now one outer span holding the line, with
+   an inner .is-outline span around whatever part of it was starred — so a
+   descendant selector would make that inner span a block too, and a partly
+   starred word ("Ne*well*") would break onto two lines. */
+.fc-spk-name > span {
     display: block;
     white-space: nowrap;   /* the size above guarantees it fits; never hyphenate */
     /* Hugs the word. A block-level line stretches the full column width, so the
@@ -532,6 +635,88 @@ fc_section_close();
     }
 }
 
+/* ── "Appearing remotely" indicator ──────────────────────────────────────────
+   `[ONLINE]` with a pulsing dot, sitting directly above the head.
+
+   Exactly the ROLES' type — same face, size, weight, tracking and case — so it
+   reads as one more line of the card's small print rather than a badge glued on.
+   The only difference is the colour.
+
+   Fixed accent BLUE, not var(--fc-spk-rim): the rim goes orange on hover and on
+   the mobile centre-highlight, and this is meant to state a fact about the
+   speaker rather than respond to the pointer. Easy to change if it should follow
+   the rest of the card — swap the two colours for var(--fc-spk-rim, #0033FF). */
+.fc-spk-online {
+    display: flex;
+    /* BASELINE, not center — and this is the third attempt, so it is worth saying
+       why the first two failed.
+     *
+     * `align-items: center` centres the dot against the text item's BOX. That box
+       is the line box, and where the glyphs sit inside it depends on the font's
+       ascent and descent. All-caps type has no descenders, so its ink sits above
+       the box's middle and a geometrically centred dot reads low. Tightening the
+       line-height helped but did not remove the dependency: it still needed the
+       font's metrics to come out the way I assumed, and they are not mine to
+       assume — the mono face may not even have loaded.
+     *
+     * Baseline alignment needs no metrics. A flex item with no text of its own
+       baselines on its bottom margin edge, so the dot sits ON the baseline and
+       its centre is exactly its own radius above it — 4px. The centre of a
+       capital is half the cap height above the baseline, and cap height is close
+       to 0.70em in every monospace face, so 4.2px at 12px type. Within a fifth of
+       a pixel, from arithmetic that cannot drift. */
+    align-items: baseline;
+    gap: 7px;
+    /* Hugs the words, like the name's lines and the roles, so the empty strip
+       beside it is not part of anything clickable or hoverable. */
+    width: fit-content;
+    /* Above the name, so the gap goes underneath it. */
+    margin: 0 0 6px;
+    font-family: var(--font-mono, "JetBrains Mono"), ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-accent, #0033FF);
+}
+/* A tight line box, so the label's own height is the type and nothing else. It
+   no longer affects where the dot lands — baseline alignment does not care — but
+   it keeps the block from carrying 1.6 lines' worth of leading above the name. */
+.fc-spk-online > span { line-height: 1; }
+.fc-spk-online i {
+    /* Positioned, because the halo below is absolute with `inset: -3px` and needs
+       this as its containing block. Removing it would let the halo escape to the
+       nearest positioned ancestor and draw a ring round the whole card. */
+    position: relative;
+    flex: 0 0 auto;
+    /* EVEN, so the radius and the baseline offset are both whole pixels. At 7px
+       the centre fell on a half-pixel and the circle rendered a fraction soft. */
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+/* The halo is a pseudo-element so the DOT itself never moves. Animating the dot
+   would change its box and shift the text beside it a fraction of a pixel every
+   frame, which reads as the label jittering. */
+.fc-spk-online i::after {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+    animation: fc-spk-pulse 2s ease-out infinite;
+}
+@keyframes fc-spk-pulse {
+    0%   { transform: scale(0.6); opacity: 0.9; }
+    70%  { transform: scale(1.5); opacity: 0; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+    /* Still a dot, still visibly a live indicator, just not moving. */
+    .fc-spk-online i::after { animation: none; opacity: 0.45; }
+}
+
 /* ── Roles ──────────────────────────────────────────────────────────────── */
 .fc-spk-roles {
     list-style: none;
@@ -570,6 +755,11 @@ fc_section_close();
        rather than a separate block above it, and every pixel saved here comes
        straight off the section's height. */
     padding-top: 0;
+    /* A row again. This was briefly a column to hold the "[ONLINE]" label above
+       the image — but this box carries the ring filter, and a filter applies to
+       everything inside its element, so the label came out with a blurred blue
+       outline traced round its own letters. The label lives above the name now,
+       outside the filter entirely, and the image is the only child again. */
     display: flex;
     justify-content: flex-start;   /* shares the name's left edge */
     align-items: flex-end;
@@ -587,50 +777,66 @@ fc_section_close();
     height: var(--fc-spk-photo-h);
     object-fit: contain;
     object-position: bottom left;
-    /* The colour corrections run as CSS functions, then the SVG filter takes
-       their output as its SourceGraphic and draws the ring around it.
-       The swap below is a straight substitution — one filter or the other, never
-       both — so the outline is exactly one colour with exactly one edge. */
-    filter: grayscale(1) contrast(1.06) brightness(1.02) url(#fc-spk-rim-rest);
+    /* The colour corrections, and NOTHING ELSE — no url() in this list.
+     *
+     * That is what lets it animate. A filter list containing a url() is not
+     * interpolated at all; it switches discretely. With the ring moved up to
+     * .fc-spk-photo, this list is three plain functions, so grayscale(1) fades
+     * to grayscale(0) over the same 50ms the ring and the name take. */
+    filter: grayscale(1) contrast(1.06) brightness(1.02);
+    transition: filter 50ms ease;
 }
-/* Highlighted: the grey comes off and the photograph is in colour.
- *
- * No `transition`. `filter: url(#a)` cannot interpolate into `url(#b)`, so a
- * transition on this property would animate grayscale() and then jump the
- * outline colour at the end — two changes at two different times, which is the
- * exact fault that was chased out of here once already. Both switch in one
- * repaint instead, along with the name.
- *
- * The ring is unaffected either way: it comes from feFlood, not from the
- * photo's own pixels, so it stays the colour it was told to be. */
+/* Highlighted: the grey comes off and the photograph is in colour. */
 .fc-spk-card.is-hot .fc-spk-shot {
-    filter: contrast(1.06) brightness(1.02) url(#fc-spk-rim-hot);
+    filter: grayscale(0) contrast(1.06) brightness(1.02);
 }
 
-/* Hover swaps the rim by redefining the variable on the card, so the filter
-   above and the name's colour are written once each and both follow. Pointer
-   devices only: on a phone :hover latches after a tap and it would stay changed.
+/* The RING, on the photo box rather than on the image.
  *
- * INSTANT, and that is a deliberate retreat from a 200ms fade.
+ * Order matters and this is the only order that works. Filters apply innermost
+ * first: the image is greyscaled, then this box draws the ring around the result.
+ * The other way round — both on the image, ring first — would put grayscale()
+ * over the ring and drain the colour out of it.
  *
- * The fade cost more than it was worth. `filter: url(#a)` cannot interpolate
- * into `url(#b)`, so the only way to animate the photo's outline was to stack
- * two pre-filtered copies and cross-fade them — and the ring's outer edge is
- * anti-aliased, so it is semi-transparent in BOTH copies. That fringe then
- * composited orange over blue and landed on brown, at every opacity including
- * 1: two soft edges instead of one, in a colour nobody chose. It also made the
- * first hover of each speaker stutter, because the second copy had never been
- * rasterised until then.
- *
- * One image and a straight filter substitution is one edge, one colour, no
- * first-hover cost, and identical on every card. The name switches in the same
- * repaint, so the two still move together.
- *
- * Getting the fade back properly means a per-card SVG filter whose flood-color
- * is a CSS variable — one image, animated colour, no compositing — which needs
- * unique filter ids rewritten on every clone. Worth doing; not worth guessing at
- * without a browser to check it in.
+ * The url() is per card (see the inline --fc-spk-ring), and it never changes.
+ * What changes is --fc-spk-rim, which the filter's feFlood reads. */
+.fc-spk-photo {
+    /* `none` fallback, not a bare var(). An unresolved var() makes the whole
+       declaration invalid-at-computed-value-time, and for `filter` that means
+       `unset` — which INHERITS, so the photo box would pick up whatever filter an
+       ancestor happened to carry. `none` fails to no ring, which is the honest
+       degradation. */
+    filter: var(--fc-spk-ring, none);
+}
+/* NB .fc-spk-defs is already positioned out of the flow further up this
+   stylesheet — it was written for the single shared <defs> block and applies
+   unchanged now that each card carries its own.
+
+   The colour the ring is flooded with, read off the card. A presentation
+   attribute on the feFlood would be overridden by this anyway; there is
+   deliberately none, so there is one place the colour comes from. */
+.fc-spk-defs feFlood {
+    flood-color: var(--fc-spk-rim, #0033FF);
+}
+
+/* NB --fc-spk-rim is REGISTERED at the top of this stylesheet, with
+ * syntax '<color>'. That registration predates this change and was there as a
+ * type guarantee, but it is also exactly what makes the transition below
+ * possible: an UNREGISTERED custom property has no type, so the browser cannot
+ * work out what is halfway between two of its values, and
+ * `transition: --fc-spk-rim` on a plain variable does nothing visible then jumps
+ * at the end of the duration. Do not remove it thinking it is only a fallback.
  */
+
+/* One duration for the whole card, matching the venue name, the manifesto's stat
+   numbers and the CFP heading. The photo's greyscale, the ring's colour and the
+   name's fill and stroke are now four things moving on one clock — which is what
+   "the same as the others" needed, and why the ring had to become animatable
+   rather than the name being given a fade on its own. */
+.fc-spk-card {
+    transition: --fc-spk-rim 50ms ease;
+}
+
 /* Driven by a CLASS, not :hover.
  *
  * :hover fires anywhere in the card's box, and the box is mostly empty air —
@@ -638,7 +844,7 @@ fc_section_close();
  * meant the row stopped and recoloured while the pointer was nowhere near the
  * speaker. speakers-carousel.js sets this only for the name, the roles and the
  * photo, so "on the speaker" means on something you can actually see. */
-.fc-spk-card.is-hot { --fc-spk-rim: var(--fc-spk-rim-hover, #FF6A2B); }
+.fc-spk-card.is-hot { --fc-spk-rim: var(--fc-spk-rim-hover, #EE8101); }
 
 /* No arrows. Dragging is the whole control on desktop, and the row drifts on
    its own regardless — a pair of buttons over a moving belt was one affordance

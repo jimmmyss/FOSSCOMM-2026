@@ -137,6 +137,18 @@ function fc_enqueue_assets() {
         FC_THEME_VERSION,
         true
     );
+    // On touch, highlights whichever [data-fc-centre-item] is nearest the middle
+    // of the screen, because there is no pointer to ask. Does nothing on a
+    // pointer device — CSS :hover owns it there. Used by the manifesto's stats,
+    // the venue name and the Get Involved heading; inert when none of them is on
+    // the page, since it looks for [data-fc-centre] and stops if there is none.
+    wp_enqueue_script(
+        'fc-centre-highlight',
+        FC_THEME_URI . '/assets/centre-highlight.js',
+        [],
+        FC_THEME_VERSION,
+        true
+    );
     wp_enqueue_script(
         'fc-countdown',
         FC_THEME_URI . '/assets/countdown.js',

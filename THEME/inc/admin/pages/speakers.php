@@ -77,28 +77,13 @@ function fc_maybe_migrate_speaker_roles(): void {
 }
 
 /** One colour box: a native picker and the hex beside it, kept in step. */
+/**
+ * Kept as a name so nothing that already calls it has to change; the markup now
+ * lives in fc_admin_colour_field() (inc/admin/sections-page.php) because the
+ * Manifesto wants the same control.
+ */
 function fc_speakers_colour_field(string $name, string $value, string $label, string $help): void {
-    $id = 'fc-col-' . $name;
-    ?>
-    <tr>
-        <th scope="row"><label for="<?php echo esc_attr($id); ?>"><?php echo esc_html($label); ?></label></th>
-        <td>
-            <input type="color"
-                   id="<?php echo esc_attr($id); ?>"
-                   value="<?php echo esc_attr($value); ?>"
-                   data-fc-colour-for="<?php echo esc_attr($name); ?>"
-                   style="vertical-align:middle;width:48px;height:32px;padding:2px;">
-            <input type="text"
-                   name="<?php echo esc_attr($name); ?>"
-                   value="<?php echo esc_attr($value); ?>"
-                   data-fc-colour-hex="<?php echo esc_attr($name); ?>"
-                   class="regular-text code"
-                   style="width:110px;vertical-align:middle;margin-left:8px;"
-                   placeholder="#FFFFFF">
-            <p class="description"><?php echo esc_html($help); ?></p>
-        </td>
-    </tr>
-    <?php
+    fc_admin_colour_field($name, $value, $label, $help);
 }
 
 function fc_admin_page_speakers() {
@@ -107,7 +92,7 @@ function fc_admin_page_speakers() {
         'title_en' => 'People who showed up.',
     ];
     $fields = [
-        'name'  => ['type' => 'text',  'label' => 'Name'],
+        'name'  => ['type' => 'text',  'label' => 'Name — wrap part in *asterisks* to outline it'],
         'photo' => [
             'type'  => 'media',
             // The ORIGINAL upload, not WordPress's "medium" derivative. Medium is
@@ -124,6 +109,14 @@ function fc_admin_page_speakers() {
             'label' => 'Roles / titles — ONE PER LINE',
             'rows'  => 3,
         ],
+        'online' => [
+            'type'  => 'bool',
+            'label' => 'Appearing remotely',
+            // `help` on a bool is the checkbox's INLINE label (see the 'bool' case
+            // in fc_repeater_field_input), not a paragraph under it — so it has to
+            // read as a label. The longer explanation is in the page intro.
+            'help'  => 'Joins online rather than in person',
+        ],
         'url'   => ['type' => 'url', 'label' => 'Link (optional — homepage, Mastodon, etc.)'],
     ];
 
@@ -134,9 +127,10 @@ function fc_admin_page_speakers() {
         'intro'      => 'One entry per speaker: the <strong>name</strong> large, the <strong>roles</strong> '
                       . 'stacked underneath, and the <strong>photo</strong> cut out and outlined, standing '
                       . 'on the section\'s bottom edge.<br><br>'
-                      . 'The name is set <strong>one word per line</strong>, and the <strong>last line is '
-                      . 'drawn hollow</strong> — "Gabe Newell" is GABE solid with NEWELL outlined under it. '
-                      . 'A single-word name is therefore entirely outlined.<br><br>'
+                      . 'The name is set <strong>one word per line</strong>. Wrap any part in '
+                      . '<strong>*asterisks*</strong> to draw it hollow — "Gabe *Newell*" is GABE solid '
+                      . 'with NEWELL outlined under it, and "*Gabe* Newell" is the other way round. A run '
+                      . 'may span several words. Nothing starred means nothing outlined.<br><br>'
                       . '<strong>Photo spec — worth following exactly:</strong><br>'
                       . '&bull; <strong>840 &times; 840 px, square.</strong> Every photo is fitted into a '
                       . 'square frame of exactly the same size, so cards are always the same width and the '
@@ -153,7 +147,10 @@ function fc_admin_page_speakers() {
                       . '&bull; <strong>Keep heads about the same size</strong> within the frame, or one '
                       . 'speaker reads as closer to the camera than the others.<br><br>'
                       . 'Put each role on its <strong>own line</strong> — press Enter for another, delete '
-                      . 'the line to remove it. Drag rows to reorder the speakers.',
+                      . 'the line to remove it. Drag rows to reorder the speakers.<br><br>'
+                      . 'Tick <strong>Appearing remotely</strong> and a blue <code>[ONLINE]</code> with a '
+                      . 'slowly pulsing dot appears just above that speaker\'s head, set in the same type '
+                      . 'as the roles.',
         'fields'     => $fields,
         'add_label'  => 'Add speaker',
         'render_before' => function ($rows) use ($defaults) {
@@ -180,20 +177,7 @@ function fc_admin_page_speakers() {
                 );
                 ?>
             </table>
-            <script>
-            /* Keep the picker and the hex box in step, both directions. */
-            (function () {
-                document.querySelectorAll('[data-fc-colour-for]').forEach(function (picker) {
-                    var name = picker.getAttribute('data-fc-colour-for');
-                    var hex = document.querySelector('[data-fc-colour-hex="' + name + '"]');
-                    if (!hex) return;
-                    picker.addEventListener('input', function () { hex.value = picker.value.toUpperCase(); });
-                    hex.addEventListener('input', function () {
-                        if (/^#[0-9a-fA-F]{6}$/.test(hex.value.trim())) picker.value = hex.value.trim();
-                    });
-                });
-            }());
-            </script>
+            <?php fc_admin_colour_sync_script(); ?>
             <h2 style="margin-top:2rem;"><?php echo esc_html__('Speakers', 'fosscomm'); ?></h2>
             <?php
         },

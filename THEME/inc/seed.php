@@ -499,6 +499,74 @@ function fc_maybe_drop_seeded_programme(): void {
  */
 add_action('admin_init', 'fc_migrate_speaker_photos_to_full');
 
+/**
+ * One-time migration: put `*asterisks*` around the part that used to be outlined
+ * automatically.
+ *
+ * Four headings are drawn hollow, and until now three of them chose the outlined
+ * part by POSITION — the speakers' last word, the venue's last line, every "+"
+ * in a stat number. They are all marked by the author now, which is a better
+ * rule but would have silently un-outlined every piece of content already
+ * written. This restores exactly what was on screen before, in the new notation,
+ * so nobody has to go round re-marking anything.
+ *
+ * Conservative: a value that ALREADY contains an asterisk is left alone, because
+ * that is somebody who has marked it deliberately.
+ */
+add_action('admin_init', 'fc_migrate_outline_to_asterisks');
+function fc_migrate_outline_to_asterisks(): void {
+    if (get_option('fc_outline_asterisks_v1') === '1') return;
+    update_option('fc_outline_asterisks_v1', '1', true);
+
+    // Speakers: the last word of each name.
+    $speakers = get_option('fc_speakers', null);
+    if (is_array($speakers)) {
+        $changed = false;
+        foreach ($speakers as $i => $row) {
+            if (!is_array($row)) continue;
+            $name = trim((string) ($row['name'] ?? ''));
+            if ($name === '' || strpos($name, '*') !== false) continue;
+            $words = preg_split('/\s+/u', $name, -1, PREG_SPLIT_NO_EMPTY);
+            if (!$words) continue;
+            $words[count($words) - 1] = '*' . $words[count($words) - 1] . '*';
+            $speakers[$i]['name'] = implode(' ', $words);
+            $changed = true;
+        }
+        if ($changed) update_option('fc_speakers', $speakers, false);
+    }
+
+    // Venue: the last line of the university name, per language.
+    $venue = get_option('fc_section_venue', null);
+    if (is_array($venue)) {
+        $changed = false;
+        foreach (['university_title_el', 'university_title_en'] as $key) {
+            $val = (string) ($venue[$key] ?? '');
+            if (trim($val) === '' || strpos($val, '*') !== false) continue;
+            $lines = preg_split('/\R/u', $val, -1, PREG_SPLIT_NO_EMPTY);
+            if (!$lines) continue;
+            $lines = array_map('trim', $lines);
+            $lines[count($lines) - 1] = '*' . $lines[count($lines) - 1] . '*';
+            $venue[$key] = implode("\n", $lines);
+            $changed = true;
+        }
+        if ($changed) update_option('fc_section_venue', $venue, false);
+    }
+
+    // Manifesto: every "+" in a stat number, which is what used to be hollow.
+    $manifesto = get_option('fc_section_manifesto', null);
+    if (is_array($manifesto) && is_array($manifesto['stats'] ?? null)) {
+        $changed = false;
+        foreach ($manifesto['stats'] as $i => $row) {
+            if (!is_array($row)) continue;
+            $num = (string) ($row['number'] ?? '');
+            if ($num === '' || strpos($num, '*') !== false || strpos($num, '+') === false) continue;
+            $manifesto['stats'][$i]['number'] = str_replace('+', '*+*', $num);
+            $changed = true;
+        }
+        if ($changed) update_option('fc_section_manifesto', $manifesto, false);
+    }
+}
+
 function fc_seed_if_empty(string $option_key, $default_value): void {
     $existing = get_option($option_key, null);
     if ($existing === null || $existing === '' || (is_array($existing) && empty($existing))) {

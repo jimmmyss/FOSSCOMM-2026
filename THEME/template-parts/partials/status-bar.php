@@ -2,7 +2,8 @@
 /**
  * Sticky 40px status bar. Single-language chrome with a language toggle on the
  * far left (shows the CURRENT language; clicking reloads the page in the other
- * one — the choice is remembered via cookie, see inc/i18n/lang.php).
+ * one — the choice is remembered via cookie, see inc/i18n/lang.php). The toggle
+ * only appears when Greek is switched on in FOSSCOMM → Top Bar.
  * The countdown ticker is hydrated by assets/src/status-bar.ts.
  */
 if (!defined('ABSPATH')) {
@@ -41,19 +42,28 @@ document.addEventListener('click', function (e) {
          `shrink-0` on each item locks their natural width so the layout
          doesn't break before the overflow kicks in. -->
     <div class="h-full px-4 lg:pl-5 lg:pr-8 flex items-center gap-4 text-ink-muted whitespace-nowrap overflow-x-auto fc-nav-no-scrollbar">
-        <?php
-        // Language toggle — far left, before the brand. Shows the CURRENT language
-        // ("ENGLISH" / "ΕΛΛΗΝΙΚΑ"); clicking reloads this same page in the other
-        // language (cookie-remembered). It's a plain link so it works without JS.
-        $fc_other = fc_other_lang();
-        ?>
-        <a href="<?php echo fc_lang_switch_url($fc_other); ?>"
-           class="fc-topbar-lang text-ink font-medium no-underline hover:text-accent focus:outline-none shrink-0"
-           aria-label="<?php echo esc_attr(fc_t('lang_switch_label') . ': ' . fc_lang_endonym($fc_other)); ?>"
-           rel="nofollow">
-            <?php echo esc_html(fc_lang_endonym(fc_current_lang())); ?>
-        </a>
-        <span class="opacity-50 shrink-0">//</span>
+        <?php if (fc_greek_enabled()) : ?>
+            <?php
+            /* Language toggle — far left, before the brand. Shows the CURRENT
+             * language ("ENGLISH" / "ΕΛΛΗΝΙΚΑ"); clicking reloads this same page
+             * in the other one (cookie-remembered). A plain link, so it works
+             * without JS.
+             *
+             * The whole thing is behind fc_greek_enabled(): with Greek switched
+             * off in FOSSCOMM → Top Bar there is no second language to offer, and
+             * a toggle with one destination is a dead control. The site is
+             * English-only until it is switched back on.
+             */
+            $fc_other = fc_other_lang();
+            ?>
+            <a href="<?php echo fc_lang_switch_url($fc_other); ?>"
+               class="fc-topbar-lang text-ink font-medium no-underline hover:text-accent shrink-0"
+               aria-label="<?php echo esc_attr(fc_t('lang_switch_label') . ': ' . fc_lang_endonym($fc_other)); ?>"
+               rel="nofollow">
+                <?php echo esc_html(fc_lang_endonym(fc_current_lang())); ?>
+            </a>
+            <span class="opacity-50 shrink-0">//</span>
+        <?php endif; ?>
         <?php
         // Landing page → "#top" anchor + smooth-scroll JS upgrade.
         // Other pages (/news/<slug>/, /coc/) → absolute URL back to home, no JS.

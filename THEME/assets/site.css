@@ -276,6 +276,18 @@ html, body {
 }
 .fc-topbar-blue,
 .fc-topbar-blue * { color: #fff !important; }
+
+/* The language toggle is a plain text link again — the switch UI that briefly
+   lived here was a misreading; the switch belongs in the dashboard, deciding
+   whether Greek is offered at all (fc_greek_enabled(), FOSSCOMM → Top Bar).
+   One thing kept from it: a visible focus ring. The original link carried
+   Tailwind's `focus:outline-none` with nothing put back, so keyboard users had
+   no way to see where they were. currentColor, so it works on the blue bar too,
+   where `.fc-topbar-blue *` forces white. */
+.fc-topbar-lang:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+}
 .fc-topbar-blue .opacity-50 { opacity: 0.65 !important; }
 .fc-topbar-blue .fc-topbar-brand:hover,
 .fc-topbar-blue .fc-topbar-brand:focus-visible { color: rgba(255, 255, 255, 0.75) !important; }
@@ -415,8 +427,16 @@ html, body {
     transition: width 600ms ease;
 }
 /* Over goal: the accent fill stays full inside the track; a separate stub
-   pinned at the track's right edge sticks out with a RED gradient, and its
-   width is trembled by assets/cfp.js (left edge never moves). */
+   pinned at the track's right edge sticks out in the HIGHLIGHT colour, and its
+   width is trembled by assets/cfp.js (left edge never moves).
+
+   #EE8101, not the red it used to be. Every accented thing on the site now works
+   off one pair — #0033FF at rest, #EE8101 when picked out — and the funding
+   overflow was the last place carrying a colour of its own (two, in fact:
+   #FF3B30 and #FF1E1E, neither used anywhere else). The pair is defined in PHP as
+   FC_OUTLINE_REST / FC_OUTLINE_HOVER (inc/helpers.php); it is a literal here
+   because this is a static stylesheet with no access to the options, and an
+   invented var() name nothing sets would only look like it was wired up. */
 .fc-progress.is-over { overflow: visible; }
 .fc-progress.is-over .fc-progress-fill { width: 100%; }
 .fc-progress-over {
@@ -428,13 +448,21 @@ html, body {
     width: 48px;                /* base length; assets/cfp.js trembles 36–60px */
     /* Gradient is locked to the MAX width (60px) via background-size, so it
        does NOT rescale as the width shakes — it stays static and the current
-       width simply reveals more/less of it (redder the further it reaches). */
-    background-color: #FF1E1E;
+       width simply reveals more/less of it. The blend is over by 55% of that
+       60px, so past ~33px the tremble only lengthens a solid highlight tail
+       rather than re-blending, which is what keeps the shake from shimmering. */
+    background-color: #EE8101;
+    /* TWO stops, where there were three. The old ramp went blue → #FF3B30 →
+       #FF1E1E, two shades of red making the tip look deeper the further it
+       reached. With one highlight colour there is no second shade to ramp
+       towards, and repeating #EE8101 at 55% and 100% would be a stop that does
+       nothing. Ending the blend at 55% keeps the geometry identical — the
+       transition finishes exactly where it did — and the colour simply holds
+       from there to the tip. */
     background-image: linear-gradient(
         to right,
         var(--color-accent, #0033FF) 0%,
-        #FF3B30 55%,
-        #FF1E1E 100%
+        #EE8101 55%
     );
     background-repeat: no-repeat;
     background-position: left center;
@@ -448,11 +476,11 @@ html, body {
 /* Over goal: the funding container's straight right border is replaced by
    two angled stubs — one from the top-right corner sloping down-right, one
    from the bottom-right corner sloping up-right, each 45% of the card's
-   actual height, with a 10% gap in the middle for the red overflow stub. */
+   actual height, with a 10% gap in the middle for the overflow stub. */
 .fc-fund { position: relative; }
 .fc-fund.is-broken {
     border-right-color: transparent; /* the angled stubs replace the right border */
-    overflow: visible;               /* let red stub + stubs spill out */
+    overflow: visible;               /* let the overflow stub + stubs spill out */
 }
 .fc-fund-break {
     position: absolute;

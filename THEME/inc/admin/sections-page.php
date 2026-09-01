@@ -6,6 +6,69 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * One colour setting: a native picker and a hex box, kept in step.
+ *
+ * Both are rendered because neither is sufficient on its own — the picker cannot
+ * be typed into or pasted from a brand guide, and the hex box cannot be browsed.
+ * The pairing script is emitted separately, once per page, by
+ * fc_admin_colour_sync_script().
+ *
+ * Shared rather than per-section: the Speakers page had this markup to itself,
+ * and the moment a second section wanted a colour it would have been copied.
+ */
+function fc_admin_colour_field(string $name, string $value, string $label, string $help): void {
+    $id = 'fc-col-' . $name;
+    ?>
+    <tr>
+        <th scope="row"><label for="<?php echo esc_attr($id); ?>"><?php echo esc_html($label); ?></label></th>
+        <td>
+            <input type="color"
+                   id="<?php echo esc_attr($id); ?>"
+                   value="<?php echo esc_attr($value); ?>"
+                   data-fc-colour-for="<?php echo esc_attr($name); ?>"
+                   style="vertical-align:middle;width:48px;height:32px;padding:2px;">
+            <input type="text"
+                   name="<?php echo esc_attr($name); ?>"
+                   value="<?php echo esc_attr($value); ?>"
+                   data-fc-colour-hex="<?php echo esc_attr($name); ?>"
+                   class="regular-text code"
+                   style="width:110px;vertical-align:middle;margin-left:8px;"
+                   placeholder="#FFFFFF">
+            <p class="description"><?php echo esc_html($help); ?></p>
+        </td>
+    </tr>
+    <?php
+}
+
+/**
+ * Keep every colour picker and its hex box in step, both directions.
+ *
+ * Emitted at most once per request, however many colour fields a page renders —
+ * it binds by attribute across the whole document, so a second copy would just
+ * double every event handler.
+ */
+function fc_admin_colour_sync_script(): void {
+    static $done = false;
+    if ($done) return;
+    $done = true;
+    ?>
+    <script>
+    (function () {
+        document.querySelectorAll('[data-fc-colour-for]').forEach(function (picker) {
+            var name = picker.getAttribute('data-fc-colour-for');
+            var hex = document.querySelector('[data-fc-colour-hex="' + name + '"]');
+            if (!hex) return;
+            picker.addEventListener('input', function () { hex.value = picker.value.toUpperCase(); });
+            hex.addEventListener('input', function () {
+                if (/^#[0-9a-fA-F]{6}$/.test(hex.value.trim())) picker.value = hex.value.trim();
+            });
+        });
+    }());
+    </script>
+    <?php
+}
+
 function fc_admin_sections_page() {
     if (!current_user_can(FC_ADMIN_CAP)) {
         wp_die(__('Insufficient permissions.', 'fosscomm'));

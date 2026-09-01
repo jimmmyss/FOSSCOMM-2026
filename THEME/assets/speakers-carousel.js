@@ -84,6 +84,57 @@
         return maskCache[key];
     }
 
+    /**
+     * TEMPORARY DIAGNOSTIC — add ?fcdebug=speakers to the URL.
+     *
+     * The first speaker behaves differently from the rest and three rounds of
+     * reading the source have not explained it. Rather than guess a fourth time,
+     * this prints the per-card state that COULD differ, so the odd one out can be
+     * spotted rather than deduced.
+     *
+     * Off unless the flag is present, so it costs visitors nothing. Delete this
+     * function and its two call sites once the cause is known.
+     */
+    var DEBUG = /[?&]fcdebug=speakers\b/.test(window.location.search);
+
+    function debugDump(rail, boxes, label) {
+        if (!DEBUG || !window.console || !console.table) return;
+        var rows = [];
+        var items = rail.children;
+        for (var i = 0; i < items.length; i++) {
+            var card = items[i].querySelector('.fc-spk-card');
+            if (!card) continue;
+            var shot = items[i].querySelector('.fc-spk-shot');
+            var filt = items[i].querySelector('filter[id]');
+            var box = null;
+            for (var b = 0; b < boxes.length; b++) if (boxes[b].card === card) { box = boxes[b]; break; }
+            var ring = card.style.getPropertyValue('--fc-spk-ring')
+                || getComputedStyle(card).getPropertyValue('--fc-spk-ring');
+            rows.push({
+                idx: card.getAttribute('data-fc-spk-index'),
+                clone: items[i].getAttribute('aria-hidden') === 'true',
+                tag: card.tagName,
+                filterId: filt ? filt.getAttribute('id') : '(none)',
+                ringVar: (ring || '').trim() || '(unset)',
+                // Does the ring's url() actually point at a filter that exists?
+                ringResolves: (function () {
+                    var m = /#([^)"']+)/.exec(ring || '');
+                    return m ? !!items[i].querySelector('filter[id="' + m[1] + '"]')
+                        || !!document.getElementById(m[1]) : false;
+                }()),
+                rimNow: getComputedStyle(card).getPropertyValue('--fc-spk-rim').trim(),
+                isHot: card.classList.contains('is-hot'),
+                photo: shot ? (shot.currentSrc || shot.src || '').split('/').pop() : '(no img)',
+                natural: shot ? shot.naturalWidth + 'x' + shot.naturalHeight : '-',
+                maskBuilt: box ? !!box.mask : null,
+                textBoxes: box ? box.text.length : null,
+                hasRect: box ? !!box.rect : null,
+            });
+        }
+        console.log('%c[fc speakers] ' + label, 'font-weight:bold');
+        console.table(rows);
+    }
+
     function init(wrap) {
         var viewport = wrap.querySelector('[data-fc-spk-viewport]');
         var rail = wrap.querySelector('[data-fc-spk-rail]');
@@ -99,8 +150,13 @@
         var raf = 0;
         var lastTs = 0;
         var clones = [];
+        // Monotonic, never reset: see fixFilterIds().
+        var cloneSeq = 0;
         var boxes = [];        // hit-test geometry, rail-relative
         var hotCard = null;
+        // Which SPEAKER is lit, as the data-fc-spk-index string. The element under
+        // the pointer changes at every loop seam; the speaker does not.
+        var hotIndex = null;
         var pointing = false;
         // Set when a drag travelled far enough that the click it produces should
         // be thrown away. Cleared by the next press so it can never outlive the
@@ -168,9 +224,48 @@
                     // worse than announcing them once.
                     copy.setAttribute('aria-hidden', 'true');
                     copy.querySelectorAll('a').forEach(function (a) { a.tabIndex = -1; });
+                    fixFilterIds(copy);
                     rail.appendChild(copy);
                     clones.push(copy);
                 }
+            }
+        }
+
+        /**
+         * Give a cloned card's <filter> a fresh id, and point the card at it.
+         *
+         * Each card carries its OWN ring filter, because that is the only way the
+         * ring's colour can come from a CSS variable and therefore animate (see
+         * the long note in template-parts/sections/speakers.php). cloneNode copies
+         * the id with it, and an id is supposed to be unique: with duplicates,
+         * `url(#fc-spk-rim-0)` on every copy resolves to the FIRST one in the
+         * document, so every clone would draw its ring in the original card's
+         * colour and never respond to its own hover.
+         *
+         * The counter is module-level so ids stay unique across rebuilds too —
+         * relayouts remove and re-add clones, and reusing a suffix could collide
+         * with a filter the browser has not finished tearing down.
+         */
+        function fixFilterIds(item) {
+            // The .fc-spk-card, not the <li> this is handed. `--fc-spk-ring` is
+            // written INLINE on the card by the template, and an element's own
+            // inline declaration beats a value inherited from its parent — so
+            // setting the variable on the <li> was a silent no-op and every clone
+            // went on pointing at the ORIGINAL card's filter.
+            //
+            // It then still LOOKED right, because that filter's feFlood reads the
+            // original card's colour and every copy of a speaker is lit at the
+            // same moment. What it cost was a ring rendered from a filter attached
+            // to an element that may be far off-screen while the clone is the one
+            // in view — which is the most likely reason the card sitting on the
+            // loop seam had its ring lag behind its name.
+            var card = item.querySelector('.fc-spk-card') || item;
+            var filters = item.querySelectorAll('filter[id]');
+            for (var i = 0; i < filters.length; i++) {
+                var was = filters[i].getAttribute('id');
+                var now = was + '-c' + (++cloneSeq);
+                filters[i].setAttribute('id', now);
+                card.style.setProperty('--fc-spk-ring', 'url(#' + now + ')');
             }
         }
 
@@ -179,7 +274,19 @@
                 if (clones[i].parentNode) clones[i].parentNode.removeChild(clones[i]);
             }
             clones = [];
-            if (hotCard && !hotCard.isConnected) setHot(null);
+
+            // The pointer may have been over a copy that has just been removed.
+            // The SPEAKER is still on the rail, so re-point at a surviving copy
+            // rather than clearing: setHot(null) would strip the class off every
+            // copy and the next frame would fade it straight back in, which is the
+            // same blink the seam swap used to cause.
+            if (hotCard && !hotCard.isConnected) {
+                var survivor = hotIndex !== null
+                    ? rail.querySelector('.fc-spk-card[data-fc-spk-index="' + hotIndex + '"]')
+                    : null;
+                if (survivor) hotCard = survivor;
+                else setHot(null);
+            }
         }
 
         /**
@@ -212,7 +319,18 @@
                 // up. The lines are `width: fit-content`, so their boxes are the
                 // words themselves.
                 var text = [];
-                var lines = items[i].querySelectorAll('.fc-spk-name span, .fc-spk-roles li');
+                // `> span`, not a descendant `span`: an outlined word is now an
+                // inner .is-outline span nested inside its line, so a descendant
+                // selector matched both and pushed a duplicate box for every
+                // starred word. Harmless for the result, but it measured each of
+                // them twice on every layout.
+                //
+                // .fc-spk-online is in here so the "[ONLINE]" label counts as part
+                // of the speaker, exactly like a role line does — it is text on the
+                // card, and pointing at it should light the card up.
+                var lines = items[i].querySelectorAll(
+                    '.fc-spk-name > span, .fc-spk-roles li, .fc-spk-online'
+                );
                 for (var n = 0; n < lines.length; n++) {
                     var box = rel(lines[n]);
                     if (box) text.push(box);
@@ -301,31 +419,77 @@
 
         /* ── state ──────────────────────────────────────────────────────── */
 
+        /**
+         * Highlight a SPEAKER, not an element.
+         *
+         * The belt is an infinite loop made of the real cards plus clones, so the
+         * same speaker exists two or three times over and the copy under the
+         * pointer changes every time the belt wraps. This used to move `is-hot`
+         * from element to element, which was invisible while the colour change was
+         * instant — the arriving copy was already orange.
+         *
+         * It stopped being invisible the moment the colour got a 110ms transition.
+         * At the wrap the class landed on a FRESH element, which starts from the
+         * resting blue and fades to orange again, so the highlight dipped: orange,
+         * snap to blue, fade back. The first speaker sits exactly on the loop seam,
+         * so it is the one that flickers.
+         *
+         * `is-hot` therefore goes on EVERY copy of the speaker at once. The copy
+         * under the pointer can change as often as it likes; the class is already
+         * on it, nothing transitions, and there is nothing to see.
+         */
         function setHot(card) {
-            if (hotCard === card) return;
-            if (hotCard) hotCard.classList.remove('is-hot');
+            var idx = card ? card.getAttribute('data-fc-spk-index') : null;
+
+            // Still tracked as an element, because the belt hold asks "is the
+            // pointer on a speaker" and the drag code compares identity.
             hotCard = card;
-            if (hotCard) hotCard.classList.add('is-hot');
-            var want = !!hotCard;
+
+            if (idx === hotIndex) return;      // same speaker, possibly a different copy
+            hotIndex = idx;
+
+            var lit = rail.querySelectorAll('.fc-spk-card.is-hot');
+            for (var i = 0; i < lit.length; i++) lit[i].classList.remove('is-hot');
+
+            if (idx !== null) {
+                var copies = rail.querySelectorAll('.fc-spk-card[data-fc-spk-index="' + idx + '"]');
+                for (var j = 0; j < copies.length; j++) copies[j].classList.add('is-hot');
+            }
+
+            var want = idx !== null;
             if (want !== pointing) {
                 pointing = want;
                 wrap.classList.toggle('is-pointing', pointing);
             }
+
+            // TEMPORARY: see debugDump(). Prints the state of every copy the
+            // moment the highlight moves, which is when the odd one out shows.
+            if (DEBUG && idx !== null) debugDump(rail, boxes, 'hot -> speaker ' + idx);
         }
 
         /**
-         * The speaker nearest the middle of the row.
+         * The speaker in the middle of the row — or none.
          *
          * The touch answer to "which one is highlighted". There is no pointer to
-         * ask on a phone, so position decides: whichever card's centre is closest
-         * to the centre of the viewport, and only ever one. It follows the belt,
-         * so the highlight travels along the row as it drifts and as you drag.
+         * ask on a phone, so position decides: the card whose centre is closest to
+         * the centre of the viewport, and only ever one. It follows the belt, so
+         * the highlight travels along the row as it drifts and as you drag.
+         *
+         * AND it has to be inside the central 30% of the width, or nothing is lit.
+         * Without that a card is always the nearest one, so one was always lit, and
+         * a highlight that is never off has stopped saying anything. The same 0.30
+         * band the stacked sections use against their HEIGHT
+         * (assets/centre-highlight.js) — one rule, turned ninety degrees.
          */
+        var CENTRE_BAND = 0.30;
+
         function nearestToCentre() {
             if (!boxes.length) return null;
             var railRect = rail.getBoundingClientRect();
             var view = viewport.getBoundingClientRect();
             var mid = view.left + view.width / 2;
+            // Half the band either side of the middle.
+            var reach = view.width * CENTRE_BAND / 2;
             var best = null;
             var bestGap = Infinity;
             for (var i = 0; i < boxes.length; i++) {
@@ -334,7 +498,7 @@
                 var gap = Math.abs((railRect.left + r.x + r.w / 2) - mid);
                 if (gap < bestGap) { bestGap = gap; best = boxes[i].card; }
             }
-            return best;
+            return bestGap > reach ? null : best;
         }
 
         function updateHot() {
@@ -370,6 +534,7 @@
             offset = wrapOffset(offset);
             render();
             measureBoxes();
+            debugDump(rail, boxes, 'looping, after clones');
             if (!raf) raf = requestAnimationFrame(frame);
         }
 

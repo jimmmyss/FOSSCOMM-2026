@@ -29,8 +29,12 @@ function fc_admin_page_venue() {
         'option_key' => 'fc_section_venue',
         'schema'     => [
             'title'            => 'bilingual',
-            'university_title' => 'bilingual',
-            'hover_text'       => 'text',
+            // textarea, not text: the name is set one LINE per line now, and
+            // sanitize_text_field() (which 'bilingual' uses) strips newlines —
+            // so every line break typed into the box would have been silently
+            // eaten on save.
+            'university_title' => 'bilingual_textarea',
+            // No 'hover_text': the field it fed is gone with the title scramble.
             'google_maps_url'  => 'url',
             'address'          => 'bilingual_textarea',
             'cluster_label'    => 'text',
@@ -40,24 +44,61 @@ function fc_admin_page_venue() {
         ],
         'render_form' => function ($values) use ($card_fields, $edition_fields, $info_fields) {
             fc_bilingual_field('title', $values, ['label' => 'Section title']);
+
+            // Colours first, before the content they apply to — the same place the
+            // Speakers page puts its pair, so the two screens read the same way.
+            $style = fc_venue_style();
             ?>
+            <h2 style="margin-top:2rem;">Name colours</h2>
+            <p class="description">The hollow LAST LINE of the venue name. The solid lines above it stay
+               the theme's ink and are not affected — that is what makes the last line read as the
+               accent rather than as the odd one out in a name that is already entirely coloured.
+               Hovering the name or the address moves both. The same pair the Speakers and Manifesto
+               pages use, kept separately so tuning one does not move the others.</p>
+            <table class="form-table" role="presentation">
+                <?php
+                fc_admin_colour_field(
+                    'fc_venue_rim',
+                    $style['rim'],
+                    'Outline',
+                    'The resting colour of the hollow last line.'
+                );
+                fc_admin_colour_field(
+                    'fc_venue_rim_hover',
+                    $style['rim_hover'],
+                    'Outline on hover',
+                    'Swapped in when the pointer is over the name or the address. Desktop only — there is no hover on a phone.'
+                );
+                ?>
+            </table>
+            <?php
+            fc_admin_colour_sync_script();
+            ?>
+
             <h2 style="margin-top:2rem;">Venue card (left of the globe)</h2>
-            <p class="description">The big title is the venue/university name. On hover it scrambles into your hover text below. Click the title to open the venue in Google Maps.</p>
+            <p class="description">The big title is the venue/university name, set in the display font at the same size as a speaker's name. Click it to open the venue in Google Maps.</p>
             <?php
             fc_bilingual_field('university_title', $values, [
-                'label' => 'Venue / University title (shown big, display font)',
-                'placeholder_en' => 'Palexpo Center',
-                'placeholder_el' => 'Παλεξπό Σέντερ',
+                'label' => 'Venue / University name (shown big, display font)',
+                'type'  => 'textarea',
+                'rows'  => 3,
+                'help'  => 'ONE LINE PER LINE — press Enter to break it where you want. Wrap any part '
+                         . 'in *asterisks* to draw it hollow, in the outline colour above: '
+                         . '"University of / *West Attica*" gives a solid first line with an outlined '
+                         . 'second one. A run may span a line break. Nothing starred means nothing '
+                         . 'outlined. Keep lines short — the size is chosen so the LONGEST line fits '
+                         . 'the column, so one long line makes every line small.',
+                'placeholder_en' => "University of\n*West Attica*",
+                'placeholder_el' => "Πανεπιστήμιο\n*Δυτικής Αττικής*",
             ]);
-            // Hover text — what the big title scrambles into on hover. Free text
-            // now (was a lat/lon pair); legacy coords_lat is read as a fallback.
-            $hover_text = (string) ($values['hover_text'] ?? ($values['coords_lat'] ?? ''));
+            /* The "hover text" field is gone. It fed a scramble on the old
+             * single-line title, and that cannot survive a name set one line per
+             * line — the name and the hover text have different line counts, so
+             * there is nothing sensible to scramble into what. Hovering now moves
+             * the outline colour instead, which is what the Speakers cards do.
+             * The stored value is left in the database untouched: harmless, and
+             * cheaper than a migration for a key nothing reads. */
             ?>
-            <div class="fc-field">
-                <label>Hover text (what the title scrambles into on hover)</label>
-                <input type="text" name="fc_field[hover_text]" value="<?php echo esc_attr($hover_text); ?>" placeholder="37.9838°N, 23.7275°E">
-                <p class="description">Any text you like — coordinates, a tagline, anything. Leave blank to disable the hover effect.</p>
-            </div>
             <div class="fc-field">
                 <label>Google Maps URL (opened on click)</label>
                 <input type="url" name="fc_field[google_maps_url]" value="<?php echo esc_attr((string) ($values['google_maps_url'] ?? '')); ?>" placeholder="https://maps.google.com/?q=...">
@@ -160,8 +201,17 @@ function fc_admin_page_venue() {
                 'fields'    => $card_fields,
                 'add_label' => 'Add travel card',
             ]);
+
         },
         'post_process' => function ($clean, $raw) use ($card_fields, $edition_fields, $info_fields) {
+            // Its own option, not part of the section payload: the section data is
+            // content, these are presentation the template reads directly. Same
+            // split the Speakers and Manifesto pages use.
+            update_option(FC_VENUE_STYLE_OPTION, [
+                'rim'       => sanitize_hex_color((string) ($raw['fc_venue_rim'] ?? '')),
+                'rim_hover' => sanitize_hex_color((string) ($raw['fc_venue_rim_hover'] ?? '')),
+            ], false);
+
             $travel_rows = isset($raw['fc_travel']) && is_array($raw['fc_travel']) ? $raw['fc_travel'] : [];
             $clean['travel_cards'] = fc_sanitize_repeater($travel_rows, $card_fields);
             $edition_rows = isset($raw['fc_editions']) && is_array($raw['fc_editions']) ? $raw['fc_editions'] : [];

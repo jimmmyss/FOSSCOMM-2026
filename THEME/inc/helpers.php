@@ -14,6 +14,276 @@ function fc_get_event_start_iso() {
 /** Option holding the speaker-card colours. Written by the Speakers admin page. */
 const FC_SPEAKERS_STYLE_OPTION = 'fc_speakers_style';
 
+/** Option holding the manifesto stat colours. Written by the Manifesto admin page. */
+const FC_MANIFESTO_STYLE_OPTION = 'fc_manifesto_style';
+
+/** Option holding the venue name colours. Written by the Venue admin page. */
+const FC_VENUE_STYLE_OPTION = 'fc_venue_style';
+
+/** Option holding the CFP heading colours. Written by the Get Involved admin page. */
+const FC_CFP_STYLE_OPTION = 'fc_cfp_style';
+
+/**
+ * The house pair for every outlined thing on the site: blue at rest, orange on
+ * hover.
+ *
+ * Three sections draw hollow text — the speakers' last name, the manifesto's
+ * "+", the venue's last line — and they are all the same gesture, so they all
+ * start from the same two colours. Each still has its OWN option and its own
+ * pair of dashboard fields: a shared setting would mean tuning the speakers
+ * silently moved the venue, which is a surprise nobody asked for. These are the
+ * defaults those three fall back to, in one place so the house colours cannot
+ * drift apart in three files.
+ */
+const FC_OUTLINE_REST  = '#0033FF';
+const FC_OUTLINE_HOVER = '#EE8101';
+
+/**
+ * The hover colours these replaced, kept ONLY so the migration below can
+ * recognise a value nobody deliberately chose. A saved colour equal to an old
+ * default is a default, not a decision.
+ */
+const FC_OUTLINE_HOVER_LEGACY = ['#FF6A2B', '#FFCC00'];
+
+/**
+ * One-time migration: move a saved hover colour that is still one of the old
+ * defaults onto the new house orange.
+ *
+ * Changing a default only reaches installs that never saved the field — and both
+ * of these have a Save button that writes every field whether it was touched or
+ * not, so anybody who has ever pressed Save on Speakers or Manifesto has the old
+ * value stored and would keep it forever. A colour that exactly equals the old
+ * default was not a choice, so it moves; anything else is left alone.
+ *
+ * Same shape as fc_mascot_maybe_raise_upright_max(): an autoloaded marker, and
+ * admin_init because a live install never re-activates the theme.
+ */
+add_action('admin_init', 'fc_migrate_outline_hover_colour');
+function fc_migrate_outline_hover_colour(): void {
+    if (get_option('fc_outline_hover_v1') === '1') return;
+    update_option('fc_outline_hover_v1', '1', true);
+
+    foreach ([
+        [FC_SPEAKERS_STYLE_OPTION, 'rim_hover'],
+        [FC_MANIFESTO_STYLE_OPTION, 'plus_hover'],
+    ] as [$option, $key]) {
+        $saved = get_option($option, null);
+        if (!is_array($saved) || !isset($saved[$key])) continue;
+        $was = strtoupper(trim((string) $saved[$key]));
+        if (!in_array($was, FC_OUTLINE_HOVER_LEGACY, true)) continue;
+        $saved[$key] = FC_OUTLINE_HOVER;
+        update_option($option, $saved, false);
+    }
+}
+
+/**
+ * Split a heading into solid and HOLLOW runs, marking each `*starred*` run to be
+ * drawn outlined.
+ *
+ * The other two hollow headings pick their outlined part by POSITION — the
+ * speakers' last word, the venue's last line — which works because a name has an
+ * obvious end. A sentence does not: "Submit a talk. Or a workshop. Or both."
+ * has no last-anything worth outlining, so the author marks it instead.
+ *
+ * NB this is NOT fc_format(). There, `*text*` means "accent colour"; here it
+ * means "hollow". Both are asterisks and they cannot both run over the same
+ * string — whichever went first would eat the markers. A field rendered through
+ * this one therefore loses the accent-colour meaning of `*text*`, which is the
+ * intended trade and is worth knowing before adding this to another field.
+ *
+ * Everything is escaped. Unmatched asterisks are left as literal text rather
+ * than swallowed, so a stray one shows up as a typo instead of silently
+ * disappearing or outlining the rest of the line.
+ */
+function fc_hollow_markup(
+    string $text,
+    string $outline_class = 'is-outline',
+    string $run_attrs = ''
+): string {
+    if ($text === '') return '';
+    // DELIM_CAPTURE keeps the inner text, so odd indices are the starred runs.
+    $parts = preg_split('/\*([^*]+)\*/u', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+    if (!is_array($parts)) return esc_html($text);
+
+    // `$run_attrs` puts the same attributes on EVERY run, solid ones included,
+    // which means solid runs get a span they would not otherwise need. That is
+    // for the manifesto's stat numbers: they carry a scramble island, and
+    // assets/dist/fc.js animates by assigning `el.textContent`, which destroys
+    // every child element on the first frame. A span nested inside a scrambled
+    // box loses its class immediately and never gets it back — so each run has
+    // to be its own island, with no nesting anywhere. Passed raw and unescaped:
+    // it is a literal attribute string from the template, never user input.
+    $attrs = $run_attrs === '' ? '' : ' ' . $run_attrs;
+
+    $out = '';
+    foreach ($parts as $i => $part) {
+        if ($part === '') continue;
+        if ($i % 2 === 1) {
+            $out .= '<span class="' . esc_attr($outline_class) . '"' . $attrs . '>'
+                . esc_html($part) . '</span>';
+        } elseif ($run_attrs !== '') {
+            $out .= '<span' . $attrs . '>' . esc_html($part) . '</span>';
+        } else {
+            $out .= esc_html($part);
+        }
+    }
+    return $out;
+}
+
+/**
+ * The two colours the venue's hollow last line is drawn in: at rest, and on
+ * hover. Same shape as fc_speakers_style() and fc_manifesto_style().
+ */
+function fc_venue_style(): array {
+    return fc_outline_style(FC_VENUE_STYLE_OPTION);
+}
+
+/** Sentinels standing in for the asterisks while a heading is split up. */
+const FC_HOLLOW_OPEN  = "\x01";
+const FC_HOLLOW_CLOSE = "\x02";
+
+/**
+ * Split a heading into pieces — words, or lines — and wrap the `*starred*` parts
+ * of each piece so they can be drawn hollow.
+ *
+ * Every hollow heading on the site works this way now: the speakers' name (split
+ * into words), the venue's name and the CFP heading (split into lines). Which
+ * part is outlined is always the author's `*asterisks*`, never a position.
+ *
+ * A NAIVE split cannot do this. `*West Attica*` broken on whitespace gives
+ * `*West` and `Attica*`, two pieces each holding one unmatched asterisk — so
+ * neither would be outlined and both would show a stray `*`. The asterisks are
+ * therefore turned into sentinels FIRST, and the open/close depth is carried
+ * across pieces, so a run spanning several words or lines outlines all of them.
+ *
+ * A span cannot cross a line, so an open run is closed at the end of each piece
+ * and reopened at the start of the next.
+ *
+ * @return string[] one HTML string per piece, already escaped.
+ */
+function fc_hollow_split(string $text, string $split_regex, string $outline_class = 'is-outline'): array {
+    if (trim($text) === '') return [];
+
+    $marked = preg_replace(
+        '/\*([^*]+)\*/u',
+        FC_HOLLOW_OPEN . '$1' . FC_HOLLOW_CLOSE,
+        $text
+    );
+    if ($marked === null) $marked = $text;
+
+    $pieces = preg_split($split_regex, $marked, -1, PREG_SPLIT_NO_EMPTY);
+    if (!is_array($pieces)) $pieces = [$marked];
+
+    $open_tag  = '<span class="' . esc_attr($outline_class) . '">';
+    $out       = [];
+    $depth     = 0;          // carried ACROSS pieces
+
+    // Tokenised on the sentinels, NOT walked character by character.
+    //
+    // A character walk would need mb_substr(), and mbstring is not guaranteed —
+    // this very theme guards mb_strtoupper() with function_exists() for that
+    // reason, and the first version of this function died with "undefined
+    // function mb_strlen" on a PHP build without it. Splitting on the sentinels
+    // needs no character indexing at all, and is UTF-8 safe because 0x01 and
+    // 0x02 cannot appear inside a multi-byte sequence: every continuation byte
+    // is >= 0x80.
+    $sentinel = '/(' . FC_HOLLOW_OPEN . '|' . FC_HOLLOW_CLOSE . ')/';
+
+    foreach ($pieces as $piece) {
+        $html = '';
+        $inside = $depth > 0;
+        if ($inside) $html .= $open_tag;
+
+        foreach (preg_split($sentinel, $piece, -1, PREG_SPLIT_DELIM_CAPTURE) ?: [] as $token) {
+            if ($token === FC_HOLLOW_OPEN) {
+                if (!$inside) { $html .= $open_tag; $inside = true; }
+                $depth++;
+                continue;
+            }
+            if ($token === FC_HOLLOW_CLOSE) {
+                if ($inside) { $html .= '</span>'; $inside = false; }
+                $depth = max(0, $depth - 1);
+                continue;
+            }
+            $html .= esc_html($token);
+        }
+        // Close anything still open: the next piece reopens it.
+        if ($inside) $html .= '</span>';
+
+        // A piece that was nothing but markers contributes no line.
+        if (trim(strip_tags($html)) !== '') $out[] = $html;
+    }
+
+    return $out;
+}
+
+/**
+ * The same text with the asterisk markers removed, for measuring.
+ *
+ * The name-size formulas count characters to work out how big the longest piece
+ * can be set; counting the asterisks too would make a marked name render smaller
+ * than an unmarked one saying the same thing.
+ */
+function fc_hollow_plain(string $text): string {
+    $out = preg_replace('/\*([^*]+)\*/u', '$1', $text);
+    return $out === null ? $text : $out;
+}
+
+/**
+ * The two colours the CFP heading's `*starred*` run is drawn in.
+ * Same shape as the other three.
+ */
+function fc_cfp_style(): array {
+    return fc_outline_style(FC_CFP_STYLE_OPTION);
+}
+
+/**
+ * One reader for an outline colour pair, since there are now four of them.
+ *
+ * They were four copies of the same eight lines, differing only in the option
+ * name and — in two cases — the array keys. The keys are `rim` / `rim_hover`
+ * everywhere here; the Speakers and Manifesto readers keep their own historical
+ * key names (`plus` / `plus_hover` for the manifesto) because those are what is
+ * already in the database, and renaming them would need a migration to buy
+ * nothing.
+ */
+function fc_outline_style(string $option): array {
+    $saved = get_option($option, []);
+    if (!is_array($saved)) $saved = [];
+    $pick = static function ($value, string $fallback): string {
+        $hex = sanitize_hex_color((string) $value);
+        return $hex ? $hex : $fallback;
+    };
+    return [
+        'rim'       => $pick($saved['rim'] ?? '', FC_OUTLINE_REST),
+        'rim_hover' => $pick($saved['rim_hover'] ?? '', FC_OUTLINE_HOVER),
+    ];
+}
+
+/**
+ * The two colours the "+" on a manifesto stat is drawn in: at rest, and on hover.
+ *
+ * A separate option from the speakers' pair rather than one shared "accent
+ * colours" setting, because the two are answering different questions — the
+ * speakers' is the outline round a photograph, this is a glyph in a number — and
+ * somebody tuning one should not silently move the other.
+ *
+ * Read on every landing-page render, so it lives here rather than in the admin
+ * directory, which only exists when is_admin().
+ */
+function fc_manifesto_style(): array {
+    $saved = get_option(FC_MANIFESTO_STYLE_OPTION, []);
+    if (!is_array($saved)) $saved = [];
+    $pick = static function ($value, string $fallback): string {
+        $hex = sanitize_hex_color((string) $value);
+        return $hex ? $hex : $fallback;
+    };
+    return [
+        'plus'       => $pick($saved['plus'] ?? '', FC_OUTLINE_REST),
+        'plus_hover' => $pick($saved['plus_hover'] ?? '', FC_OUTLINE_HOVER),
+    ];
+}
+
 /**
  * The two outline colours for a speaker's cut-out photo: at rest, and on hover.
  *
@@ -35,8 +305,8 @@ function fc_speakers_style(): array {
     return [
         // The portraits stand on the section's own paper, so the resting outline
         // is the theme accent — a white one would be invisible against it.
-        'rim'       => $pick($saved['rim'] ?? '', '#0033FF'),
-        'rim_hover' => $pick($saved['rim_hover'] ?? '', '#FF6A2B'),
+        'rim'       => $pick($saved['rim'] ?? '', FC_OUTLINE_REST),
+        'rim_hover' => $pick($saved['rim_hover'] ?? '', FC_OUTLINE_HOVER),
     ];
 }
 

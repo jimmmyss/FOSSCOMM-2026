@@ -256,10 +256,41 @@ $eyebrow = fc_section_eyebrow($section);
 @media (min-width: 1024px) {
     .fc-hero-wordmark { font-size: clamp(3rem, 8.5vw, 11rem); }
 }
-/* Outlined year — hollow white stroke, transparent fill (1.html .outline). */
+/* Outlined year — hollow white stroke, transparent fill (1.html .outline).
+ *
+ * The stroke is in em, so it stays the same PROPORTION of the letters at every
+ * size. It was 3px flat, and the wordmark above is fluid — clamp(3rem, 24vw,
+ * 10rem) on a phone and clamp(3rem, 8.5vw, 11rem) on desktop — so the same
+ * three pixels were a very different weight depending on the screen:
+ *
+ *     375px phone   wordmark  90px   3px = 3.33%
+ *     1440px        wordmark 122px   3px = 2.45%
+ *     1920px        wordmark 163px   3px = 1.84%
+ *
+ * A phone therefore drew the outline about 1.4x heavier than a laptop and 1.8x
+ * heavier than a wide monitor, which is exactly the "it gets thicker as it gets
+ * smaller" — the outline was not getting thicker, the letters were getting
+ * thinner around it.
+ *
+ * 0.018em is the WIDE end of that range — the proportion a flat 3px drew at
+ * 1920px and above, which is where the old value looked right. It holds that
+ * everywhere now: 1.6px on a 375px phone, 2.2px at 1440, 3.0px at 1920, 3.2px
+ * at the 176px cap.
+ *
+ * It was briefly 0.022em, the middle of the desktop range, which came out
+ * HEAVIER than the old 3px on a wide screen (3.6px at 1920) — thicker than the
+ * thing it was meant to reproduce. One number to nudge either way.
+ */
 .fc-hero-outline {
-    -webkit-text-stroke: 3px #fff;
+    -webkit-text-stroke: 0.018em #fff;
     color: transparent;
+}
+/* …but only where stroking actually works. `color: transparent` with nothing
+   drawn behind it is an INVISIBLE "/26", not a hollow one — the same trap the
+   speakers' hollow name documents at length. Without the guard the year simply
+   disappeared on any engine without -webkit-text-stroke. */
+@supports not (-webkit-text-stroke: 1px white) {
+    .fc-hero-outline { color: #fff; }
 }
 
 /* .fc-cta-text underline lives in assets/site.css — shared with fc_cta_link()

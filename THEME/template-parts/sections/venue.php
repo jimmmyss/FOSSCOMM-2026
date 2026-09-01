@@ -15,10 +15,9 @@ $data    = fc_section_data($section);
 
 $title       = fc_bi($data, 'title');
 $uni_title   = fc_bi($data, 'university_title');
-// Hover text: the big venue title scrambles into this on hover. Was a lat/lon
-// pair; now a single free-text field (legacy coords_lat kept as a fallback).
-$hover_text  = (string) ($data['hover_text'] ?? '');
-if ($hover_text === '') $hover_text = (string) ($data['coords_lat'] ?? '');
+// No $hover_text. It fed a scramble on the old single-line title; the name is
+// set one line per line now, hovering moves the outline colour instead, and the
+// dashboard field is gone. Any stored value is simply no longer read.
 $maps_url    = (string) ($data['google_maps_url'] ?? '');
 $address     = fc_bi($data, 'address');
 $info_rows   = (array)  ($data['info_rows']       ?? []);
@@ -144,37 +143,131 @@ $eyebrow     = fc_section_eyebrow($section);
              instead of floating in the middle when it shrinks. -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start md:items-stretch">
 
-            <!-- Left: venue card — big hover-scramble title + Google Maps link + address + info rows -->
-            <div class="space-y-6 pb-6 md:pb-20">
-                <?php $uni = fc_one($uni_title); if ($uni !== '') :
-                    $has_maps   = $maps_url !== '';
-                    $has_hover  = $hover_text !== '';
-                    $link_tag   = $has_maps ? 'a' : 'div';
-                    $link_attrs = 'class="fc-venue-title-link block no-underline text-inherit"';
-                    if ($has_maps) {
-                        $link_attrs .= ' href="' . esc_url($maps_url) . '" target="_blank" rel="noreferrer"';
-                    }
-                    // Main title = the venue name (active language); on hover it
-                    // scrambles into the admin-set hover text (any free text).
-                    // Click opens Google Maps.
-                    ?>
-                    <<?php echo $link_tag; ?> <?php echo $link_attrs; ?>>
-                        <h3 class="fc-venue-title-en font-display text-3xl md:text-5xl leading-[1.05] tracking-tight text-ink m-0"
-                            data-fc-default="<?php echo esc_attr($uni); ?>"
-                            data-fc-hover="<?php echo esc_attr($has_hover ? $hover_text : $uni); ?>"><?php echo esc_html($uni); ?></h3>
-                    </<?php echo $link_tag; ?>>
-                <?php endif; ?>
+            <!-- Left: venue card — hollow-last-word name + Google Maps link + address + info rows.
+                 No `space-y-6`: the name/address pair is deliberately tighter than
+                 the gap before the info table, and a uniform 24px between all three
+                 is what made them read as three unrelated blocks. Each child sets
+                 its own top margin in the <style> below. -->
+            <div class="pb-6 md:pb-20">
 
-                <?php $address_text = fc_one($address); if ($address_text !== '') : ?>
-                    <div class="font-mono text-sm leading-relaxed border-l-2 border-accent pl-4">
-                        <div class="flex flex-wrap gap-x-3 gap-y-2">
-                            <p class="m-0 text-ink-muted whitespace-pre-line"><?php echo fc_format($address_text); ?></p>
-                        </div>
-                    </div>
+                <?php
+                /* The venue name, set the way a speaker's name is: uppercase, one
+                 * word per line, the last word drawn hollow in the accent. The two
+                 * places the site names something at size now share one treatment,
+                 * which is the point.
+                 *
+                 * Replaced a single-line title over an address in a blue-ruled box.
+                 * The rule read as a blockquote — a convention for quoted speech,
+                 * and the only left-rule in the section — and the address under it
+                 * was small AND mono AND muted, three de-emphases at once, in the
+                 * same visual language as the info table 24px below it but a
+                 * different shape. That similarity-without-sameness is what made it
+                 * look accidental.
+                 *
+                 * NB: no hover-scramble. The old title scrambled into the
+                 * dashboard's hover text; that cannot survive one-word-per-line,
+                 * because the two strings have different word counts ("University
+                 * of West Attica" is four, "Πανεπιστήμιο Δυτικής Αττικής" is three)
+                 * and there is nothing sensible to scramble into what. The hover
+                 * response is the outline changing colour instead, exactly as a
+                 * speaker card does. The hover-text field is now unused here.
+                 */
+                $uni = fc_one($uni_title);
+                // MANUAL line breaks, and the *starred* part drawn hollow.
+                //
+                // Both are the author's call. Where a venue name breaks is not
+                // guessable — it is a phrase, and "University / Of / West /
+                // Attica" is four lines of which two are noise. Neither is which
+                // part should be outlined: it was automatically the LAST line,
+                // which is only ever right by luck. Same convention as the
+                // speakers' name, the CFP heading and the stat numbers.
+                $uni_lines = fc_hollow_split($uni, '/\R/u');
+
+                // The size is chosen so the LONGEST line fits the column, then
+                // every line is set at that size — names at different sizes read
+                // as an accident rather than as fitting. Measured in characters,
+                // which is what the budget in the CSS below is denominated in.
+                //
+                // Measured on the PLAIN text: the asterisks are markup, and
+                // counting them would set a marked name smaller than an unmarked
+                // one saying exactly the same thing.
+                $uni_longest = 1;
+                foreach (fc_lines(fc_hollow_plain($uni)) as $line) {
+                    $len = function_exists('mb_strlen') ? mb_strlen($line, 'UTF-8') : strlen($line);
+                    if ($len > $uni_longest) $uni_longest = $len;
+                }
+
+                $address_text = fc_one($address);
+                $addr_lines   = fc_lines($address_text);
+                $has_maps     = $maps_url !== '';
+                $vstyle       = fc_venue_style();
+                ?>
+
+                <?php if (!empty($uni_lines) || !empty($addr_lines)) : ?>
+                    <?php
+                    /* ONE element wrapping the name AND the address, so hovering
+                     * either moves the outline — exactly the speakers' card, where
+                     * the name, the roles and the photo are all one hover target
+                     * and one link.
+                     *
+                     * They were siblings before, and only the name reacted. */
+                    ?>
+                    <?php
+                    /* data-fc-centre: on touch there is no pointer, so
+                     * assets/centre-highlight.js lights this while its centre is
+                     * inside the middle 30% of the screen, and puts it out again
+                     * as it scrolls away. No `-item` needed — a container with
+                     * nothing marked inside it is itself the item, which is right
+                     * here: the link is both the hover target and the box worth
+                     * measuring, and splitting the two would mean measuring
+                     * something other than the thing that lights up. */
+                    ?>
+                    <?php if ($has_maps) : ?>
+                        <a class="fc-venue-name-link block no-underline text-inherit"
+                           href="<?php echo esc_url($maps_url); ?>" target="_blank" rel="noreferrer"
+                           data-fc-centre
+                    <?php else : ?>
+                        <div class="fc-venue-name-link block" data-fc-centre
+                    <?php endif; ?>
+                           style="--fc-venue-rim: <?php echo esc_attr($vstyle['rim']); ?>;
+                                  --fc-venue-rim-hover: <?php echo esc_attr($vstyle['rim_hover']); ?>;
+                                  --fc-venue-longest: <?php echo (int) $uni_longest; ?>;">
+
+                        <?php if (!empty($uni_lines)) : ?>
+                            <h3 class="fc-venue-name m-0">
+                                <?php // Each line is already HTML from
+                                      // fc_hollow_split(): escaped, with any
+                                      // *starred* part wrapped in .is-outline.
+                                      // Uppercased in CSS (text-transform), not
+                                      // here — mb_strtoupper() would have had to
+                                      // run over the markup and would uppercase
+                                      // the tag names too. ?>
+                                <?php foreach ($uni_lines as $line) : ?>
+                                    <span><?php echo $line; ?></span>
+                                <?php endforeach; ?>
+                            </h3>
+                        <?php endif; ?>
+
+                        <?php if (!empty($addr_lines)) : ?>
+                            <!-- No Tailwind type classes: .fc-venue-addr sets the
+                                 face, the size, the tracking and the case, all
+                                 copied from .fc-spk-roles. `font-mono text-sm`
+                                 here would have been a second opinion on two of
+                                 them — 14px against the rule's 12px — settled only
+                                 by which stylesheet the browser read last, which is
+                                 not a thing to leave to chance. -->
+                            <div class="fc-venue-addr">
+                                <?php foreach ($addr_lines as $line) : ?>
+                                    <span class="block"><?php echo esc_html($line); ?></span>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+
+                    <?php echo $has_maps ? '</a>' : '</div>'; ?>
                 <?php endif; ?>
 
                 <?php if (!empty($info_rows)) : ?>
-                    <dl class="border-t border-border m-0 p-0">
+                    <dl class="fc-venue-info border-t border-border m-0 p-0">
                         <?php foreach ($info_rows as $row) :
                             $rlabel = fc_bi($row, 'label');
                             $rvalue = fc_bi($row, 'value');
@@ -274,134 +367,153 @@ $eyebrow     = fc_section_eyebrow($section);
    edge so it can be auto-selected like the rest. */
 .fc-edition-spacer { width: 70vw; }
 
-/* Venue card title: hover scrambles the English title into the coordinates
-   label (window.fcScramble, same engine the FAQ uses) and instantly hides the
-   Greek sub-line so the coordinates stand alone. Click opens Google Maps.
-   Hover behaviour is gated behind the lg breakpoint (matches fc.js's
-   `(max-width: 1023.98px)` mobile check) so touch viewports — including
-   hybrid laptops and DevTools mobile mode that still report `(hover: hover)`
-   — never trigger the scramble or colour change. Tap stays click-only. */
-.fc-venue-title-link { cursor: var(--fc-cur-pointer, pointer); }
-/* Subline that only exists to show the longitude on hover (no Greek title set).
-   Reserve the visual space so the title doesn't shift when hover content appears,
-   but keep it invisible until hover. */
-.fc-venue-title-el-hover-only { visibility: hidden; }
-.fc-venue-title-link.is-hovering .fc-venue-title-el-hover-only { visibility: visible; }
-@media (min-width: 1024px) {
-    a.fc-venue-title-link { transition: color 200ms ease; }
-    a.fc-venue-title-link:hover .fc-venue-title-en { color: var(--color-accent, #0033FF); }
+/* ── Venue name: one word per line, last one hollow ──────────────────────────
+   The speakers' signature treatment (.fc-spk-name), applied to the venue. Two
+   details carried over because both are easy to get wrong:
+
+     • the stroke is in em, so it stays the same PROPORTION of the letters at
+       every size instead of looking heavier as the name shrinks;
+     • the outline colour is set OUTSIDE the @supports, so an engine without
+       -webkit-text-stroke shows a SOLID accent word rather than an invisible
+       one. `color: transparent` with nothing drawn behind it is a missing word,
+       and the fallback in each var() matters for the same reason: an invalid
+       `color` INHERITS, and the parent here is ink, so a failed variable would
+       silently render the last word solid black. */
+.fc-venue-name {
+    font-family: var(--font-display, "Space Grotesk"), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    /* THE SPEAKERS' SIZE, by the speakers' rule: the size at which the longest
+       line exactly fills the column, floored at 18px and capped at 82px — the
+       same three numbers as .fc-spk-name.
+       The coefficient is 1.45 rather than the speakers' 1.52, and that is not a
+       taste decision. A capital costs about 0.6em in this face once the -0.05em
+       tracking comes off, so the size at which n characters exactly fill a
+       column of width w is w / (0.6n) — a coefficient of 1.667. The speakers
+       use 1.52 (≈9% spare) because they know their column exactly: it is a CSS
+       variable they set themselves. Here the column is a grid track this
+       stylesheet can only ESTIMATE (below), so the extra margin covers the
+       estimate being a little optimistic. Overflowing into the map is the
+       failure worth spending 4% to avoid. */
+    font-size: clamp(
+        18px,
+        calc(var(--fc-venue-col, 24rem) * 1.45 / var(--fc-venue-longest, 12)),
+        82px
+    );
+    line-height: 0.86;
+    letter-spacing: -0.05em;
+    text-transform: uppercase;
+    color: var(--color-ink, #0A0A0A);
 }
+/* The column this name has to fit, reconstructed from the layout above it:
+   fc_section_open() wraps everything in max-w-[1440px] with px-4 (1rem a side)
+   and px-8 (2rem a side) from md, and the venue grid is one column below md and
+   two with gap-12 (3rem) from md. */
+.fc-venue-name { --fc-venue-col: calc(100vw - 2rem); }
+@media (min-width: 768px) {
+    .fc-venue-name { --fc-venue-col: calc((min(1440px, 100vw) - 4rem - 3rem) / 2); }
+}
+/* fit-content, not the full column. A block-level line stretches the whole
+   width, so the empty strip beside a short word would be part of the link's
+   box — clickable, and hoverable, while the pointer is plainly beside the
+   word. Same reason the speakers' name does it. */
+/* DIRECT children only. Each line is now one outer span with an inner
+   .is-outline span around whatever part of it was starred — a descendant
+   selector would make that inner span a block too, and a line with only part of
+   it marked ("University *of*") would break in the middle. */
+.fc-venue-name > span { display: block; width: fit-content; }
+/* ONE variable, --fc-venue-rim-now, is what the outline is actually drawn in.
+   It starts at the dashboard's resting colour (set on the link below) and the
+   hover moves it — so the colour is declared here once and the hover rules are
+   two lines instead of a copy of this block inside every @supports. */
+.fc-venue-name span.is-outline { color: var(--fc-venue-rim-now, #0033FF); }
+@supports (-webkit-text-stroke: 1px black) {
+    .fc-venue-name span.is-outline {
+        color: transparent;
+        -webkit-text-stroke: 0.035em var(--fc-venue-rim-now, #0033FF);
+        /* Hollow letters at tight tracking run into each other — the stroke
+           adds width the solid weight does not have. A touch looser. */
+        letter-spacing: -0.028em;
+    }
+}
+/* Hover moves the outline, and only the outline: the solid lines stay ink, so
+   the last line reads as the accent rather than as the odd one out in a name
+   that is already entirely coloured.
+ *
+ * Driven through one variable so there is a single place the hover writes and
+ * both the fill and the stroke read it — otherwise every hover rule has to be
+ * duplicated inside the @supports for the stroke as well. */
+.fc-venue-name-link {
+    cursor: var(--fc-cur-pointer, pointer);
+    --fc-venue-rim-now: var(--fc-venue-rim, #0033FF);
+}
+
+/* OUTSIDE the hover query, both of these, because a phone has to have them.
+   There is no pointer on touch, so assets/centre-highlight.js sets .is-hot on
+   this link while it is near the middle of the screen — and the transition has
+   to live out here too, or the mobile highlight would snap while the desktop one
+   faded. Putting a highlight rule inside @media (hover: hover) is the mistake
+   that made the speakers' mobile highlight do nothing at all. */
+.fc-venue-name-link.is-hot { --fc-venue-rim-now: var(--fc-venue-rim-hover, #EE8101); }
+.fc-venue-name span.is-outline {
+    transition: color 50ms ease, -webkit-text-stroke-color 50ms ease;
+}
+
+@media (hover: hover) {
+    /* THE WORDS, not the box.
+     *
+     * The link is a block, so its box is the whole column — mostly empty air to
+     * the right of a short line. `:hover` on it would light the name while the
+     * pointer was plainly beside the words, which is the exact fault the
+     * speakers row went to the trouble of alpha-testing its way out of.
+     * `:has()` narrows the trigger to a line of the name or a line of the
+     * address, both of which are `width: fit-content`, so the target hugs the
+     * type. Name and address together, as one thing. */
+    @supports selector(:has(*)) {
+        a.fc-venue-name-link:has(.fc-venue-name span:hover),
+        a.fc-venue-name-link:has(.fc-venue-addr span:hover) {
+            --fc-venue-rim-now: var(--fc-venue-rim-hover, #EE8101);
+        }
+    }
+    /* Without :has() there is no way to ask "is the pointer on the text", so the
+       box is the best available answer. Over-triggering beats not working. */
+    @supports not selector(:has(*)) {
+        a.fc-venue-name-link:hover {
+            --fc-venue-rim-now: var(--fc-venue-rim-hover, #EE8101);
+        }
+    }
+}
+
+/* The address, set exactly as a speaker's ROLES are — same face, same 12px,
+   same tracking, same uppercase, same 5px tuck under the name. It is the same
+   thing in both places: a caption on the name above it, not a block in its own
+   right. Every value here is lifted from .fc-spk-roles.
+   The wrapper's Tailwind `space-y-6` was removed for this: it sets margin-top
+   on every sibling through a selector these rules cannot outrank, so the 5px
+   would silently have been 24px and the address would have gone on floating. */
+.fc-venue-addr {
+    margin-top: 5px;
+    font-family: var(--font-mono, "JetBrains Mono"), ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.6;
+    color: var(--color-ink-muted, #6B6B66);
+}
+/* Same reason as the name's lines: the box is the line of type, not the column
+   it sits in. */
+.fc-venue-addr span { width: fit-content; }
+.fc-venue-info { margin-top: 2rem; }
+
+/* The title-scramble CSS that used to live here is gone with the effect it
+   styled (.fc-venue-title-link / -en / -el, and the coordinates sub-line). The
+   name is set one line per line now and hovering moves the outline colour
+   instead; the "hover text" dashboard field went with it. */
 </style>
-<?php /* Hover-scramble swap.
-   Desktop pointer hover (and keyboard focus): EN scrambles into the latitude;
-   the subline scrambles into the longitude. On un-hover both scramble back.
-   Mobile tap: first tap scrambles to lat/lon (no CSS :hover effect — those
-   styles are gated behind the lg media query above). Second tap navigates
-   to Google Maps if a URL is set, otherwise swaps back to defaults. A tap
-   outside the title resets the state. */ ?>
-<script>
-(function () {
-    // Live check — viewport-width-based, matching fc.js's lg breakpoint. Using
-    // (hover: none) here was unreliable: hybrid touch laptops and DevTools'
-    // mobile mode often still report (hover: hover) and the scramble would
-    // fire on tap. Re-evaluated at every event so a window resize takes effect
-    // without reload.
-    var mqMobile = window.matchMedia && window.matchMedia('(max-width: 1023.98px)');
-    function isMobile() { return !!(mqMobile && mqMobile.matches); }
-    var GLYPHS = 'αβγδεζηθικλμνξοπρστυφχψω0123456789';
-    function glyphify(text) {
-        var out = '';
-        for (var i = 0; i < text.length; i++) {
-            var c = text.charAt(i);
-            out += (c === ' ' || c === '\n')
-                ? c
-                : GLYPHS.charAt(Math.floor(Math.random() * GLYPHS.length));
-        }
-        return out;
-    }
-    function scrambleTo(elm, text) {
-        if (!elm || text === null) return;
-        if (typeof window.fcScramble === 'function') {
-            window.fcScramble(elm, text);
-        } else {
-            elm.textContent = text;
-        }
-    }
-    function isDeadHref(link) {
-        if (link.tagName !== 'A') return true;
-        var href = link.getAttribute('href');
-        if (href === null) return true;
-        var t = href.trim();
-        return t === '' || t === '#';
-    }
-    var links = document.querySelectorAll('.fc-venue-title-link');
-    links.forEach(function (link) {
-        var en = link.querySelector('.fc-venue-title-en');
-        var el = link.querySelector('.fc-venue-title-el');
-        if (!en && !el) return;
-        var state = false;
-        function swap(toHover) {
-            if (toHover === state) return;
-            state = toHover;
-            if (toHover) {
-                // EN scrambles to lat, subline scrambles to lon. If the subline
-                // is empty by default (no Greek title set), glyphify first so
-                // the user sees characters land instead of an empty string.
-                link.classList.add('is-hovering');
-                if (en) scrambleTo(en, en.getAttribute('data-fc-hover'));
-                if (el) {
-                    var elHover = el.getAttribute('data-fc-hover');
-                    var elDefault = el.getAttribute('data-fc-default') || '';
-                    if (elDefault === '' && elHover) {
-                        el.textContent = glyphify(elHover);
-                    }
-                    scrambleTo(el, elHover);
-                }
-            } else {
-                if (en) scrambleTo(en, en.getAttribute('data-fc-default'));
-                if (el) {
-                    var elDefault2 = el.getAttribute('data-fc-default') || '';
-                    el.textContent = glyphify(elDefault2);
-                    link.classList.remove('is-hovering');
-                    scrambleTo(el, elDefault2);
-                } else {
-                    link.classList.remove('is-hovering');
-                }
-            }
-        }
-        // Desktop: pointer-only hover (+ keyboard focus parity).
-        link.addEventListener('mouseenter', function () {
-            if (isMobile()) return;
-            swap(true);
-        });
-        link.addEventListener('mouseleave', function () {
-            if (isMobile()) return;
-            swap(false);
-        });
-        link.addEventListener('focus', function () {
-            if (isMobile()) return;
-            swap(true);
-        }, true);
-        link.addEventListener('blur', function () {
-            if (isMobile()) return;
-            swap(false);
-        }, true);
-        // Mobile: a tap on a real link (Google Maps URL set) navigates
-        // immediately — no reveal-first / two-tap. Only the link-less title
-        // (a <div>, dead href) toggles the hover reveal on tap, since it has
-        // nothing to open.
-        link.addEventListener('click', function (e) {
-            if (!isMobile()) return;
-            if (!isDeadHref(link)) return;   // real <a href> → let the browser navigate
-            e.preventDefault();
-            swap(!state);
-        });
-        // Reset when the user taps anywhere else.
-        document.addEventListener('click', function (e) {
-            if (!isMobile() || !state) return;
-            if (link.contains(e.target)) return;
-            swap(false);
-        }, true);
-    });
-})();
-</script>
+
+<?php /* The title-scramble script that used to close this file is gone too.
+   It bound to .fc-venue-title-link, which no longer exists: the venue name is
+   set one line per line and a scramble cannot cross that — the name and the
+   hover text had different line counts, so there was nothing sensible to
+   scramble into what. Hovering the name or the address moves the outline
+   colour instead, which is what a speaker card does, and it is pure CSS. */ ?>

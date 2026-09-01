@@ -13,14 +13,46 @@ const FC_LANG_DEFAULT = 'en';
 const FC_LANG_COOKIE  = 'fc_lang';
 
 /**
+ * Is Greek offered at all?
+ *
+ * A dashboard switch (FOSSCOMM → Top Bar). Off by default is NOT the behaviour —
+ * it defaults ON, so an install that has never seen the setting keeps the
+ * bilingual site it already had. Only an explicit `0` turns it off.
+ *
+ * Cached, because fc_current_lang() consults it and that is called from
+ * practically every template on every request.
+ */
+function fc_greek_enabled(): bool {
+    static $on = null;
+    if ($on !== null) {
+        return $on;
+    }
+    $status = get_option('fc_status_bar', []);
+    if (!is_array($status) || !array_key_exists('greek_enabled', $status)) {
+        return $on = true;      // never configured: keep the site bilingual
+    }
+    return $on = ((string) $status['greek_enabled'] === '1');
+}
+
+/**
  * The active language for this request. Resolved once and cached: a valid
  * ?lang= query arg wins (and is persisted to a cookie on `init`), then the
  * cookie, then the default. English is the site default.
+ *
+ * With Greek switched off this is ALWAYS English, whatever the cookie or the
+ * query string says. That is the important half of the switch: without it,
+ * anybody who had already chosen Greek would keep getting Greek — with the
+ * toggle now hidden, and so no way back — and a stale ?lang=el link would still
+ * work. Turning the language off has to turn it off for everyone, not just for
+ * people who have not visited yet.
  */
 function fc_current_lang(): string {
     static $lang = null;
     if ($lang !== null) {
         return $lang;
+    }
+    if (!fc_greek_enabled()) {
+        return $lang = 'en';
     }
     // ?lang= override (sanitized; must be a known language).
     if (isset($_GET['lang'])) {
@@ -47,6 +79,12 @@ function fc_current_lang(): string {
 add_action('init', 'fc_resolve_lang_cookie');
 function fc_resolve_lang_cookie(): void {
     if (!isset($_GET['lang'])) {
+        return;
+    }
+    // Nothing to persist when there is only one language: a ?lang=el that
+    // fc_current_lang() is going to ignore must not be written to a cookie
+    // either, or switching Greek back on would silently resurrect it.
+    if (!fc_greek_enabled()) {
         return;
     }
     $q = strtolower(sanitize_key((string) wp_unslash($_GET['lang'])));
