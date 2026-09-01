@@ -153,10 +153,23 @@
         // Monotonic, never reset: see fixFilterIds().
         var cloneSeq = 0;
         var boxes = [];        // hit-test geometry, rail-relative
+        // Cached layout geometry, refreshed by measureBoxes(). See the note there
+        // for why the frame loop must not measure.
+        var railBaseLeft = 0;  // rail's left edge with the transform removed
+        var viewMid = 0;       // viewport centre, in client px
+        var viewReach = 0;     // half the centre band
+        // What the last hit test was answered for, so an unchanged frame can skip
+        // it entirely.
+        var lastHitX = NaN, lastHitY = NaN, lastHitOffset = NaN;
         var hotCard = null;
         // Which SPEAKER is lit, as the data-fc-spk-index string. The element under
         // the pointer changes at every loop seam; the speaker does not.
         var hotIndex = null;
+        // Is the section anywhere near the viewport? Consulted by every place that
+        // would otherwise start the frame loop, so scrolling past cannot leave it
+        // running. Assumed true until an IntersectionObserver says otherwise —
+        // without one, the old always-on behaviour.
+        var onScreen = true;
         var pointing = false;
         // Set when a drag travelled far enough that the click it produces should
         // be thrown away. Cleared by the next press so it can never outlive the
@@ -300,6 +313,29 @@
          */
         function measureBoxes() {
             var railRect = rail.getBoundingClientRect();
+
+            // The geometry that does NOT change while the belt runs, cached here
+            // so the frame loop can do arithmetic instead of asking the DOM.
+            //
+            // This matters more than it looks. getBoundingClientRect() is only
+            // cheap while layout is clean, and it is NOT clean during a scroll:
+            // section-nav.js writes the top bar's transform in its own rAF
+            // callback, and if that callback runs before this one in the same
+            // frame, a read here forces a synchronous layout of the whole
+            // document. Two independent scripts, one thrash, once per frame,
+            // exactly while the phone is busiest.
+            //
+            // `- offset` removes the transform that is already applied, leaving
+            // the rail's left edge as if it were at rest — so the live position
+            // is railBaseLeft + offset, which we know without measuring.
+            railBaseLeft = railRect.left - offset;
+            var view = viewport.getBoundingClientRect();
+            viewMid = view.left + view.width / 2;
+            viewReach = view.width * CENTRE_BAND / 2;
+            // Forces the next hit test even if nothing appears to have moved:
+            // the boxes themselves are new.
+            lastHitOffset = NaN;
+
             var rel = function (el) {
                 if (!el) return null;
                 var r = el.getBoundingClientRect();
@@ -402,9 +438,13 @@
          */
         function hitAt(clientX, clientY) {
             if (!boxes.length) return null;
-            var railRect = rail.getBoundingClientRect();
-            var x = clientX - railRect.left;
-            var y = clientY - railRect.top;
+            // One read, and only the vertical half is actually needed live: the
+            // horizontal position is railBaseLeft + offset, which is known. `top`
+            // changes as the page scrolls, and clientY is viewport-relative, so
+            // it cannot be cached the same way. This path only runs for a real
+            // pointer, and only when something has moved — see updateHot().
+            var x = clientX - (railBaseLeft + offset);
+            var y = clientY - rail.getBoundingClientRect().top;
             for (var i = 0; i < boxes.length; i++) {
                 var b = boxes[i];
                 for (var t = 0; t < b.text.length; t++) {
@@ -485,25 +525,45 @@
 
         function nearestToCentre() {
             if (!boxes.length) return null;
-            var railRect = rail.getBoundingClientRect();
-            var view = viewport.getBoundingClientRect();
-            var mid = view.left + view.width / 2;
-            // Half the band either side of the middle.
-            var reach = view.width * CENTRE_BAND / 2;
+            // NO DOM READS. This is the touch path and it runs on every animation
+            // frame — the belt is moving, so which card is centred genuinely
+            // changes frame to frame. It used to take two getBoundingClientRect()
+            // calls per frame; both are now arithmetic on the cache measureBoxes()
+            // left behind, with `offset` supplying the only part that moves.
+            var left = railBaseLeft + offset;
             var best = null;
             var bestGap = Infinity;
             for (var i = 0; i < boxes.length; i++) {
                 var r = boxes[i].rect;
                 if (!r) continue;
-                var gap = Math.abs((railRect.left + r.x + r.w / 2) - mid);
+                var gap = Math.abs((left + r.x + r.w / 2) - viewMid);
                 if (gap < bestGap) { bestGap = gap; best = boxes[i].card; }
             }
-            return bestGap > reach ? null : best;
+            return bestGap > viewReach ? null : best;
         }
 
         function updateHot() {
             if (touchMode) { setHot(nearestToCentre()); return; }
-            if (!pointer.inside || drag.id !== null) { setHot(null); return; }
+            if (!pointer.inside || drag.id !== null) {
+                // Invalidate, so re-entering at the very same pixel still tests.
+                lastHitX = lastHitY = lastHitOffset = NaN;
+                setHot(null);
+                return;
+            }
+
+            // Skip the test when nothing that could change the answer has moved.
+            //
+            // The drift is 22px/s — about a third of a pixel per frame — so
+            // re-testing every frame asks the same question sixty times a second
+            // and gets the same answer. And while a speaker IS lit the belt is
+            // held still (see frame()), so hovering costs nothing at all rather
+            // than a layout read per frame.
+            if (pointer.x === lastHitX && pointer.y === lastHitY
+                && Math.abs(offset - lastHitOffset) < 1) return;
+            lastHitX = pointer.x;
+            lastHitY = pointer.y;
+            lastHitOffset = offset;
+
             setHot(hitAt(pointer.x, pointer.y));
         }
 
@@ -535,7 +595,7 @@
             render();
             measureBoxes();
             debugDump(rail, boxes, 'looping, after clones');
-            if (!raf) raf = requestAnimationFrame(frame);
+            if (!raf && onScreen && !document.hidden) raf = requestAnimationFrame(frame);
         }
 
         /* ── motion ─────────────────────────────────────────────────────── */
@@ -712,14 +772,62 @@
         // Nothing to animate off-screen or on a hidden tab.
         document.addEventListener('visibilitychange', function () {
             if (document.hidden) stop();
-            else if (looping && !raf) raf = requestAnimationFrame(frame);
+            else if (looping && !raf && onScreen) raf = requestAnimationFrame(frame);
         });
 
+        /* ── relayout, but only when the WIDTH changed ───────────────────────
+         *
+         * On a phone `resize` fires every time the browser chrome slides away,
+         * which is to say constantly while scrolling. Nothing here depends on the
+         * height — the card column is arithmetic from the photo ratio, the belt is
+         * horizontal, the centre band is a fraction of the WIDTH — but layout()
+         * is not cheap: it tears down every clone and rebuilds it, which means
+         * destroying and recreating a dozen inline SVG filters and the compositing
+         * layer behind each card, then re-reading every rect.
+         *
+         * So the single most expensive thing this script does was being triggered
+         * by the address bar, in the middle of the scroll it was interrupting.
+         * That is most of "the mobile carousel feels laggy".
+         */
         var resizeRaf = 0;
+        var lastWidth = window.innerWidth;
         window.addEventListener('resize', function () {
+            if (window.innerWidth === lastWidth) return;
             if (resizeRaf) return;
-            resizeRaf = requestAnimationFrame(function () { resizeRaf = 0; layout(); });
+            resizeRaf = requestAnimationFrame(function () {
+                resizeRaf = 0;
+                lastWidth = window.innerWidth;
+                layout();
+            });
         }, { passive: true });
+
+        /* ── nothing animates off-screen ─────────────────────────────────────
+         *
+         * The belt used to run for the whole life of the page. Reading the
+         * manifesto, filling in the CFP form, looking at the map — the speakers
+         * row was still translating sixty times a second and re-deciding which
+         * card was centred, several sections above the fold.
+         *
+         * `visibilitychange` below only covers a hidden TAB, which is the rarer
+         * case. This is the same guard venue-map.js already uses for its compass.
+         *
+         * The offset is a plain variable, so the belt resumes exactly where it
+         * stopped rather than jumping.
+         */
+        if ('IntersectionObserver' in window) {
+            new IntersectionObserver(function (entries) {
+                onScreen = entries[0].isIntersecting;
+                if (!onScreen) {
+                    stop();
+                } else if (looping && !raf && !document.hidden) {
+                    // Geometry may have changed while we were not looking, and
+                    // lastTs is cleared by stop() so the first frame cannot
+                    // integrate the whole absence as one enormous dt.
+                    measureBoxes();
+                    raf = requestAnimationFrame(frame);
+                }
+            }, { rootMargin: '100px' }).observe(wrap);
+        }
 
         // Card widths and alpha masks both depend on decoded images, so the
         // first measurement has to wait for them. Load is the backstop for

@@ -339,6 +339,100 @@ function fc_media_original_url(string $url): string {
 }
 
 /**
+ * Which attachment is this URL, if any — including when the URL is the
+ * un-scaled original.
+ *
+ * attachment_url_to_postid() matches against `_wp_attached_file`, and for a
+ * large upload that is the `-scaled` copy WordPress made, not the file that was
+ * uploaded. So the original's own URL — exactly what
+ * fc_media_original_url() hands back — is the one URL that does NOT resolve.
+ * Three attempts, cheapest first.
+ */
+function fc_attachment_id_from_url(string $url): int {
+    if ($url === '' || !function_exists('attachment_url_to_postid')) return 0;
+
+    $id = (int) attachment_url_to_postid($url);
+    if ($id) return $id;
+
+    // An original whose stored file is `name-scaled.ext`.
+    $scaled = preg_replace('/\.(jpe?g|png|gif|webp|avif)$/i', '-scaled.$1', $url);
+    if ($scaled && $scaled !== $url) {
+        $id = (int) attachment_url_to_postid($scaled);
+        if ($id) return $id;
+    }
+
+    // A derivative: drop the `-WxH` and try the base.
+    $base = preg_replace('/-\d+x\d+(\.(?:jpe?g|png|gif|webp|avif))$/i', '$1', $url);
+    if ($base && $base !== $url) {
+        $id = (int) attachment_url_to_postid($base);
+        if ($id) return $id;
+    }
+
+    return 0;
+}
+
+/**
+ * Responsive `<img>` attributes for a stored media URL: src, srcset, sizes and
+ * intrinsic dimensions.
+ *
+ * WHY, and it is worth spelling out because the obvious reading of
+ * fc_media_original_url() above is that bigger is simply better:
+ *
+ * That function exists because a 300px file in an 840-device-pixel box is a
+ * mushy upscale. It fixed that by always serving the ORIGINAL — which on a phone
+ * is the opposite mistake and a much more expensive one. A 1536x1144 PNG decodes
+ * to about 7MB of bitmap whatever size it is painted at, and it is being painted
+ * into a 260px box. Multiply by a dozen speakers, twice over because the belt
+ * clones its cards, and the phone is holding far more decoded image than it has
+ * budget for. That is not a download problem you can wait out; it is memory
+ * pressure and decode time on the main thread, and it shows up as a carousel
+ * that will not hold its frame rate.
+ *
+ * srcset is the actual answer to "how big should this image be": it offers all
+ * the sizes and lets the browser pick using the box size AND the device pixel
+ * ratio. A 3x phone with a 260px box asks for 780px and gets the 1024 file; a
+ * desktop with a 420px box at 2x asks for 840 and gets the same one; nobody gets
+ * the 1536 unless their screen genuinely warrants it. Sharper than the 300px
+ * derivative that started all this, and a fraction of the original's cost.
+ *
+ * `sizes` must describe the box, and the box is
+ * `clamp(260px, 26vw, 420px)` (see --fc-spk-photo-h). Written out as explicit
+ * conditions rather than a clamp() inside the attribute: math functions in
+ * `sizes` are newer than the rest of this and a wrong `sizes` is worse than a
+ * verbose one — it makes the browser choose badly in silence.
+ *
+ * Degrades to exactly the current behaviour: no attachment, no srcset, plain src.
+ */
+function fc_media_img_attrs(string $url, string $sizes = ''): array {
+    $out = ['src' => $url, 'srcset' => '', 'sizes' => '', 'width' => 0, 'height' => 0];
+    if ($url === '') return $out;
+
+    $id = fc_attachment_id_from_url($url);
+    if (!$id) return $out;
+
+    // 'large' is the default src: 1024px on the long side, which covers every
+    // box this theme draws at 1x-2x. srcset carries the rest, up and down.
+    $src = function_exists('wp_get_attachment_image_src')
+        ? wp_get_attachment_image_src($id, 'large')
+        : false;
+    if (!$src || empty($src[0])) return $out;
+
+    $srcset = function_exists('wp_get_attachment_image_srcset')
+        ? wp_get_attachment_image_srcset($id, 'large')
+        : '';
+
+    $out['src']    = (string) $src[0];
+    $out['width']  = (int) ($src[1] ?? 0);
+    $out['height'] = (int) ($src[2] ?? 0);
+    // A srcset with one candidate is noise; the browser has no choice to make.
+    if (is_string($srcset) && strpos($srcset, ',') !== false) {
+        $out['srcset'] = $srcset;
+        $out['sizes']  = $sizes;
+    }
+    return $out;
+}
+
+/**
  * Split a multi-line admin field into trimmed, non-empty lines.
  *
  * One role per line is how a speaker's titles are entered — "Co-founder",

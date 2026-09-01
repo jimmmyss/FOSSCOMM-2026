@@ -141,10 +141,22 @@ $body_text = fc_one($body);
         --fc-mf-plus-now: var(--fc-mf-plus-hover, #EE8101);
     }
 }
-/* Outside the query too: the touch highlight slides from stat to stat as you
-   scroll, and without a transition the colour would snap. */
+/* Outside the hover query, so a pointer device gets the fade wherever the
+   highlight came from. Touch is opted out again just below. */
 .fc-mf-hollow {
     transition: color 50ms ease, -webkit-text-stroke-color 50ms ease;
+}
+/* Not on touch. There is no pointer, so the highlight is driven by the centre
+   band as you SCROLL — the colour changes because the page moved, not because
+   anything was done to that element, and a fade tied to scroll position reads as
+   lag rather than as polish. It also keeps this in step with the speakers row,
+   whose ring is an SVG filter and genuinely cannot be animated at phone speed.
+   (hover: none), the same gate the scripts use to decide there is no pointer. */
+@media (hover: none) {
+    .fc-mf-hollow { transition: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .fc-mf-hollow { transition: none; }
 }
 </style>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-0 items-stretch">

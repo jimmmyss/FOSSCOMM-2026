@@ -194,11 +194,21 @@ function init() {
   // is composited, and assigning the same transform string every frame keeps
   // dirtying it for no change — which on a phone is the difference between the
   // compositor carrying the bar and the main thread re-doing it.
+  // Looked up once, not per scroll frame. getElementById is cheap but offsetHeight
+  // is a LAYOUT READ, and this function runs on every frame the page scrolls — so
+  // it was forcing style/layout to be up to date sixty times a second to re-learn
+  // a number that only changes when the viewport does. Refreshed by onResize().
+  let heroEl = null
+  let barH = 40
+  function remeasureChrome() {
+    heroEl = document.getElementById('hero')
+    if (statusBar) barH = statusBar.offsetHeight || 40
+  }
+
   let lastTransform = null
   function chrome() {
     if (!isLanding || !statusBar) return
-    const hero = document.getElementById('hero')
-    const barH = statusBar.offsetHeight || 40
+    const hero = heroEl
     const heroBottom = hero ? hero.getBoundingClientRect().bottom : -barH
     let want = ''
     if (isMobileNav()) {
@@ -261,6 +271,7 @@ function init() {
 
   function onResize() {
     tops = null   // offsets are width-dependent; re-measure before the next pass
+    remeasureChrome()
     onScroll()
   }
 
@@ -268,6 +279,7 @@ function init() {
   window.addEventListener('resize', onResize)
   window.addEventListener('load', onResize)
   tick()
+  remeasureChrome()   // prime the cache before chrome() first reads it
   chrome()
 
   measureSectionsEnd()

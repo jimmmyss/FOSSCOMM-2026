@@ -326,8 +326,34 @@ fc_section_open($section, array_merge($meta, ['class' => $section_class]));
                                         <?php // draggable="false": an image's native drag-and-drop
                                               // competes with the carousel's own, and wins — grab a
                                               // photo and the belt does not move at all. ?>
+                                        <?php
+                                        /* srcset, because the box is 260px on a phone and 420px at
+                                         * the widest desktop — and the stored URL is the full
+                                         * original, which can be 1536px of transparent PNG. Handing
+                                         * that to a phone costs about 7MB of decoded bitmap per
+                                         * speaker, doubled by the belt's clones, and the carousel
+                                         * pays for it in dropped frames.
+                                         *
+                                         * `sizes` describes --fc-spk-photo-h below: clamp(260px,
+                                         * 26vw, 420px). 26vw reaches 260px at a 1000px viewport and
+                                         * 420px at about 1615px, which is where the two breakpoints
+                                         * come from. Keep the three in step if that clamp changes.
+                                         */
+                                        $shot = fc_media_img_attrs(
+                                            $card['photo'],
+                                            '(max-width: 999px) 260px, (min-width: 1615px) 420px, 26vw'
+                                        );
+                                        ?>
                                         <img class="fc-spk-shot"
-                                             src="<?php echo esc_url($card['photo']); ?>"
+                                             src="<?php echo esc_url($shot['src']); ?>"
+                                             <?php if ($shot['srcset'] !== '') : ?>
+                                             srcset="<?php echo esc_attr($shot['srcset']); ?>"
+                                             sizes="<?php echo esc_attr($shot['sizes']); ?>"
+                                             <?php endif; ?>
+                                             <?php if ($shot['width'] && $shot['height']) : ?>
+                                             width="<?php echo (int) $shot['width']; ?>"
+                                             height="<?php echo (int) $shot['height']; ?>"
+                                             <?php endif; ?>
                                              alt="<?php echo esc_attr($card['name']); ?>"
                                              draggable="false"
                                              loading="<?php echo $i < 4 ? 'eager' : 'lazy'; ?>"
@@ -830,11 +856,42 @@ fc_section_close();
 
 /* One duration for the whole card, matching the venue name, the manifesto's stat
    numbers and the CFP heading. The photo's greyscale, the ring's colour and the
-   name's fill and stroke are now four things moving on one clock — which is what
+   name's fill and stroke are four things moving on one clock — which is what
    "the same as the others" needed, and why the ring had to become animatable
    rather than the name being given a fade on its own. */
 .fc-spk-card {
     transition: --fc-spk-rim 50ms ease;
+}
+
+/* …EXCEPT ON TOUCH, where it is switched off entirely.
+ *
+ * The ring is an SVG filter — a Gaussian blur over the portrait's alpha, then a
+ * hard threshold — and its colour comes from the feFlood. Animating the colour
+ * therefore means RE-RUNNING that filter on every frame of the transition. On a
+ * desktop that is a handful of frames on one card and nobody notices. On a phone
+ * it is too slow to finish inside a frame, and what you see is the ring vanishing
+ * and then reappearing in the new colour: the filter output arrives late, so for
+ * a moment there is no outline layer at all. White, then blue.
+ *
+ * Mobile makes it worse than a phone's GPU alone would. There is no pointer, so
+ * the highlight is driven by the centre band as you SCROLL — the filter is being
+ * re-rendered during the one moment the browser can least afford it.
+ *
+ * Off here, everything about the card snaps instead: the ring, the name and the
+ * greyscale change in one repaint, so they still agree with each other, which was
+ * the actual requirement. The fade is a desktop refinement.
+ *
+ * `(hover: none)` deliberately, not a width breakpoint — it is the same gate
+ * speakers-carousel.js uses to decide there is no pointer, so the animation is
+ * off exactly where the scroll-driven highlight is on. */
+@media (hover: none) {
+    .fc-spk-card { transition: none; }
+    .fc-spk-shot { transition: none; }
+}
+/* Same reasoning for anyone who has asked for less movement. */
+@media (prefers-reduced-motion: reduce) {
+    .fc-spk-card { transition: none; }
+    .fc-spk-shot { transition: none; }
 }
 
 /* Driven by a CLASS, not :hover.

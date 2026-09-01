@@ -242,6 +242,18 @@ if ($has_cfp) : ?>
 .fc-cfp-title .is-outline {
     transition: color 50ms ease, -webkit-text-stroke-color 50ms ease;
 }
+/* Not on touch. There is no pointer, so the highlight is driven by the centre
+   band as you SCROLL — the colour changes because the page moved, not because
+   anything was done to that element, and a fade tied to scroll position reads as
+   lag rather than as polish. It also keeps this in step with the speakers row,
+   whose ring is an SVG filter and genuinely cannot be animated at phone speed.
+   (hover: none), the same gate the scripts use to decide there is no pointer. */
+@media (hover: none) {
+    .fc-cfp-title .is-outline { transition: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .fc-cfp-title .is-outline { transition: none; }
+}
 /* Pointer devices: hovering the heading moves it. On a phone :hover latches
    after a tap and would stay moved, which is why the positional highlight above
    exists instead. */
