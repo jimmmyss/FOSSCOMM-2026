@@ -2,7 +2,7 @@
 
 Bad time to be here, everyone is slacking.
 
-### Made by those humans (A–Z):
+### Made by those humans (A-Z):
 
 - Dimitris Athanasopoulos
 - Thanasis Giannoulakis
