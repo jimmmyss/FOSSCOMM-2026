@@ -14,6 +14,8 @@ Bad time to be here, everyone is slacking.
 - Efstathios Iosifidis
 - Kostas Papadimas
 
+### Volunteers:
+
 ## Sponsors:
 ### Diamonds:
 - Typesense
