@@ -10,17 +10,17 @@ Bad time to be here, everyone is slacking.
 - Nikolas Pissas
 - Nikos Tsekos
 
-## Suporters:
+### Suporters:
 - Efstathios Iosifidis
 
 ## Sponsors:
 ### Diamonds:
 - Typesense
-## Goldies:
+### Goldies:
 - efood
-## Silvers:
+### Silvers:
 - Skroutz
-Bronze:
+### Bronze:
 - OnlyOffice
 
 ### Donation:
