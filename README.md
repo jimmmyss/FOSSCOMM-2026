@@ -12,6 +12,7 @@ Bad time to be here, everyone is slacking.
 
 ### Suporters:
 - Efstathios Iosifidis
+- kostas Papadimas
 
 ## Sponsors:
 ### Diamonds:
