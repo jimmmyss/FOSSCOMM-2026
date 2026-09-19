@@ -2,12 +2,26 @@
 
 Bad time to be here, everyone is slacking.
 
-### Made by those humans (A-Z):
+## Made by those humans (A-Z):
 
+### Curators:
 - Dimitris Athanasopoulos
 - Thanasis Giannoulakis
 - Nikolas Pissas
 - Nikos Tsekos
+
+## Suporters:
+- Efstathios Iosifidis
+
+## Sponsors:
+### Diamonds:
+- Typesense
+## Goldies:
+- efood
+## Silvers:
+- Skroutz
+Bronze:
+- OnlyOffice
 
 ### Donation:
 
