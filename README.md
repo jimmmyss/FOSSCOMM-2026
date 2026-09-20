@@ -26,6 +26,6 @@ Bad time to be here, everyone is slacking.
 ### Bronze:
 - OnlyOffice
 
-### Donation ([Link](https://donate.stripe.com/4gwg2BaV74DQeBO005)):
+### Donate ([CLICK ME](https://donate.stripe.com/4gwg2BaV74DQeBO005)):
 
 <img src="ASSETS/DONATION-QR.png" width="256">
