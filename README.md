@@ -4,8 +4,10 @@ Bad time to be here, everyone is slacking.
 
 ## Made by those humans (A-Z):
 
-### Curators:
+### Director:
 - Dimitris Athanasopoulos
+
+### Curators:
 - Thanasis Giannoulakis
 - Nikolas Pissas
 - Nikos Tsekos
