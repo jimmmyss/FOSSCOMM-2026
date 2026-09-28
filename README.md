@@ -8,13 +8,14 @@ Bad time to be here, everyone is slacking.
 - Dimitris Athanasopoulos
 
 ### Curators:
-- Thanasis Giannoulakis
 - Nikolas Pissas
 - Nikos Tsekos
+- Thanasis Giannoulakis
 
 ### Suporters:
 - Efstathios Iosifidis
 - Kostas Papadimas
+- Patrick Fitzgerald
 
 ### Volunteers:
 
