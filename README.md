@@ -19,13 +19,13 @@ Bad time to be here, everyone is slacking.
 
 ## Sponsors:
 ### Diamonds:
-- Typesense
+- Typesense, Libre Space Foundation
 ### Goldies:
-- efood
+- efood, Hack the Box, Shopflix
 ### Silvers:
 - Skroutz
 ### Bronze:
-- OnlyOffice
+- OnlyOffice, Epignosis, Ferryhopper, Hellenics Informatics Union, Lambda Twelve, JetBrains
 
 ### Donate ([CLICK ME](https://donate.stripe.com/4gwg2BaV74DQeBO005)):
 
