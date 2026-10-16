@@ -33,10 +33,10 @@ Bad time to be here, everyone is slacking.
 
 ## License:
 
+[![CC BY-NC-ND 4.0](https://licensebuttons.net/l/by-nc-nd/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
+
 Copyright © 2026 The FOSSCOMM 2026 Team.
 
 This work is licensed under the [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License](https://creativecommons.org/licenses/by-nc-nd/4.0/). You may share it unchanged, for non-commercial purposes only, with credit to "FOSSCOMM 2026 by the FOSSCOMM 2026 Team" and a link to this repository. See [LICENSE](LICENSE) for the full terms.
 
 Sponsor, partner and community logos, speaker photos and fonts belong to their respective owners and are not covered by this license.
-
-[![CC BY-NC-ND 4.0](https://licensebuttons.net/l/by-nc-nd/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
