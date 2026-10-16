@@ -27,10 +27,6 @@ Bad time to be here, everyone is slacking.
 ### Bronze:
 - OnlyOffice, Epignosis, Ferryhopper, Hellenics Informatics Union, Lambda Twelve, JetBrains
 
-### Donate ([CLICK ME](https://donate.stripe.com/4gwg2BaV74DQeBO005)):
-
-<img src="ASSETS/DONATION-QR.png" width="256">
-
 ## License:
 
 [![CC BY-NC-ND 4.0](https://licensebuttons.net/l/by-nc-nd/4.0/88x31.png)](https://creativecommons.org/licenses/by-nc-nd/4.0/)
