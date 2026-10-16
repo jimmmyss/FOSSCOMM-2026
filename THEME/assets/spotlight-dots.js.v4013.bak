@@ -1,0 +1,627 @@
+/* FOSSCOMM 2026 — blue dot panels with a pixel-sharp cursor spotlight.
+ *
+ * #speakers and #communities read as ONE field. The dot lattice and the wave
+ * are phased off DOCUMENT coordinates, and the spotlight is one position on the
+ * page that every panel draws its share of — so a disc straddling the seam is a
+ * single circle, and a cursor sitting in the next section over (Schedule, say)
+ * still lights the part of the disc that reaches into a panel.
+ *
+ *                 on the blue (rest)        inside the disc
+ *     ground      #0033FF                   #FAFAF7
+ *     dots        rgb(56,96,255)            #E2E2DF
+ *     names/title #FAFAF7 + #EE8101 accent  #0A0A0A + #0033FF accent
+ *     small print #8CA3FF                   #6B6B66
+ *
+ * ── LAYERS, bottom to top ─────────────────────────────────────────────────
+ *   canvas   ground, white core, dots                      z 0
+ *   content  the section's own markup, plus the inverted
+ *            copies masked to the core                     z 1
+ *   halo     three rings of #FFEE87 at 50/25/10%, each two
+ *            lattice steps wide, drawn OVER the type       z 2
+ *
+ * ── WHY THE COPIES ARE TRACKED EVERY FRAME ────────────────────────────────
+ * The speaker and community rows are belts: speakers-belt.js slides them with
+ * a CSS animation and CLONES cards to fill the loop. A name's position inside
+ * its section is therefore never constant, and computing it once — which is
+ * what an earlier version did — aims the mask at where the name used to be.
+ * That is why the colours never changed on the live page while a static test
+ * passed.
+ *
+ * So each copy's offset is stored relative to its ANCHOR — the belt rail it
+ * rides on, or the section if it is not on one — which IS constant, and the
+ * anchors' live positions are read each frame. That is one layout read per belt
+ * rather than one per name, and every read happens before any write, so the
+ * frame never forces a second layout.
+ *
+ * ── TWO SCHEMES ───────────────────────────────────────────────────────────
+ * data-fc-spotlight="blue"  — Speakers, Communities, Footer: a blue ground with
+ *     a white disc, as in the table above.
+ * data-fc-spotlight="paper" — Sponsors: the page's own paper and wave show
+ *     through, and the disc is BLUE, carrying the blue panels' colours inside it.
+ *     It paints no section-sized canvas at all — just a small one the size of
+ *     the disc, moved with the cursor, because there is no ground to draw.
+ *
+ * ── QUANTISED TO THE DOT ──────────────────────────────────────────────────
+ * Every edge — core and rings — steps one DOT (6px) at a time, and the centre
+ * snaps to that lattice in document space, so both panels agree on it.
+ */
+(function () {
+    'use strict';
+
+    var PITCH = 40, DOT = 6, Q = DOT;
+    var BLUE_GROUND = '#0033FF', BLUE_DOT = 'rgb(56,96,255)';
+    var WHITE_GROUND = '#FAFAF7', WHITE_DOT = '#E2E2DF';
+    var RADIUS = 104;                          // the white core, CSS px
+    var RING_STEPS = 2;                        // each halo ring = 2 lattice steps
+    var HALO = ['rgba(255,238,135,0.50)',      // #FFEE87
+                'rgba(255,238,135,0.25)',
+                'rgba(255,238,135,0.10)'];
+    var HALO_R = RADIUS + HALO.length * RING_STEPS * Q;
+
+    /* What inverts inside the disc. Names, the section title, roles, and the
+     * small mono lines — which covers the eyebrow and the TBA text, both .fc-label. */
+    var TARGETS = '.fc-spk-name, .fc-section-heading, .fc-spk-roles, .fc-label, .fc-copy, .fc-foot-links, ' +
+                  '.fc-spk-online, .fc-spk-shot, .fc-tier-title';
+    // every belt that slides its contents: the speaker/community rows and the
+    // sponsor rows are different scripts with different markers
+    var RAILS = '[data-fc-spk-rail], [data-fc-belt-rail]';
+
+    // the wave — same constants as assets/wave-bg.js
+    var AMP_1 = 18, KX_1 = 0.014, SPEED_1 = 0.45;
+    var AMP_2 = 11, KX_2 = 0.027, SPEED_2 = -0.65;
+    var AMP_3 = 5,  KX_3 = 0.060, KY_3 = 0.30 / 16, SPEED_3 = 0.85;
+
+    var reduced = window.matchMedia
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // the pointer, in CLIENT coordinates — scroll is added per frame, so the
+    // disc stays under a still cursor while the page scrolls beneath it
+    var ptr = { cx: 0, cy: 0, on: false };
+
+    function halfWidth(r, dy) {
+        var s = r * r - dy * dy;
+        return s < 0 ? -1 : Math.floor(Math.sqrt(s) / Q);
+    }
+
+    function axis(len, pitch) {
+        var n = Math.floor(len / pitch);
+        if (n < 1) n = 1;
+        var m = Math.round((len - (n - 1) * pitch) / 2);
+        var out = [];
+        for (var k = -1; k <= n; k++) out.push(m + pitch * k);   // one beyond each edge
+        return out;
+    }
+
+    function rowsFromDocument(top, height, pitch) {
+        var first = Math.ceil((top - pitch * 2) / pitch) * pitch + pitch / 2;
+        var out = [];
+        for (var y = first; y < top + height + pitch * 2; y += pitch) out.push(y - top);
+        return out;
+    }
+
+    /* The core as an image, for masking the type. Same rows as the canvas core. */
+    function coreMask() {
+        var reach = Math.round(RADIUS / Q), S = (reach * 2 + 1) * Q;
+        var c = document.createElement('canvas');
+        c.width = S; c.height = S;
+        var g = c.getContext('2d');
+        g.fillStyle = '#fff';
+        for (var j = -reach; j <= reach; j++) {
+            var w = halfWidth(RADIUS, j * Q);
+            if (w < 0) continue;
+            g.fillRect((reach - w) * Q, (j + reach) * Q, (w * 2 + 1) * Q, Q);
+        }
+        return { uri: c.toDataURL('image/png'), size: S };
+    }
+
+    /* The halo, rendered ONCE at device resolution and then only moved. A ring
+     * is the cells beyond the previous radius and within its own, so it is two
+     * rects per row and the rings never overlap each other or the core. */
+    function haloImage(dpr) {
+        var reach = Math.round(HALO_R / Q), S = (reach * 2 + 1) * Q;
+        var c = document.createElement('canvas');
+        c.width = S * dpr; c.height = S * dpr;
+        c.style.width = S + 'px'; c.style.height = S + 'px';
+        var g = c.getContext('2d');
+        g.scale(dpr, dpr);
+        var radii = [RADIUS];
+        for (var k = 1; k <= HALO.length; k++) radii.push(RADIUS + k * RING_STEPS * Q);
+        for (k = 1; k < radii.length; k++) {
+            var p = new Path2D();
+            for (var j = -reach; j <= reach; j++) {
+                var dy = j * Q, wo = halfWidth(radii[k], dy), wi = halfWidth(radii[k - 1], dy);
+                if (wo < 0) continue;
+                var y = (j + reach) * Q;
+                if (wi < 0) {
+                    p.rect((reach - wo) * Q, y, (wo * 2 + 1) * Q, Q);
+                } else if (wo > wi) {
+                    var len = (wo - wi) * Q;
+                    p.rect((reach - wo) * Q, y, len, Q);
+                    p.rect((reach + wi + 1) * Q, y, len, Q);
+                }
+            }
+            g.fillStyle = HALO[k - 1];
+            g.fill(p);
+        }
+        return { canvas: c, size: S };
+    }
+
+    /* ── the inverted copies ─────────────────────────────────────────────── */
+
+    function anchorOf(el, section) {
+        var rail = el.closest(RAILS);
+        return rail && section.contains(rail) ? rail : section;
+    }
+
+    /* Clone each target and lay the clone exactly over it. The clone keeps its
+     * classes — they are what give it the same font, padding and line breaks —
+     * and its layout properties are written INLINE, because an inline style
+     * beats any non-!important rule and nothing in the theme can then drop the
+     * clone back into the flow, which is the only way it can show as a second
+     * copy of the text. Margins go (they live outside the original's box);
+     * padding stays (the clone sits at the padding edge and needs the same
+     * inset to land its text on the original's). */
+    function mountDups(section) {
+        var els = section.querySelectorAll(TARGETS);
+        var made = 0;
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            if (el.classList.contains('fc-spot-dup') || el.closest('.fc-spot-dup')) continue;
+            var anc = el.parentElement && el.parentElement.closest(TARGETS);
+            if (anc && section.contains(anc)) continue;           // its ancestor is already copied
+            /* An <img> cannot hold a child, so a photo's copy goes in as its
+             * NEXT SIBLING and the photo box is the positioning context. Text
+             * copies go inside the element they copy. */
+            var isImg = el.tagName === 'IMG';
+            var host = isImg ? el.parentNode : el;
+            var has = false;
+            if (isImg) {
+                has = !!(el.nextElementSibling && el.nextElementSibling.classList.contains('fc-spot-dup'));
+            } else {
+                for (var c = el.firstElementChild; c; c = c.nextElementSibling) {
+                    if (c.classList.contains('fc-spot-dup')) { has = true; break; }
+                }
+            }
+            if (has) continue;
+            if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+
+            var dup = el.cloneNode(true);
+            dup.classList.add('fc-spot-dup');
+            dup.setAttribute('aria-hidden', 'true');
+            dup.setAttribute('inert', '');                       // out of the tab order and the AT tree
+            dup.removeAttribute('aria-label');
+            dup.removeAttribute('id');
+            var ided = dup.querySelectorAll('[id]');
+            for (var k = 0; k < ided.length; k++) ided[k].removeAttribute('id');
+            var links = dup.querySelectorAll('a, button, [tabindex]');
+            for (k = 0; k < links.length; k++) links[k].setAttribute('tabindex', '-1');
+            var s = dup.style;
+            s.position = 'absolute'; s.top = '0'; s.left = '0'; s.margin = '0';
+            s.pointerEvents = 'none';
+            if (isImg) {
+                /* Leave width and height to the class: the photo is sized by
+                 * width:100% and --fc-spk-photo-h, and overriding either would
+                 * stop the copy matching the original pixel for pixel. */
+                dup.removeAttribute('loading');               // same file, already decoded
+                host.insertBefore(dup, el.nextSibling);
+            } else {
+                s.right = '0'; s.bottom = 'auto'; s.width = 'auto'; s.height = 'auto';
+                el.appendChild(dup);
+            }
+            made++;
+        }
+        return made;
+    }
+
+    /* ── a panel ─────────────────────────────────────────────────────────── */
+
+    function Panel(section, mask) {
+        this.section = section;
+        this.paper = section.getAttribute('data-fc-spotlight') === 'paper';
+        if (this.paper) {
+            this.coreWrap = document.createElement('div');
+            this.coreWrap.className = 'fc-spot-core';
+            this.coreWrap.setAttribute('aria-hidden', 'true');
+            this.coreWrap.style.visibility = 'hidden';
+            section.insertBefore(this.coreWrap, section.firstChild);
+            this.core = null;
+        } else {
+            this.canvas = document.createElement('canvas');
+            this.canvas.className = 'fc-spot-canvas';
+            this.canvas.setAttribute('aria-hidden', 'true');
+            this.ctx = this.canvas.getContext('2d', { alpha: false });
+            section.insertBefore(this.canvas, section.firstChild);
+        }
+
+        this.haloWrap = document.createElement('div');
+        this.haloWrap.className = 'fc-spot-halo';
+        this.haloWrap.setAttribute('aria-hidden', 'true');
+        this.haloWrap.style.visibility = 'hidden';
+        section.appendChild(this.haloWrap);
+        this.halo = null;
+
+        var st = section.style;
+        st.setProperty('--fc-spot-mask', 'url(' + mask.uri + ')');
+        st.setProperty('--fc-spot-size', mask.size + 'px');
+        st.setProperty('--fc-spot-half', (mask.size / 2) + 'px');
+        st.setProperty('--fc-anchor-x', '0px');
+        st.setProperty('--fc-anchor-y', '0px');
+        st.setProperty('--fc-spot-on', '0');
+
+        this.w = 0; this.h = 0; this.dpr = 0;
+        this.docLeft = 0; this.docTop = -1e9;
+        this.xs = []; this.ys = [];
+        this.rails = [];
+        this.dups = [];
+        this.active = false;
+        this.offsetsDirty = true;
+        this.tick = 0;
+        this.rect = null;
+        this.near = false;
+        this.pending = null;
+        this.prevCore = null;
+        this.refresh();
+    }
+
+    // re-scan the DOM: new belt copies, new rails
+    Panel.prototype.refresh = function () {
+        mountDups(this.section);
+        this.rails = [].slice.call(this.section.querySelectorAll(RAILS));
+        this.dups = [].slice.call(this.section.querySelectorAll('.fc-spot-dup'));
+        this.offsetsDirty = true;
+    };
+
+    Panel.prototype.size = function (w, h, dpr) {
+        this.w = w; this.h = h; this.dpr = dpr;
+        if (this.paper) {
+            // only as big as the disc — there is no ground to paint
+            var reach = Math.round(RADIUS / Q), S = (reach * 2 + 1) * Q;
+            if (this.core) this.coreWrap.removeChild(this.core.canvas);
+            var cc = document.createElement('canvas');
+            cc.width = S * dpr; cc.height = S * dpr;
+            cc.style.width = S + 'px'; cc.style.height = S + 'px';
+            cc.className = 'fc-spot-core-img';
+            this.coreWrap.appendChild(cc);
+            this.core = { canvas: cc, ctx: cc.getContext('2d'), size: S, reach: reach };
+        } else {
+            this.canvas.width = w * dpr;
+            this.canvas.height = h * dpr;
+            this.canvas.style.width = w + 'px';
+            this.canvas.style.height = h + 'px';
+        }
+        this.xs = axis(w, PITCH);
+        this.docTop = -1e9;                       // force rows to rebuild
+        if (this.halo) this.haloWrap.removeChild(this.halo.canvas);
+        this.halo = haloImage(dpr);
+        this.halo.canvas.className = 'fc-spot-halo-img';
+        this.haloWrap.appendChild(this.halo.canvas);
+        this.prevCore = null;
+    };
+
+    /* READ phase — layout reads only. */
+    Panel.prototype.read = function (gx, gy, sx, sy) {
+        /* The PADDING box, not the border box. The canvas, the halo and the
+         * paper core are all `inset: 0`, which places them inside the section's
+         * border — so a section with a 1px top border (Sponsors keeps one) had
+         * every coordinate here one pixel off from where those layers actually
+         * sit. That was measured, not guessed: a paper disc's dots landed on the
+         * background's dots only 81.9% of the time, which is exactly one dot
+         * row's worth. Everything below works from this one origin. */
+        var s = this.section, bb = s.getBoundingClientRect();
+        var r = {
+            left: bb.left + s.clientLeft, top: bb.top + s.clientTop,
+            width: s.clientWidth, height: s.clientHeight
+        };
+        r.right = r.left + r.width; r.bottom = r.top + r.height;
+        this.rect = r;
+        var lx = gx - (r.left + sx), ly = gy - (r.top + sy);
+        this.near = ptr.on && lx > -HALO_R && lx < r.width + HALO_R
+                           && ly > -HALO_R && ly < r.height + HALO_R;
+        if (!this.near) return;
+        this.railRects = [];
+        for (var i = 0; i < this.rails.length; i++) this.railRects.push(this.rails[i].getBoundingClientRect());
+        // re-measure the copies every half second while lit — cheap insurance
+        // against anything that shifts them without a resize or a mutation
+        if (++this.tick % 30 === 0) this.offsetsDirty = true;
+        if (this.offsetsDirty) {
+            var out = [];
+            for (var k = 0; k < this.dups.length; k++) {
+                var d = this.dups[k];
+                if (!d.isConnected) continue;
+                var a = anchorOf(d.parentNode, this.section);   // text: the copied element; photo: its box
+                var dr = d.getBoundingClientRect();
+                var ar = a === this.section ? r : a.getBoundingClientRect();
+                out.push([d, dr.left - ar.left, dr.top - ar.top]);
+            }
+            this.pending = out;
+            this.offsetsDirty = false;
+        }
+    };
+
+    /* WRITE phase — no layout reads from here on. */
+    Panel.prototype.write = function (t, gx, gy, sx, sy, vh, now) {
+        var r = this.rect;
+        var w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+        var dpr = Math.max(1, Math.min(2, Math.round(window.devicePixelRatio || 1)));
+        if (w !== this.w || h !== this.h || dpr !== this.dpr) this.size(w, h, dpr);
+
+        var docLeft = r.left + sx, docTop = r.top + sy;
+        if (Math.abs(docTop - this.docTop) > 0.5) {
+            this.ys = rowsFromDocument(docTop, h, PITCH);
+            this.docTop = docTop;
+        }
+        this.docLeft = docLeft;
+
+        var lx = Math.round(gx - docLeft), ly = Math.round(gy - docTop);
+        var near = this.near;
+
+        if (this.paper) {
+            if (near) {
+                this.paintCore(t, lx, ly, now);
+                var cs = this.core.size / 2;
+                this.core.canvas.style.transform = 'translate(' + (lx - cs) + 'px,' + (ly - cs) + 'px)';
+            }
+        } else if (r.bottom > -HALO_R && r.top < vh + HALO_R) {
+            this.paint(t, near, lx, ly, r, vh);
+        }
+
+        var st = this.section.style;
+        if (this.pending) {
+            for (var i = 0; i < this.pending.length; i++) {
+                var p = this.pending[i];
+                p[0].style.setProperty('--fc-off-x', p[1] + 'px');
+                p[0].style.setProperty('--fc-off-y', p[2] + 'px');
+            }
+            this.pending = null;
+        }
+        if (near) {
+            st.setProperty('--fc-spot-x', lx + 'px');
+            st.setProperty('--fc-spot-y', ly + 'px');
+            for (var k = 0; k < this.rails.length; k++) {
+                var rr = this.railRects[k];
+                this.rails[k].style.setProperty('--fc-anchor-x', (rr.left - r.left) + 'px');
+                this.rails[k].style.setProperty('--fc-anchor-y', (rr.top - r.top) + 'px');
+            }
+            var hs = this.halo.size / 2;
+            this.halo.canvas.style.transform = 'translate(' + (lx - hs) + 'px,' + (ly - hs) + 'px)';
+            if (!this.active) {
+                st.setProperty('--fc-spot-on', '1');
+                this.haloWrap.style.visibility = 'visible';
+                if (this.paper) this.coreWrap.style.visibility = 'visible';
+            }
+        } else if (this.active) {
+            st.setProperty('--fc-spot-on', '0');
+            this.haloWrap.style.visibility = 'hidden';
+            if (this.paper) this.coreWrap.style.visibility = 'hidden';
+        }
+        this.active = near;
+    };
+
+    Panel.prototype.paint = function (t, near, lx, ly, r, vh) {
+        var g = this.ctx, dpr = this.dpr;
+        var W = this.canvas.width, H = this.canvas.height;
+        var u = dpr, half = Math.round(DOT * dpr / 2), q = Q * dpr;
+
+        /* Only the band that can be seen (plus a margin for fast scrolls) is
+         * repainted. A panel can be well over a screen tall, and repainting the
+         * parts nobody can see was most of the per-frame cost. */
+        var MARGIN = 300;
+        var vy0 = Math.max(0, -r.top - MARGIN), vy1 = Math.min(this.h, vh - r.top + MARGIN);
+        if (vy1 <= vy0) return;
+        var by0 = Math.floor(vy0 * dpr), by1 = Math.ceil(vy1 * dpr);
+
+        g.fillStyle = BLUE_GROUND;
+        g.fillRect(0, by0, W, by1 - by0);
+        // the previous core may sit partly outside the band — clear it too, so
+        // no stale white is left behind for a scroll to uncover
+        if (this.prevCore) {
+            g.fillRect(this.prevCore[0], this.prevCore[1], this.prevCore[2], this.prevCore[3]);
+            this.prevCore = null;
+        }
+
+        var cxD = lx * dpr, cyD = ly * dpr;
+
+        // the wave, in document space so it runs on across the seam
+        var p1 = t * SPEED_1, p2 = t * SPEED_2, p3 = t * SPEED_3;
+        var nC = this.xs.length, i;
+        if (!this.flat || this.flat.length !== nC) {
+            this.flat = new Float64Array(nC); this.cS = new Float64Array(nC); this.cC = new Float64Array(nC);
+        }
+        for (i = 0; i < nC; i++) {
+            var xd = this.xs[i] + this.docLeft;
+            this.flat[i] = AMP_1 * Math.sin(xd * KX_1 + p1) + AMP_2 * Math.sin(xd * KX_2 + p2);
+            var a = xd * KX_3 + p3;
+            this.cS[i] = Math.sin(a); this.cC[i] = Math.cos(a);
+        }
+
+        /* ONE dot path, filled twice. First everywhere in the blue's dot colour;
+         * then, clipped to the disc, the white ground and the same dots again in
+         * the white's dot colour. A dot straddling the disc's edge is therefore
+         * split along that edge PIXEL BY PIXEL — each pixel takes the colour of
+         * the side it is on. Colouring each dot by where its CENTRE fell made a
+         * straddling dot flip whole, which showed as dots on the rim all going
+         * one colour or the other. */
+        var dots = new Path2D();
+        for (var jj = 0; jj < this.ys.length; jj++) {
+            var yb = this.ys[jj];
+            if (yb < vy0 - PITCH || yb > vy1 + PITCH) continue;
+            var b = (yb + this.docTop) * KY_3, sb = Math.sin(b), cb = Math.cos(b);
+            for (var ii = 0; ii < nC; ii++) {
+                var dyCss = this.flat[ii] + AMP_3 * (this.cS[ii] * cb + this.cC[ii] * sb);
+                var x = Math.round(this.xs[ii] * dpr) - half;
+                var y = Math.round((yb + dyCss) * dpr) - half;     // whole device pixels
+                dots.rect(x + u, y, u * 4, u);
+                dots.rect(x, y + u, u * 6, u * 4);
+                dots.rect(x + u, y + u * 5, u * 4, u);
+            }
+        }
+        g.fillStyle = BLUE_DOT;
+        g.fill(dots);
+
+        if (near) {
+            var reach = Math.round(RADIUS / Q);
+            var core = new Path2D();
+            for (var j = -reach; j <= reach; j++) {
+                var wc = halfWidth(RADIUS, j * Q);
+                if (wc < 0) continue;
+                core.rect(cxD - (wc + 0.5) * q, cyD + j * q - q / 2, (wc * 2 + 1) * q, q);
+            }
+            g.save();
+            g.clip(core);
+            g.fillStyle = WHITE_GROUND;
+            g.fill(core);
+            g.fillStyle = WHITE_DOT;
+            g.fill(dots);
+            g.restore();
+            var ext = (reach + 1) * q;
+            this.prevCore = [cxD - ext, cyD - ext, ext * 2, ext * 2];
+        }
+    };
+
+    /* The background field's own dot positions, in VIEWPORT device pixels —
+     * a replica of assets/wave-bg.js's grid, so a paper panel's disc can
+     * recolour exactly those dots rather than draw a second, different set. */
+    function bgAxis(len, p) {
+        var n = Math.floor(len / p);
+        if (n < 1) n = 1;
+        var m = Math.round((len - (n - 1) * p) / 2), out = [];
+        for (var k = 0; k < n; k++) out.push(Math.round(m + p * k));
+        return out;
+    }
+
+    /* The BLUE disc of a paper panel, drawn into its own small canvas.
+     *
+     * Outside the disc the dots on a paper panel are the PAGE's wave background
+     * (assets/wave-bg.js), showing through. So the dots inside are not a new
+     * field: they are that field's dots, at that field's positions and on that
+     * field's clock, recoloured — and clipped to the disc, so a dot on the rim is
+     * blue for exactly the pixels inside and the background's own colour for the
+     * rest. Two independent grids meeting at the edge would not line up. */
+    Panel.prototype.paintCore = function (t, lx, ly, now) {
+        var c = this.core, g = c.ctx, dpr = this.dpr, S = c.size, R = c.reach;
+        var q = Q * dpr, u = dpr, half = Math.round(DOT * dpr / 2);
+        var ox = lx - S / 2, oy = ly - S / 2;              // canvas origin, panel CSS px
+        g.clearRect(0, 0, c.canvas.width, c.canvas.height);
+
+        var disc = new Path2D(), mid = (R + 0.5) * q;
+        for (var j = -R; j <= R; j++) {
+            var w = halfWidth(RADIUS, j * Q);
+            if (w < 0) continue;
+            disc.rect(mid - (w + 0.5) * q, mid + j * q - q / 2, (w * 2 + 1) * q, q);
+        }
+        g.fillStyle = BLUE_GROUND;
+        g.fill(disc);
+
+        g.save();
+        g.clip(disc);
+        // the background's clock: wave-bg.js publishes its start time, and both
+        // scripts are handed the same rAF timestamp in a frame
+        var tg = (now - (window.FC_WAVE_T0 != null ? window.FC_WAVE_T0 : now)) / 1000;
+        if (reduced) tg = 0;
+        var p1 = tg * SPEED_1, p2 = tg * SPEED_2, p3 = tg * SPEED_3;
+        var gp = PITCH * dpr;
+        var cols = bgAxis(Math.round(window.innerWidth * dpr), gp);
+        var gys = bgAxis(Math.round(window.innerHeight * dpr), gp);
+        gys.unshift(gys[0] - gp); gys.push(gys[gys.length - 1] + gp);
+        // this canvas's top-left in VIEWPORT device px: the core layer is inset 0
+        // in the section, which the browser snaps to whole pixels, and the canvas
+        // is translated within it by a whole number of CSS px
+        var vx0 = Math.round(this.rect.left * dpr) + ox * dpr;
+        var vy0 = Math.round(this.rect.top * dpr) + oy * dpr;
+        var span = S * dpr;
+        var dots = new Path2D();
+        for (var jj = 0; jj < gys.length; jj++) {
+            var yr = gys[jj];
+            if (yr < vy0 - gp * 2 || yr > vy0 + span + gp * 2) continue;
+            var b = (yr / dpr) * KY_3, sb = Math.sin(b), cb = Math.cos(b);
+            for (var ii = 0; ii < cols.length; ii++) {
+                var xr = cols[ii];
+                if (xr < vx0 - gp || xr > vx0 + span + gp) continue;
+                var xCss = xr / dpr, a = xCss * KX_3 + p3;
+                var dyCss = AMP_1 * Math.sin(xCss * KX_1 + p1) + AMP_2 * Math.sin(xCss * KX_2 + p2)
+                          + AMP_3 * (Math.sin(a) * cb + Math.cos(a) * sb);
+                var x = xr - half - vx0;
+                var y = yr + Math.round(dyCss * dpr) - half - vy0;
+                dots.rect(x + u, y, u * 4, u);
+                dots.rect(x, y + u, u * 6, u * 4);
+                dots.rect(x + u, y + u * 5, u * 4, u);
+            }
+        }
+        g.fillStyle = BLUE_DOT;
+        g.fill(dots);
+        g.restore();
+    };
+
+    /* ── wiring ──────────────────────────────────────────────────────────── */
+
+    function init() {
+        var blue = document.querySelectorAll('#speakers, #communities, footer.fc-section-dots');
+        for (var w = 0; w < blue.length; w++) blue[w].setAttribute('data-fc-spotlight', 'blue');
+        var paper = document.querySelectorAll('#sponsors');
+        for (w = 0; w < paper.length; w++) paper[w].setAttribute('data-fc-spotlight', 'paper');
+        var sections = document.querySelectorAll('[data-fc-spotlight]');
+        if (!sections.length) return;
+
+        var mask = coreMask();
+        var panels = [];
+        for (var i = 0; i < sections.length; i++) panels.push(new Panel(sections[i], mask));
+
+        /* The belts add and remove card copies; new names need their own copies
+         * and every offset needs re-measuring. Our own insertions are taken off
+         * the queue straight away so they do not loop back here. */
+        if (window.MutationObserver) {
+            panels.forEach(function (p) {
+                var queued = false;
+                var mo = new MutationObserver(function () {
+                    if (queued) return;
+                    queued = true;
+                    requestAnimationFrame(function () {
+                        queued = false;
+                        p.refresh();
+                        mo.takeRecords();
+                    });
+                });
+                mo.observe(p.section, { childList: true, subtree: true });
+            });
+        }
+
+        /* The pointer is tracked on the WHOLE document, not just the panels: a
+         * cursor in the section next door must still light the part of the disc
+         * that reaches into one. Capture phase, because the belts stop pointer
+         * events propagating. Touch is ignored — this is a hover effect. */
+        document.addEventListener('pointermove', function (e) {
+            if (e.pointerType === 'touch') { ptr.on = false; return; }
+            ptr.cx = e.clientX; ptr.cy = e.clientY; ptr.on = true;
+        }, { passive: true, capture: true });
+        document.addEventListener('mouseout', function (e) {
+            if (!e.relatedTarget) ptr.on = false;           // left the window
+        }, { passive: true });
+        window.addEventListener('blur', function () { ptr.on = false; });
+
+        function onResize() { for (var k = 0; k < panels.length; k++) panels[k].offsetsDirty = true; }
+        window.addEventListener('resize', onResize);
+        window.addEventListener('load', onResize);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(onResize);
+
+        var start = performance.now();
+        function frame(now) {
+            var t = reduced ? 0 : (now - start) / 1000;
+            var sx = window.scrollX || window.pageXOffset || 0;
+            var sy = window.scrollY || window.pageYOffset || 0;
+            var vh = window.innerHeight;
+            var gx = Math.round((ptr.cx + sx) / Q) * Q;
+            var gy = Math.round((ptr.cy + sy) / Q) * Q;
+            var k;
+            for (k = 0; k < panels.length; k++) panels[k].read(gx, gy, sx, sy);        // all reads
+            for (k = 0; k < panels.length; k++) panels[k].write(t, gx, gy, sx, sy, vh, now); // then all writes
+            requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init, { once: true });
+    } else {
+        init();
+    }
+})();

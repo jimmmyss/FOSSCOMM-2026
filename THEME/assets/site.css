@@ -1,0 +1,1730 @@
+/* Qaroxe — 16px bitmap accent face from wepfont.com (via dafont). Used by
+   .fc-accent (every *asterisk* span produced by fc_format()) and by
+   .fc-hero-year-outline (the blue title year in the hero). Drop the file at
+   assets/fonts/Qaroxe.ttf — the URL below is relative to this stylesheet.
+   font-display: swap so paint isn't blocked while the .ttf loads. */
+@font-face {
+    font-family: "Qaroxe";
+    src: url("./fonts/Qaroxe.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+    /* Qaroxe is a 16px bitmap face whose native vertical metrics are much taller
+       than the display/body fonts. Without this, an *accent* word that lands on a
+       WRAPPED line of a heading makes that one line's box taller than the rest, so
+       the leading looks uneven the moment the title breaks across lines. These
+       overrides clamp Qaroxe's line-box contribution to ~1em (baseline at 80%) so
+       a highlighted word no longer inflates the line it sits on. They affect only
+       line-box height / baseline reservation — the glyphs still render full size,
+       so the visible accent size is unchanged. */
+    ascent-override: 80%;
+    descent-override: 20%;
+    line-gap-override: 0%;
+}
+
+/* Geist — the paragraph face (body text everywhere). A VARIABLE font: its one
+   file carries a weight axis from 100 to 900 (read off the fvar table), which is
+   why font-weight is a range here rather than a single value; without the range
+   a <strong> would be synthesised instead of drawing the real bold.
+
+   Latin only — it has no Greek glyphs. That is handled by the font STACK, not
+   here: every stack that names it puts "Inter" straight after it, and the
+   browser falls back per character, so a Greek paragraph is drawn in Inter
+   (still loaded from Google Fonts in assets/dist/fc.css) instead of whatever
+   sans-serif the system happens to have. */
+@font-face {
+    font-family: "Geist";
+    src: url("./fonts/Geist.ttf") format("truetype");
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Red Hat Display — the paragraph face until Geist replaced it. The file is
+   still in assets/fonts and the face is still declared, so putting it back is a
+   one-word change to --font-sans in inc/bootstrap.php; nothing names it now, and
+   a declared face that nothing uses is never downloaded. */
+@font-face {
+    font-family: "Red Hat Display";
+    src: url("./fonts/RedHatDisplay.ttf") format("truetype");
+    font-weight: 300 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* ── Sticky chrome bars: one shared height + flush stacking ──────────────────
+   The status bar, the mobile section-nav strip, the schedule filter bar and the
+   venue editions bar are ALL exactly --fc-bar-h tall, and any bar that locks
+   BELOW another (the in-section sub-bars) sticks exactly one bar-height down so
+   they sit flush — never overlapping.
+
+   The height is a FIXED px value on purpose. The mobile root-font-size downscale
+   (87.5%, see below) shrinks rem utilities like `h-10`/`top-10` but NOT px ones
+   like `h-[41px]`, so the old mix made the bars different heights on phones and
+   the sub-bars overlapped the section-nav by ~6px. Keying every bar off one px
+   token removes that mismatch at every breakpoint. Same locking mechanism for
+   all: position:sticky + a top offset that is a multiple of --fc-bar-h. */
+:root { --fc-bar-h: 40px; }
+.fc-bar     { height: var(--fc-bar-h); }   /* status bar + in-section sub-bars (always horizontal) */
+.fc-bar-sub { top: var(--fc-bar-h); }       /* sticky offset: lock one bar down */
+/* The section-nav is a horizontal strip on mobile/tablet but a TALL VERTICAL
+   list on desktop, so it only takes the fixed bar height BELOW lg. Forcing the
+   height at every width (plain .fc-bar) clipped the desktop list to one bar with
+   overflow-visible — which both poisoned the --fc-sections-end measurement (the
+   editions panel then locked over the links) and made the long sticky list
+   repaint on every scroll (lag). Height only < lg keeps the desktop list
+   auto-height. */
+@media (max-width: 1023.98px) {
+    .fc-bar-mobile { height: var(--fc-bar-h); }
+}
+
+/* `scroll-behavior` is `auto` until the page has finished loading; the
+   `.fc-scroll-smooth` class is added by assets/section-nav.js after the load
+   event. Reason: with smooth set during load, the browser's scroll-restoration
+   (or a hash-jump like `#hero` left in the URL by section-nav.js's
+   `history.replaceState`) animates over the user's own scroll input, which
+   feels like being pulled back up to home if you scroll down quickly. After
+   load it switches to smooth so anchor-link clicks animate as before. */
+html.fc-scroll-smooth {
+    scroll-behavior: smooth;
+}
+
+/* --------------------------------------------------------------------------
+   Global mobile (phone) text down-scale.
+   On phones we shrink the ROOT font-size, so every rem-based piece of content
+   — section titles, paragraphs/body, CTA labels, info-row values, FAQ text,
+   schedule / sponsor / venue copy, etc. — scales down ~12.5% together with its
+   rem spacing (so proportions stay balanced, just smaller). The site chrome is
+   sized in fixed px and is therefore UNTOUCHED: the section-nav sidebar
+   (.fc-nav-link, 11px), the section eyebrows, the 19th-Panhellenic / email /
+   socials lines, and the mobile bars all keep their size. Desktop and tablet
+   (>= 768px) are unaffected.
+   -------------------------------------------------------------------------- */
+@media (max-width: 767.98px) {
+    html { font-size: 87.5%; }
+}
+
+
+/* Body must be TRANSPARENT so the global wave-canvas (assets/wave-bg.js,
+   appended to body with z-index: -1) is visible. In CSS painting order
+   the root html background paints first → negative-z descendants (our
+   canvas) paint second → body's own background paints third (covering the
+   canvas if non-transparent). The paper colour stays on <html> (set in
+   assets/dist/fc.css) so transparent sections still read as "on paper". */
+html body { background-color: transparent; }
+
+/* Hero background: faint dotted grid that drifts diagonally down-right.
+   Pure CSS — no canvas, no JS. The pseudo-element is oversized by one tile
+   on the top + left so a translate(tile, tile) lands seamlessly back on the
+   pattern's original phase, giving a continuous loop. transform animation
+   so the browser composites it on the GPU instead of repainting every frame.
+   Cost is independent of viewport size.
+
+   Note: this class is applied alongside Tailwind's `absolute inset-0` on the
+   hero mount, so we don't set our own position — the element already has a
+   positioned containing block from `absolute`, which is what the ::before
+   needs. We only own `overflow` and the pseudo-element. */
+.fc-hero-dots {
+    overflow: hidden;
+}
+.fc-hero-dots::before {
+    content: "";
+    position: absolute;
+    /* Extend one tile past the top + left so a translate(tile, tile) loop
+       always covers the parent (the trailing edge fills as the leading edge
+       exits). */
+    top: -32px;
+    right: 0;
+    bottom: 0;
+    left: -32px;
+    background-image: radial-gradient(circle, var(--color-ink-faint, #C9C7BF) 2.5px, transparent 2.5px);
+    background-size: 32px 32px;
+    /* Constant pixel-space speed (32px / 5s ≈ 6.4 px/s) so motion looks the
+       same at every viewport width — the animation operates on CSS pixels,
+       not viewport-relative units. */
+    animation: fc-hero-dots-drift 5s linear infinite;
+    will-change: transform;
+}
+@keyframes fc-hero-dots-drift {
+    from { transform: translate(0, 0); }
+    to   { transform: translate(32px, 32px); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .fc-hero-dots::before { animation: none; }
+}
+
+/* ── Shared CTA text wrapper ────────────────────────────────────────────────
+   Used by fc_cta_link() and the hero CTA renderer: the link wraps its visible
+   text in <span class="fc-cta-text">…</span> with the trailing arrow outside it.
+   It used to carry the buttons' underline; buttons have no underline now, and
+   the class stays as the hook in case one is ever wanted back. */
+.fc-cta-text { text-decoration: none; }
+
+/* ── A hovering label that does not move the furniture ───────────────────────
+   fc_cta_link() prints a button's hover text alongside its label when it has
+   one. Both are here: two hidden ghosts sharing a single grid cell, so the cell
+   is as wide as the LONGER of them, and the live label absolutely positioned
+   over that cell so nothing it does changes the box.
+
+   Without it the button grew on hover, and the two sponsor CTAs — one evenly
+   spaced row — pushed each other sideways as you moved between them. It also
+   covers the frames in between: assets/hover-scramble.js draws random
+   characters on the way from one string to the other, and those are neither
+   string's width. */
+.fc-cta-stack {
+    position: relative;
+    display: inline-grid;
+}
+.fc-cta-stack > .fc-cta-ghost {
+    grid-area: 1 / 1;
+    visibility: hidden;
+}
+.fc-cta-stack > .fc-cta-live {
+    position: absolute;
+    inset: 0;
+    white-space: nowrap;
+}
+/* The arrow rides inside the stack now, so the link's own `gap-2` no longer
+   spaces it — the same 0.5rem, written here instead. */
+.fc-cta-stack .fc-arrow { margin-left: 0.5rem; }
+
+/* ── Label face ──────────────────────────────────────────────────────────────
+   The small caption type, taken from the sponsor tier's description line
+   ("TIER 02") and used for every label on the site: section eyebrows, the
+   section nav, the top bar, the schedule and venue bars, "Getting here",
+   "Submissions close in", stat labels, chips, footer column titles.
+
+   One class, so the face lives in one place. Only the type is set here —
+   colour, margins and line-height stay with each element, because those
+   genuinely differ (white on the blue hero, accent for "before the workshop",
+   leading-none on the schedule chips).
+
+   Doubled class: beats the unlayered .font-mono in fc.css and any Tailwind
+   type utility on an ancestor. tabular-nums is what .font-mono used to supply,
+   and the ticking countdowns rely on it not to jitter. */
+.fc-label.fc-label {
+    font-family: var(--font-mono, "JetBrains Mono"), ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+}
+@media (min-width: 768px) {
+    .fc-label.fc-label { font-size: 12px; }
+}
+
+/* ── Button face ─────────────────────────────────────────────────────────────
+   Every CTA that used to end in "→": the sponsor tier TITLE's face (display
+   family, 700, uppercase, -0.04em), and a ">" in Qaroxe, always in the accent.
+   The size is a separate class, .fc-btn-size, because the venue's "Getting
+   here" card titles share this face at their own size.
+
+   Put .fc-btn on the element that holds the text, never on a wrapper around a
+   .font-display child — that class sets weight 500 on the child directly and
+   would win over anything inherited. */
+.fc-btn.fc-btn {
+    font-family: var(--font-display, "Space Grotesk"), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+}
+/* FOSSCOMM → Text Style, "Show in capitals" switched off: the text is shown
+   exactly as it was typed, so a title typed in capitals still reads in capitals.
+   The class goes on <body> (fc_body_class_text_style() in inc/helpers.php). */
+.fc-btn-as-typed .fc-btn.fc-btn { text-transform: none; }
+
+/* Every button's size: the sponsor tier title's size.
+ *
+ * The tier title is fitted to its column, but capped — 24px on a phone, 36px
+ * from md — and a tier name is short enough that it always sits at the cap. So
+ * the caps ARE its size, and they are tokens both rules read: change a token
+ * and the tier titles and every button move together.
+ *
+ * Put it on the LINK, not the text span, so the ">" inherits the same size.
+ * line-height 1 rather than the title's 0.9: with capitals switched off a
+ * button can have descenders, and a wrapped two-line button needs the room. */
+:root {
+    --fc-title-size-sm: 24px;
+    --fc-title-size: 36px;
+    /* The house hover colour — the same orange the hollow headings move to
+       (FC_OUTLINE_HOVER in inc/helpers.php). */
+    --fc-accent-hot: #EE8101;
+}
+.fc-btn-size.fc-btn-size {
+    font-size: var(--fc-title-size-sm);
+    line-height: 1;
+}
+@media (min-width: 768px) {
+    .fc-btn-size.fc-btn-size { font-size: var(--fc-title-size); }
+}
+.fc-arrow.fc-arrow {
+    font-family: "Qaroxe", var(--font-mono, "JetBrains Mono"), ui-monospace, monospace;
+    /* A bitmap face has no bold cut. Letting the browser smear one out of the
+       button's 700 turns the pixel steps to mush. */
+    font-weight: 400;
+    font-synthesis: none;
+    letter-spacing: 0;
+    text-transform: none;
+    text-decoration: none;
+    color: var(--color-accent, #0033FF);
+    /* No transition: the switch to the hover colour is instant. */
+}
+
+/* Hover (and keyboard focus): the LABEL stays ink and only the ">" moves, to the
+   house orange. Without these the label would follow whatever the link's own
+   hover is — `.accent-link:hover` in fc.css on the sponsor and Get Involved
+   buttons, Tailwind's hover:text-accent on the hero's — and the arrow would go
+   with it, so the whole button changed colour at once.
+
+   EVERY SELECTOR IS ANCHORED ON `a`, and that is load-bearing rather than
+   tidiness: .fc-btn is a FACE, and things that are not buttons wear it too — the
+   FAQ questions, the venue's "Getting here" card titles. A bare `.fc-btn:hover`
+   also matches those, so pointing at a FAQ question painted it ink just as the
+   row turned blue underneath it, i.e. black text on blue instead of white.
+   Buttons are links; the face on its own is not.
+
+   The two forms cover both shapes a button comes in: .fc-btn on the <a> itself
+   (fc_cta_link) and .fc-btn on a span inside it (the hero), where the colour is
+   inherited rather than set. */
+/* EVERY BUTTON, the same way: the words ink, always — at rest and under the
+   pointer; the ">" and any *marked* run in the accent, and those two, and only
+   those, go to the house orange on hover. The label no longer goes blue:
+   `.accent-link:hover` in fc.css (the sponsor and Get Involved buttons) is held
+   off below; the hero's Tailwind hover:text-accent never reached its links
+   (fc.css's unlayered `a { color: inherit }` outranks the layer). */
+a.fc-btn.fc-btn:hover .fc-arrow.fc-arrow,
+a.fc-btn.fc-btn:focus-visible .fc-arrow.fc-arrow,
+a:hover .fc-arrow.fc-arrow,
+a:focus-visible .fc-arrow.fc-arrow,
+a.fc-btn.fc-btn:hover .fc-accent.fc-accent,
+a.fc-btn.fc-btn:focus-visible .fc-accent.fc-accent,
+a:hover .fc-btn .fc-accent.fc-accent,
+a:focus-visible .fc-btn .fc-accent.fc-accent {
+    color: var(--fc-accent-hot, #EE8101);
+}
+a.accent-link.accent-link:hover,
+a.accent-link.accent-link:focus-visible { color: inherit; }
+
+/* ── Section "show the global wave background through me" marker ────────────
+ * The dot pattern is no longer painted in CSS — it has been replaced by an
+ * animated dot-wave canvas (assets/wave-bg.js), a single fixed full-viewport
+ * <canvas> appended to <body> at z-index: -1.
+ *
+ * .fc-section-dots is now just a marker. fc_section_open() skips its default
+ * bg-paper class when this marker is present, leaving the section transparent
+ * so the wave canvas underneath shows through. Tweak the wave look / colour
+ * / speed in assets/wave-bg.js — the knobs are at the top of the file.
+ *
+ * The class is applied via fc_section_open(['class' => 'fc-section-dots']) in:
+ *   - template-parts/sections/speakers.php
+ *   - template-parts/sections/news.php
+ *   - template-parts/sections/sponsors.php
+ *   - template-parts/sections/hero.php  (the right panel, inline)
+ *
+ * Keeping the rule (empty) so the selector is easy to find via grep. */
+.fc-section-dots { background: transparent; }
+
+/* No horizontal scrollbar ever. `clip` (not `hidden`) doesn't create a new
+   scroll container, so it does not interfere with position:sticky in the
+   sidebar or filter bars. */
+html, body {
+    overflow-x: clip;
+}
+
+/* No scrollbar down the side either: the page scrolls exactly as before — wheel,
+   touch, keys, the anchor links — it just draws no bar. Set here, in the
+   render-blocking stylesheet, so it is in force from the first paint: the layout
+   width never changes mid-load, which is what the belts, the schedule and the
+   mascot measure against. */
+html { scrollbar-width: none; -ms-overflow-style: none; }
+html::-webkit-scrollbar,
+body::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+    html.fc-scroll-smooth { scroll-behavior: auto; }
+}
+
+/* Global *asterisk* highlight applied by fc_format(). Editors wrap any segment
+   in *…* in any admin field and it renders in the theme accent colour on the
+   front-end. Inherits font-weight/size so it never breaks line metrics.
+   Typography swap: Qaroxe is the dedicated accent face — same blue treatment
+   is also applied to the hero title year (.fc-hero-year-outline).
+   Doubled class selector + !important on font-family: bumps specificity above
+   Tailwind v4's font utilities (.font-display etc) on ancestors, since the
+   Tailwind browser build injects its compiled CSS after this stylesheet. */
+.fc-accent.fc-accent {
+    color: var(--color-accent, #0033FF);
+    font-family: "Qaroxe", var(--font-display, "Space Grotesk"), ui-sans-serif, system-ui, sans-serif !important;
+
+    /* QAROXE HAS ONE WEIGHT — 400 — and nothing else. Inside a heading that asks
+       for 700 the browser SYNTHESISES a bold by smearing the outlines sideways,
+       which on a pixel face turns the steps to mush and reads as a different,
+       fatter font. It only started showing when the manifesto and speakers
+       headings moved from 500 to 700; asking for the weight the face actually
+       has, and refusing the synthetic one, puts it back to how it drew before. */
+    font-weight: 400;
+    font-synthesis: none;
+    -webkit-font-synthesis: none;
+
+    /* Stops a highlighted word making its line taller than the others.
+     *
+     * The @font-face overrides at the top of this file were the first attempt and
+     * they are not enough, because line-box height does not depend on how TALL a
+     * font is — both inline boxes are exactly line-height tall either way. It
+     * depends on where the baseline sits inside that box, which is set by the
+     * ASYMMETRY (ascent − descent). Two boxes of equal height with baselines at
+     * different depths, stacked on a shared baseline, span more than one box:
+     *
+     *     line grows by |δ_display − δ_accent| / 2,  where δ = ascent − descent
+     *
+     * Qaroxe is overridden to 80/20, so δ = 60%; Space Grotesk is about 71%. An
+     * 11-point gap is a ~5% taller line — invisible on one line, obvious the
+     * moment a title wraps and only some lines contain a highlight.
+     *
+     * Matching the two δ values would need Space Grotesk's exact metrics and
+     * would break against any fallback face. Zero side-steps the whole thing: a
+     * zero-height inline box cannot stretch the line whatever font wins. The
+     * glyphs are unaffected — they sit on the baseline, which line-height does
+     * not move — and wrapping inside a multi-word highlight is safe, because the
+     * block's own strut sets a floor under EVERY line box regardless.
+     */
+    line-height: 0;
+}
+
+/* Global %fine print% aside applied by fc_format(): wrap any segment in %…% in an
+   admin field and it renders small + muted-grey on the front-end — e.g. a
+   parenthetical gloss inside a big title. Size is relative (em) so it scales to
+   whatever text it sits in; bump 0.5em to taste. Doubled class beats Tailwind
+   utilities injected after this stylesheet (same trick as .fc-accent above). */
+.fc-fine.fc-fine {
+    font-size: 0.5em;
+    font-weight: 400;
+    color: var(--color-ink-muted, #6B6B66);
+}
+
+/* ── Body copy, one colour ──────────────────────────────────────────────────
+   Every block of running text on the site is the venue "getting here" cards'
+   grey. That colour was only theirs before, so the same kind of writing was ink
+   in the manifesto, ink in Get Involved and grey beside the map — three shades
+   of the same voice depending on which template printed it.
+
+   `.fc-copy` goes on the WRAPPER of anything rendered by fc_format_block(), and
+   only its PARAGRAPHS take the colour. That is deliberate: a wrapper can hold
+   other things — the venue cards put a `.fc-btn` title above each paragraph —
+   and colouring the wrapper would drag those with it, because this stylesheet
+   is unlayered and beats the Tailwind `text-ink` utility on the title whatever
+   its specificity. Paragraphs are exactly the running text and nothing else.
+
+   Small print is untouched: `.fc-label`, the news excerpts and the card captions
+   already sit on this same token, which is why they match without being listed
+   here. A [link](url) inside a paragraph stays accent blue — .fc-link below
+   outranks the inherited colour. */
+.fc-copy p {
+    color: var(--color-ink-muted, #6B6B66);
+}
+
+/* A *marked* run inside a PARAGRAPH of running text: THE COLOUR ONLY.
+ *
+ * Everywhere else on the site a marked run also swaps to Qaroxe — that is the
+ * accent face, and in a title it is the point of marking a word at all. In a
+ * paragraph it is wrong: a pixel face at body size, in the middle of a sentence
+ * set in Geist, reads as a rendering fault rather than as emphasis, and the
+ * line it lands on sits on different metrics from the ones around it.
+ *
+ * So here the run keeps the sentence's own face, weight and leading, and all
+ * that is left of .fc-accent is the blue. `!important` because the rule it is
+ * overriding carries one (it needs it to beat Tailwind's font utilities), and
+ * inherit rather than a named family so this never has to be kept in step with
+ * whatever the body face is. font-synthesis goes back to auto with it: that was
+ * there to stop the browser smearing Qaroxe's pixel steps into a fake bold, and
+ * with a real face it would only rob a marked run inside bold text of its
+ * weight.
+ *
+ * `p` IS THE POINT OF THE SELECTOR, not tidiness. A .fc-copy wrapper can hold
+ * headings as well as prose — the venue's "getting here" cards put a title over
+ * each paragraph — and a marked run in one of THOSE is a title's highlight and
+ * keeps the pixel face, exactly as it did before any of this. Only the running
+ * text gives it up. */
+.fc-copy p .fc-accent.fc-accent {
+    font-family: inherit !important;
+    font-weight: inherit;
+    line-height: inherit;
+    font-synthesis: auto;
+    -webkit-font-synthesis: auto;
+}
+
+/* Inline [text](url) links produced by fc_format_inline_links(): always the
+   accent blue, no underline, no arrow. This needs an explicit rule (not the
+   Tailwind `text-accent` utility) because fc.css's UNLAYERED `a { color: inherit }`
+   beats any LAYERED Tailwind utility — in the CSS cascade, unlayered styles win
+   over layered ones regardless of specificity. A plain class rule here outranks
+   that `a` element rule, so the link reliably shows blue everywhere (FAQ answers,
+   Code of Conduct, the venue "getting here" cards, …). Doubled class keeps it
+   ahead of any inherited colour utility on a parent. */
+.fc-link.fc-link { color: var(--color-accent, #0033FF); }
+
+/* ── The way back from a standalone page ────────────────────────────────────
+   "< / BACK HOME", printed by fc_back_link(): /speakers/, the Code of Conduct,
+   the attributions and a news article all carry the same one.
+
+   The whole line is in the face it sits in — .fc-label, the small mono — and
+   the "<" is NOT the buttons' Qaroxe arrow: it is a character of this line.
+   Only the colours are the buttons': the mark is accent at rest and goes to the
+   house orange under the pointer while the words go accent, which is the
+   two-colour swap every button on the site makes.
+
+   Written out rather than left to `hover:text-accent`, which never applies to
+   an <a>: fc.css's UNLAYERED `a { color: inherit }` beats a LAYERED Tailwind
+   utility whatever its specificity. Same reason .fc-link is written out above. */
+/* /speakers/ and /communities/: the rule under each row of cards is drawn far
+   past both sides so it always reaches the edges; clipping here stops it at the
+   SECTION's edges, exactly where the section separator above it stops. */
+.fc-grid-page { overflow-x: clip; }
+
+.fc-back {
+    color: inherit;
+    text-decoration: none;
+    transition: color 50ms ease;
+}
+.fc-back:hover,
+.fc-back:focus-visible { color: var(--color-accent, #0033FF); }
+.fc-back .fc-back-mark { color: var(--color-accent, #0033FF); }
+.fc-back:hover .fc-back-mark,
+.fc-back:focus-visible .fc-back-mark { color: var(--fc-accent-hot, #EE8101); }
+
+.fc-nav-no-scrollbar::-webkit-scrollbar { display: none; }
+.fc-nav-no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+
+.fc-nav-link {
+    color: inherit;
+    /* No transition. Every colour change in the chrome is instant — see the
+       note on .fc-num below. */
+}
+
+/* ── Numbers picked out ──────────────────────────────────────────────────────
+   The index in "05 / Venue" — in the sidebar and on the section itself — and
+   the year in "2026 / Athens" in the venue's editions list. Blue at rest,
+   the house orange while whatever carries them is hovered, with the words
+   beside them going grey → blue at the same moment.
+
+   EVERY ONE OF THESE IS INSTANT, deliberately: the whole set used to fade over
+   80-200ms, and a two-colour change (number one way, text the other) reads as
+   a smear rather than a switch when it is eased. */
+.fc-num { color: var(--color-accent, #0033FF); }
+.fc-nav-link:hover .fc-num,
+.fc-nav-link:focus-visible .fc-num,
+.fc-eyebrow:hover .fc-num,
+.fc-year-btn:hover .fc-num,
+.fc-year-btn:focus-visible .fc-num,
+.fc-year-btn.is-hovered .fc-num {
+    color: var(--fc-accent-hot, #EE8101);
+}
+/* A section's eyebrow is not a link, but it answers to the pointer like one. */
+.fc-eyebrow:hover { color: var(--color-accent, #0033FF); }
+.fc-nav-link.is-active {
+    color: #0033FF;
+}
+/* The section you are IN: the words go blue, so the number cannot stay blue
+   too — it would vanish into them. It takes the hot colour, the same swap the
+   pointer makes, so "here" and "under the pointer" read the same way. */
+.fc-nav-link.is-active .fc-num { color: var(--fc-accent-hot, #EE8101); }
+
+/* ── Selectable bar items: shared hover effect ───────────────────────────── */
+/* Every "bar with selectable text" — schedule filter, venue editions, section
+   nav, status-bar brand — uses the same hover: text fades to accent in ~80ms.
+   The schedule filter's <select> rule lives next to its own template (its
+   appearance reset has to stay there); these target the other variants.
+   Doubled class selectors bump specificity above Tailwind's `transition-colors`
+   utility (150ms duration), which would otherwise win as Tailwind v4 browser
+   injects its compiled CSS after the regular stylesheets. */
+.fc-year-btn.fc-year-btn,
+.fc-nav-link.fc-nav-link,
+.fc-topbar-brand.fc-topbar-brand,
+.fc-topbar-item.fc-topbar-item {
+    /* Instant, not an 80ms fade: these carry a number that changes to a
+       different colour than the words beside it, and easing the two blurs the
+       switch. Doubled selectors so this beats Tailwind's transition-colors. */
+    transition: none;
+}
+/* Section-nav link hover: explicit rule (instead of relying on Tailwind's
+   hover:text-accent utility, which gets compiled at runtime by the v4 browser
+   build and isn't guaranteed to land before paint on first load). Doubled
+   class for specificity over Tailwind's matching rule. */
+.fc-nav-link.fc-nav-link:hover,
+.fc-nav-link.fc-nav-link:focus-visible { color: var(--accent); outline: none; }
+/* var(), not a bare `pointer`: FOSSCOMM → Cursor can replace the pointer, and a
+   hardcoded value here would show the system hand on this one element while the
+   rest of the site showed the custom one. Falls back cleanly when none is set. */
+.fc-topbar-brand { cursor: var(--fc-cur-pointer, pointer); }
+.fc-topbar-brand:hover,
+.fc-topbar-brand:focus-visible { color: var(--accent); outline: none; }
+
+/* ── Landing-page home chrome ────────────────────────────────────────────────
+   The section-nav sidebar is a CSS-sticky rail anchored to the post-hero column
+   (template-parts/partials/section-nav.php + front-page.php's .fc-rest), so it
+   starts at the Manifesto section line on its own — no JS show/hide here.
+
+   Top bar: blue over Home, flips to white the moment the Manifesto section line
+   reaches it (assets/section-nav.js, off the hero's bottom edge — not a scroll
+   threshold) — an instant swap (no fade). `.fc-topbar-blue` is server-rendered
+   on the landing page so there's no first-paint flash. The doubled-up overrides
+   use !important to beat the inline Tailwind utilities on the bar + its spans. */
+.fc-topbar-blue {
+    background-color: var(--color-accent, #0033FF) !important;
+    /* the role blue: every line on a blue ground */
+    border-bottom-color: #8CA3FF !important;
+}
+.fc-topbar-blue,
+.fc-topbar-blue * { color: #fff !important; }
+
+/* The language toggle is a plain text link again — the switch UI that briefly
+   lived here was a misreading; the switch belongs in the dashboard, deciding
+   whether Greek is offered at all (fc_greek_enabled(), FOSSCOMM → Top Bar).
+   One thing kept from it: a visible focus ring. The original link carried
+   Tailwind's `focus:outline-none` with nothing put back, so keyboard users had
+   no way to see where they were. currentColor, so it works on the blue bar too,
+   where `.fc-topbar-blue *` forces white. */
+.fc-topbar-lang:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+}
+/* On the BLUE bar the location and the countdown go to the house orange; on the
+   paper bar they go to the accent (the rules above). The FOSSCOMM brand stays
+   white on the blue bar — `.fc-topbar-blue *` already makes it so, and it is
+   deliberately left out here. !important, because that rule forces white with
+   one of its own. */
+.fc-topbar-blue .fc-topbar-item:hover {
+    color: var(--fc-accent-hot, #EE8101) !important;
+}
+/* Paper bar: the same gesture in the accent. */
+.fc-topbar-item:hover { color: var(--color-accent, #0033FF); }
+
+/* ── Sponsor tiers ──────────────────────────────────────────────────────────
+   A tier is a description, a title, and ONE line of logos. The line never wraps:
+   when it overflows it becomes a drifting, draggable belt instead
+   (assets/logo-belt.js), which is the speakers row's behaviour applied to logos.
+
+   What this replaced: a per-tier table of six hard-coded slugs, each with its own
+   max-width, and a PHP function that balanced a tier across as many centred rows
+   as it needed. Tiers are data now — there is no fixed set to write sizes for. */
+
+/* ── The tier block ─────────────────────────────────────────────────────────
+   A description, a title, one line of logos, and a single rule underneath in
+   the tier's colour. Nothing else: no outline, no panel colour, no hatch, and
+   no breaking out of the section's own column.
+
+   That is a deliberate retreat from the brochure's framed card. Carried across a
+   full-width band it needed a coloured plate, a hatch ring, two negative-z-index
+   layers to let the page's wave through, and a lifted max-width — four
+   mechanisms, each with its own way of going wrong, for a strip of decoration.
+   One rule says the same thing: a tier ends here, and this is its colour.
+
+   The tier's colour drives three things and paints none of them as a panel:
+   the rule below, the hollow run in the title, and the progress dots. */
+/* ── Letting the belt reach the section's edges ──────────────────────────────
+   Two things stand between it and them, and both are on the wrapper
+   fc_section_open() puts round every section: `px-4 md:px-8`, and
+   `max-w-[1440px] mx-auto`.
+
+   The padding is cancelled by the belt's own negative margin (see .fc-belt). The
+   cap is lifted here, for this section only — and then handed straight back to
+   everything that is NOT a tier, and inside a tier to everything that is not the
+   belt. So the heading, the section title and the CTA sit on exactly the column
+   they always did, and only the logos escape it.
+
+   `max-width: none` and a negative margin are both resolved against real layout,
+   which is the whole point: no viewport units, so no scrollbar to be wrong about
+   and no rail width to keep in step. */
+.fc-section-bleed > div { max-width: none; }
+/* Two things bleed now: a sponsor tier's belt and the speakers' row. Everything
+   else in such a section is handed the measure straight back. */
+.fc-section-bleed > div > :not(.fc-tier):not(.fc-spk-wrap):not(.fc-com-wrap),
+.fc-tier > :not(.fc-belt) {
+    /* 1440 minus the gutter the wrapper used to hold, so these sit on the same
+       measure as every other section's content. */
+    max-width: calc(1440px - 4rem);
+    margin-inline: auto;
+}
+
+/* No bottom margin. A tier ends at its rule, and the gap above that rule
+   (.fc-tier-rule's margin-top) is the only space a tier owns — the 52px that
+   used to sit under it as well read as a second, competing gap. */
+.fc-tier {
+    margin-bottom: 0;
+}
+
+/* The rule: its OWN element, not a border on the tier.
+ *
+ * It was `border-bottom` on .fc-tier, and that is what stopped the belt reaching
+ * the edge of the screen: a border wraps the whole tier, so the belt could only
+ * bleed as far as the box the border was drawn around. Separating them lets the
+ * belt escape the column while the line stays in it — which is also what makes
+ * the line the shorter of the two, sitting under the type rather than running the
+ * full width of the logos.
+ *
+ * A hairline. It is a boundary, not a frame; the thinner it is, the more it reads
+ * as the section's own ruling rather than a border drawn around something. */
+.fc-tier-rule {
+    height: 1px;
+    /* The site's line colour, like every other separator: the light grey on the
+       white. (It used to take the tier's own colour — --fc-tier-line from the
+       dashboard — which made it the one rule on the page that was not.) */
+    background: var(--color-border, #DDDDDA);
+    margin-top: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+/* The head: the description and the title. Left-aligned at every width, like
+   every other heading on the page. */
+.fc-tier-head {
+    /* The measuring stick for the type. `cqi` is 1% of THIS element's inline
+       size, so the title is sized against the column it sits in.
+       NB: cqi may not be used in this rule — it resolves against the nearest
+       ANCESTOR container, and an element is not its own ancestor. Descendants
+       only. That bug cost a round here already. */
+    container-type: inline-size;
+    margin-bottom: clamp(0.75rem, 1.5vw, 1.25rem);
+}
+
+/* The small line above the title. Its face is .fc-label (top of this file) —
+   this line is where that face was taken from, and every label on the site now
+   shares it. Only the spacing and colour are its own. */
+.fc-tier-desc {
+    margin: 0 0 5px;
+    line-height: 1.6;
+    color: var(--color-ink-muted, #6B6B66);
+}
+
+/* The title, in the speakers' name face and sized by the same rule the venue
+   name and the CFP heading use: the size at which the LONGEST line exactly fills
+   the column.
+
+   The coefficient is 1.45, the venue's rather than the speakers' 1.52, for the
+   venue's reason: a capital costs about 0.6em in this face once the tracking
+   comes off, so the exact-fit coefficient is 1/0.6 = 1.667, and the margin below
+   it covers the column being an estimate.
+
+   TWO CEILINGS, and the gap between them is the point. This is a label over a
+   row of logos, not the content of its section — so it is capped well under the
+   venue's 82px on a desktop, and much harder on a phone, where the same size
+   would be most of the screen's width for something that is only introducing
+   what comes next. */
+.fc-tier-title {
+    /* No bottom margin: the title is the last thing in the head, so the gap to
+       the logos belongs to the head and lives in exactly one place.
+       (It would not collapse if it had one — `container-type` brings layout
+       containment, which stops margins collapsing through. The two used to add
+       up to a 60px gap.) */
+    margin: 0;
+    font-family: var(--font-display, "Space Grotesk"), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    /* The ceiling is a token shared with every button (.fc-btn-size, top of
+       this file). */
+    font-size: clamp(
+        15px,
+        calc(var(--fc-tier-col, 24rem) * 1.45 / var(--fc-tier-longest, 12)),
+        var(--fc-title-size-sm, 24px)
+    );
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+    color: var(--color-ink, #0A0A0A);
+    /* The safety net. The font size is an ESTIMATE from a character count, and
+       an estimate can be wrong — bounding the box means a bad guess wraps inside
+       the column instead of running out over the page. */
+    max-width: 100%;
+}
+.fc-tier-title > span { max-width: 100%; }
+@media (min-width: 768px) {
+    .fc-tier-title {
+        font-size: clamp(
+            18px,
+            calc(var(--fc-tier-col, 24rem) * 1.45 / var(--fc-tier-longest, 12)),
+            var(--fc-title-size, 36px)
+        );
+    }
+}
+/* The column the title has to fit — measured, not reconstructed.
+   `cqi` is a percentage of the query container's CONTENT box, so 100cqi is the
+   head's width exactly. */
+.fc-tier-title { --fc-tier-col: 100cqi; }
+
+/* ── The big section heading ─────────────────────────────────────────────────
+   The venue name's face — the display family at 700 with its tight tracking —
+   at section-title size. Started as the sponsors' funding headline ("<words>
+   €<amount> <words>"), and the manifesto and speakers headings are set in it
+   too, so the three read as one voice. Passed to fc_section_open() as
+   'title_class'; the sponsors' heading is built in its own template.
+
+   *Marked* runs still work: the title goes through fc_format() either way, so
+   an asterisked word is the blue pixel face inside this. */
+.fc-section-heading {
+    margin: 0 0 clamp(2rem, 4vw, 3.25rem);
+    font-family: var(--font-display, "Space Grotesk"), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.05em;
+    line-height: 1.05;
+    font-size: clamp(2rem, 5vw, 3.75rem);
+    color: var(--color-ink, #0A0A0A);
+}
+/* A heading that is also the way to a page carrying the whole of what its
+   section samples — Speakers → /speakers/, Communities → /communities/. It
+   behaves like every button on the site: the words ink, at rest and on hover;
+   the *marked* run and the ">" after it in the accent, and those two go to the
+   house orange on hover (the ">" off the generic `a:hover .fc-arrow` rule
+   above).
+
+   `display: inline` deliberately — the heading may wrap, and an inline-block
+   would refuse to break, pushing a long title off the side. */
+.fc-section-heading-link {
+    color: inherit;
+    text-decoration: none;
+}
+/* Doubled class to clear .fc-accent.fc-accent's own colour. */
+.fc-section-heading-link:hover .fc-accent.fc-accent,
+.fc-section-heading-link:focus-visible .fc-accent.fc-accent {
+    color: var(--fc-accent-hot, #EE8101);
+}
+/* em, so the gap scales with the heading rather than jumping at the breakpoint
+   where its size changes — the same treatment the tier titles' arrow gets. */
+.fc-section-heading-link .fc-arrow.fc-arrow { margin-left: 0.3em; }
+
+/* The amount holds together as one word — a number broken across two lines is
+   unreadable, and the fill level is measured on its box. */
+.fc-fund-amount { white-space: nowrap; }
+/* The € is NOT Qaroxe: that face has no euro glyph, so it would fall back to
+   another font mid-number and sit at a different size. Its own span, in the
+   heading's face, and in the heading's colour — it belongs to the sentence
+   rather than to the figure, so it stays ink while the digits fill with blue.
+   `inherit`, so it follows the heading if that colour is ever changed. */
+.fc-fund-cur {
+    color: inherit;
+    letter-spacing: 0;
+}
+
+/* THE GLASS. The digits are filled from the bottom to amount/goal of their own
+   height, with a wave rolling across the surface. Three background layers,
+   clipped to the glyphs:
+     1. the wave   — a seamless tile, repeated across, parked at the level
+     2. the liquid — flat accent from the bottom up to the level
+     3. the empty  — faint grey behind the whole thing
+   The wave's fill is a literal #0033FF: a data: URI cannot read a CSS variable.
+   Keep it in step with --color-accent if that ever changes. */
+.fc-fund-digits {
+    font-family: "Qaroxe", var(--font-display, "Space Grotesk"), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 400;
+    font-synthesis: none;
+    letter-spacing: 0;
+    /* The level is measured on the DIGITS, not on the line box: the box carries
+       the font's descent and half-leading under the glyphs, so filling from its
+       bottom edge would hide the first fifth of the liquid below the baseline.
+       MEASURED from the font, not guessed: every digit in Qaroxe spans 0 to 768
+       of its 1024 units, so the figures stand exactly on the baseline and are
+       0.75em tall. The baseline itself sits 0.225em up from the bottom of the
+       box — the 20% descent from the @font-face override at the top of this
+       file, plus half of this heading's 1.05 leading. */
+    --fc-ink-bottom: 0.225em;
+    --fc-ink-height: 0.75em;
+    --fc-fund-level: calc(var(--fc-ink-bottom) + var(--fc-fund-fill, 0) * var(--fc-ink-height) / 100);
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='24' viewBox='0 0 120 24' preserveAspectRatio='none'%3E%3Cpath d='M0 12 Q15 2 30 12 T60 12 T90 12 T120 12 V24 H0 Z' fill='%230033FF'/%3E%3C/svg%3E"),
+        linear-gradient(var(--color-accent, #0033FF), var(--color-accent, #0033FF)),
+        linear-gradient(var(--color-ink-faint, #C9C7BF), var(--color-ink-faint, #C9C7BF));
+    background-size: 6em 0.2em, 100% var(--fc-fund-level), 100% 100%;
+    background-repeat: repeat-x, no-repeat, no-repeat;
+    /* The wave sits with its own middle on the surface, so crests stand above
+       the liquid and troughs cut into it. */
+    background-position: left 0 bottom calc(var(--fc-fund-level) - 0.1em), left bottom, left top;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    /* One tile per cycle, so the loop is seamless. */
+    animation: fc-fund-wave 3.2s linear infinite;
+}
+@keyframes fc-fund-wave {
+    from { background-position: left 0    bottom calc(var(--fc-fund-level) - 0.1em), left bottom, left top; }
+    to   { background-position: left -6em bottom calc(var(--fc-fund-level) - 0.1em), left bottom, left top; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .fc-fund-digits { animation: none; }
+}
+/* Without background-clip: text the number would be invisible, so it falls back
+   to a solid accent figure rather than to nothing. */
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+    .fc-fund-digits {
+        -webkit-text-fill-color: var(--color-accent, #0033FF);
+        color: var(--color-accent, #0033FF);
+        background-image: none;
+    }
+}
+
+/* ── The two sponsor CTAs ────────────────────────────────────────────────────
+   "Become a sponsor" and the donation link, side by side and spread evenly:
+   space-evenly puts the SAME gap at the left edge, between the buttons and at
+   the right edge, all inside the section's own padding. One button alone lands
+   centred, which is the right answer for that case too.
+
+   align-items: start so two descriptions of different lengths still hang from
+   the same line; each column is centred on its own button. */
+.fc-sponsor-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: start;
+    /* ROW gap only. A column-gap would be ADDED to the space space-evenly has
+       already worked out, so the gap in the middle came out exactly that much
+       wider than the two at the edges — the one thing this row is supposed to
+       get right. The row gap only applies once the pair wraps on a narrow
+       screen, where it is the space between them. */
+    gap: 2.5rem 0;
+    /* The COLUMNS are centred by space-evenly; the type inside them is not. A
+       `text-align: center` here would centre the label and its description too,
+       and every other block of copy on the site is ranged left. */
+}
+.fc-sponsor-cta {
+    /* The measure of the text under a button, so a long description wraps
+       rather than stretching the column across the row. */
+    max-width: 24rem;
+}
+/* On a phone the two never share a line: one under the other, ranged left,
+   exactly like the Get Involved cards at the same width (their grid-cols-1
+   gap-8 below md). Letting the evenly-spread row wrap put the second button
+   under the first at a different left edge, which read as a mistake. */
+@media (max-width: 767.98px) {
+    .fc-sponsor-ctas {
+        display: grid;
+        grid-template-columns: 1fr;
+        justify-items: start;
+        gap: 2rem;
+    }
+}
+
+/* The ">" after a tier's name, in THAT TIER's colour — the one the rule under
+   it and the *marked* run of the title are drawn in, so the three read as one
+   idea. It rides the title's font-size, so it is the same size next to a
+   tier name as it is in a button.
+
+   The descendant form out-specifies .fc-arrow.fc-arrow's accent blue, which
+   would otherwise win on source order and paint every tier's arrow the same. */
+.fc-tier-title .fc-tier-arrow.fc-tier-arrow {
+    color: var(--fc-tier-colour, #0033FF);
+    /* em, so the gap scales with the arrow rather than jumping at the
+       breakpoint where the title changes size. */
+    margin-left: 0.4em;
+}
+
+/* DIRECT children only, and fit-content: each line is its own block so a
+   two-line title breaks where the author broke it, and the box is the words
+   rather than the empty strip beside them. Same as the venue name. */
+.fc-tier-title > span { display: block; width: fit-content; }
+
+/* The *starred* run: SOLID, in the tier's own colour.
+ *
+ * Not hollow. The other four headings on the site outline their marked run —
+ * the speakers' name, the venue, the manifesto's numbers, the CFP heading — and
+ * that is a treatment for type that IS its section. This is a small label over a
+ * row of logos, and at 24px on a phone a stroked letterform is mostly stroke.
+ * Filled colour says the same thing at any size.
+ *
+ * The class is `is-accent`, not `is-outline`: fc_hollow_split() takes the class
+ * name as an argument precisely so a heading can mark its run without claiming a
+ * treatment it does not use.
+ *
+ * NO HOVER either. Every other marked heading is a link or a card and changes
+ * colour when you point at it; this one is a label, so it holds one colour.
+ * That is why there is no is-hot rule and no --fc-*-hover variable here.
+ *
+ * The literal fallback in the var() matters: an invalid `color` INHERITS, and
+ * the parent here is ink — a missing variable would silently render the run
+ * solid black and look like nothing was marked at all. */
+.fc-tier-title span.is-accent { color: var(--fc-tier-colour, #0033FF); }
+
+/* `**double-marked**`: the same colour, OUTLINED.
+ *
+ * Two markers, two treatments, and the author picks per run — `*Gold*` fills,
+ * `**Gold**` hollows. fc_hollow_split() takes both class names for exactly this.
+ *
+ * The colour is set OUTSIDE the @supports deliberately. Where text stroking works
+ * the rule below paints the fill transparent and this is irrelevant; where it
+ * does not, the run stays SOLID but still coloured — never invisible text, which
+ * `color: transparent` with nothing drawn behind it would be. */
+.fc-tier-title span.is-outline { color: var(--fc-tier-colour, #0033FF); }
+@supports (-webkit-text-stroke: 1px black) {
+    .fc-tier-title span.is-outline {
+        color: transparent;
+        /* em, so the stroke stays the same PROPORTION of the letters at every
+           size instead of looking heavier as the title shrinks. */
+        -webkit-text-stroke: 0.04em var(--fc-tier-colour, #0033FF);
+        /* Hollow letters at tight tracking run into each other — the stroke adds
+           width the solid weight does not have. A touch looser. */
+        letter-spacing: -0.022em;
+    }
+}
+/* ── The belt ─────────────────────────────────────────────────────────────
+   Full-bleed to the edges of the SECTION — the page area to the right of the
+   fixed nav rail. Not the whole window: that runs the logos underneath the
+   sidebar, where they are half hidden and the row appears to start off-screen.
+
+   ── NO VIEWPORT UNITS. This is the third attempt and the reason is worth
+   stating, because `calc(50% - 50vw + var(--fc-rail) / 2)` LOOKS right and is
+   provably exact on paper:
+
+     • it assumes the rail's width, a number that lives in three other files;
+     • it assumes the wrapper's 1440px cap, so the correction covers a gap that
+       only exists above a certain width;
+     • it assumes `100vw` is the width a block actually gets — and it is not.
+       100vw includes the scrollbar, percentages do not, so with a 15px scrollbar
+       the belt sits 7.5px under the rail and hangs 7.5px past the window, at
+       every width.
+
+   Three assumptions that have to hold at once, and the form is only correct while
+   they all do. The maths below has none of them: a negative margin cancels the
+   wrapper's own padding, and .fc-section-bleed lifts its cap, so the belt is as
+   wide as the section is by construction — at every width, scrollbar or not,
+   whatever the rail is doing.
+
+   Only the BELT bleeds. The type and the rule stay in the column — which is why
+   the rule is its own element rather than a border on the tier. */
+.fc-belt { margin-inline: -1rem; }         /* cancels the wrapper's px-4 */
+@media (min-width: 768px) {
+    .fc-belt { margin-inline: -2rem; }     /* cancels the wrapper's px-8 */
+}
+
+.fc-belt-viewport {
+    overflow: hidden;
+    /* The row is dragged, so the browser's own horizontal panning must not also
+       claim the gesture. Vertical scrolling still works. */
+    touch-action: pan-y;
+    /* A drag across a row of logos is a drag, not a selection. */
+    user-select: none;
+    -webkit-user-select: none;
+}
+.fc-belt-rail {
+    /* The logo square, for every sponsor in every tier.
+       On the RAIL, not on .fc-belt: cqi resolves against the nearest ancestor
+       query container, and .fc-belt is the container — so written there it would
+       have measured the viewport instead. The rail is a descendant, so here it
+       means what it says. Inherited by every cell and box below. */
+    --fc-logo-box: clamp(78px, 9cqi, 124px);
+
+    display: flex;
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    /* The separation between logos lives HERE now, not as padding inside each
+       cell. Two reasons it had to move rather than just shrink:
+
+         • a cell's padding is part of the cell, so it was also the space at the
+           very start and end of the belt — the row began with a gap before the
+           first logo and the loop seam carried a double gap;
+         • padding counts toward the width the belt measures, so a row that fit
+           with room to spare could still be pushed into looping by its own
+           whitespace.
+
+       A gap sits only BETWEEN items, which is what the space was ever for. */
+    gap: clamp(1.75rem, 3.5cqi, 4rem);
+    /* Centred until the script decides there is enough to scroll — a three-logo
+       tier is a centred row, not a belt with a gap in it. */
+    justify-content: center;
+}
+/* Set by the script once it knows the row overflows: it is a moving belt now, so
+   it starts at the left — and only THEN is it worth a compositing layer.
+   `will-change` on a rail that never moves is a layer held for nothing. */
+.fc-belt.is-looping .fc-belt-rail {
+    justify-content: flex-start;
+    will-change: transform;
+}
+/* ── The cursors, and what counts as being ON a logo ─────────────────────────
+   A logo is a mark on transparent paper, not the rectangle it is delivered in:
+   a wordmark's box is mostly air, and two of them side by side leave a wide
+   strip between the marks where the pointer was over a link and said so. So the
+   hand is shown — and the click is allowed — only over the artwork's own opaque
+   pixels, which logo-belt.js tests against the image's alpha and reports by
+   putting .is-on-logo on the belt.
+
+   Everywhere else the cursor is whatever the row itself is: the open hand when
+   it loops and can be dragged, the plain arrow when it does not, and the closed
+   hand while it is being dragged, which wins over all of it.
+
+   `.fc-belt-cell` has to give up its own cursor for any of that to show: the
+   site-wide `html a[href] { cursor: pointer }` in inc/bootstrap.php applies
+   DIRECTLY to the cell, and a directly-applied declaration beats an inherited
+   one however specific the inherited one is. Doubling the class clears that
+   rule; `inherit` then puts the cell back under the viewport's decision.
+
+   ORDER IS THE LOGIC here — every selector below is (0,3,0), so the last one
+   that matches is the one that applies. */
+.fc-belt.is-looping .fc-belt-viewport { cursor: var(--fc-cur-grab, grab); }
+.fc-belt.is-on-logo .fc-belt-viewport { cursor: var(--fc-cur-pointer, pointer); }
+.fc-belt.is-dragging .fc-belt-viewport { cursor: var(--fc-cur-grabbing, grabbing); }
+.fc-belt-cell.fc-belt-cell,
+.fc-belt-cell.fc-belt-cell * { cursor: inherit; }
+
+.fc-belt-item { flex: 0 0 auto; margin: 0; }
+
+/* ── Logo sizing: ONE HEIGHT for every logo ─────────────────────────────────
+   Every logo is drawn at the same height and its box takes whatever width that
+   shape needs. A square mark is a square; a wordmark is a wide rectangle; both
+   stand exactly as tall as each other, which is what makes the row read as one
+   line of equals rather than a set of differently-sized pictures.
+
+   It replaces fitting everything into one SQUARE box, which sounds like the same
+   thing and is not: a 4:1 wordmark contained in a square is limited by its width
+   and comes out a quarter of the height of the square mark beside it. Filling
+   the height and letting the width follow is what "the same size" means for two
+   things that are not the same shape.
+
+   --fc-logo-ar is the logo's own ratio, written inline per cell by the template
+   from the media library (fc_logo_aspect()). Server-side deliberately: the box's
+   width is then known at FIRST PAINT, so nothing reflows when the images decode
+   and the belt measures the right width the first time instead of deciding
+   whether to scroll from a row of empty boxes.
+
+   The section's height is still fixed regardless — the row is as tall as
+   --fc-logo-box and nothing else, whatever shapes are in it. */
+.fc-belt { container-type: inline-size; }
+.fc-belt-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* NO PADDING. The separation is the rail's `gap` — see the note there for
+       why it could not simply be made smaller. */
+    color: inherit;
+    text-decoration: none;
+    /* The full base height, whatever this particular logo's box came out as.
+       That is what keeps the SECTION a fixed height: a tier of nothing but wide
+       wordmarks — every box shorter than the base — still occupies the same row
+       as a tier with a square mark in it. */
+    height: var(--fc-logo-box);
+}
+.fc-belt-box {
+    position: relative;
+    display: block;
+    /* Both axes as multiples of one base size, computed per logo by
+       fc_logo_box(): a wide mark is scaled up HALF as far as filling the height
+       would take it, so it reads as an equal without taking four box-widths of
+       the row. Plain arithmetic rather than `aspect-ratio`, so there is no second
+       way for the two to disagree.
+       cqi — a proportion of the belt, not the window — so the logos scale with
+       the column they are in. Declared on the rail (see there) because cqi
+       written on the container itself measures the next container up.
+       Both fall back to 1 — a square — when the shape is unknown, which is the
+       one box that cannot hide anything: `contain` letterboxes inside it. */
+    width: calc(var(--fc-logo-box) * var(--fc-logo-w, 1));
+    height: calc(var(--fc-logo-box) * var(--fc-logo-h, 1));
+}
+.fc-belt-logo {
+    display: block;
+    /* The box already matches the artwork's ratio, so `contain` fills it exactly
+       — it is here for the case where it does not: an unknown shape, or one past
+       the FC_LOGO_AR_MAX cap. Those letterbox rather than crop or stretch. */
+    width: 100%;
+    height: 100%;
+    object-fit: contain;     /* real colours — no grayscale / contrast filter */
+    -webkit-user-drag: none;
+    user-drag: none;
+}
+/* A sponsor's second logo is not a hover state any more: it is the logo shown
+   INSIDE the cursor's highlight, where assets/spotlight-dots.js lays a copy of
+   the box over the original (FOSSCOMM → Sponsors, "Logo inside the
+   highlight"). */
+
+
+/* ── Carousel progress ──────────────────────────────────────────────────────
+   One dot per sponsor, filling in the tier's colour as the belt travels one full
+   set — so the row says how many there are AND how far round you have come,
+   which a belt with no edges otherwise cannot tell you.
+
+   ONLY IN CAROUSEL MODE. A tier whose logos all fit is not a carousel and has no
+   progress to report; a row of dots under a line that never moves would be a
+   control that does nothing. The decision is measured at runtime, so CSS reveals
+   them off the class the script sets rather than PHP deciding.
+
+   The fill is pure CSS arithmetic. logo-belt.js writes ONE variable on the
+   container, --fc-belt-p, holding progress scaled to the dot count (0 → n). Each
+   dot knows its own index, so its fill is (p - i) clamped to 0..1 — they fill one
+   at a time, each one gradually, and the script never touches a dot. */
+.fc-belt-dots { display: none; }
+.fc-belt.is-looping .fc-belt-dots {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
+    margin-top: clamp(1rem, 2vw, 1.5rem);
+}
+.fc-belt-dot {
+    position: relative;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    overflow: hidden;
+    /* What has NOT filled yet: the light grey of the lines, solid — the tier's
+       colour advancing through it, rather than one colour at two opacities,
+       which read as a dot that had merely faded. */
+    background: #DDDDDA;
+}
+.fc-belt-dot-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    /* (p - i), clamped — 0% until this dot's turn, 100% once it has passed.
+       clamp() on percentages does the whole job with no per-dot JS. The circle's
+       `overflow: hidden` crops the advancing edge, so a half-filled dot reads as
+       a level rising through it. */
+    width: clamp(0%, calc((var(--fc-belt-p, 0) - var(--fc-dot-i, 0)) * 100%), 100%);
+    /* The part that HAS filled: the tier's own colour, solid — the same one as
+       the rule under its title, so the dots say which tier they belong to. */
+    background: var(--fc-tier-colour, #0033FF);
+}
+
+/* A tier that runs left to right (every other one — assets/logo-belt.js marks
+   it .is-rightward) has its indicator mirrored to match: the first dot is the
+   rightmost, and the fill travels right to left, each dot filling from its
+   right edge. */
+.fc-belt.is-rightward .fc-belt-dots { flex-direction: row-reverse; }
+.fc-belt.is-rightward .fc-belt-dot-fill { left: auto; right: 0; }
+/* A sponsor with no logo yet: the name, set at the same height so the line does
+   not collapse around it. */
+.fc-belt-name {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    white-space: nowrap;
+    color: var(--color-ink-muted, #6B6B66);
+    font-size: 0.95rem;
+    line-height: 1.2;
+}
+
+/* ── Get Involved: funding progress bar ─────────────────────────────────── */
+.fc-progress {
+    position: relative;
+    height: 0.6rem;
+    background: var(--color-border, rgba(10, 10, 10, 0.12));
+}
+/* Under/at goal: clip the fill to the track. */
+.fc-progress:not(.is-over) { overflow: hidden; }
+.fc-progress-fill {
+    position: absolute;
+    inset: 0 auto 0 0;          /* pin left, full height */
+    height: 100%;
+    background: var(--color-accent, #0033FF);
+    transition: width 600ms ease;
+}
+/* Over goal: the accent fill stays full inside the track; a separate stub
+   pinned at the track's right edge sticks out in the HIGHLIGHT colour, and its
+   width is trembled by assets/cfp.js (left edge never moves).
+
+   #EE8101, not the red it used to be. Every accented thing on the site now works
+   off one pair — #0033FF at rest, #EE8101 when picked out — and the funding
+   overflow was the last place carrying a colour of its own (two, in fact:
+   #FF3B30 and #FF1E1E, neither used anywhere else). The pair is defined in PHP as
+   FC_OUTLINE_REST / FC_OUTLINE_HOVER (inc/helpers.php); it is a literal here
+   because this is a static stylesheet with no access to the options, and an
+   invented var() name nothing sets would only look like it was wired up. */
+.fc-progress.is-over { overflow: visible; }
+.fc-progress.is-over .fc-progress-fill { width: 100%; }
+.fc-progress-over {
+    position: absolute;
+    left: 100%;                 /* exactly the track's right edge = 100% */
+    top: 0;
+    bottom: 0;
+    z-index: 2;                 /* above the erased-border gap, below shards */
+    width: 48px;                /* base length; assets/cfp.js trembles 36–60px */
+    /* Gradient is locked to the MAX width (60px) via background-size, so it
+       does NOT rescale as the width shakes — it stays static and the current
+       width simply reveals more/less of it. The blend is over by 55% of that
+       60px, so past ~33px the tremble only lengthens a solid highlight tail
+       rather than re-blending, which is what keeps the shake from shimmering. */
+    background-color: #EE8101;
+    /* TWO stops, where there were three. The old ramp went blue → #FF3B30 →
+       #FF1E1E, two shades of red making the tip look deeper the further it
+       reached. With one highlight colour there is no second shade to ramp
+       towards, and repeating #EE8101 at 55% and 100% would be a stop that does
+       nothing. Ending the blend at 55% keeps the geometry identical — the
+       transition finishes exactly where it did — and the colour simply holds
+       from there to the tip. */
+    background-image: linear-gradient(
+        to right,
+        var(--color-accent, #0033FF) 0%,
+        #EE8101 55%
+    );
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: 60px 100%;
+    transition: width 60ms cubic-bezier(0.22, 0.9, 0.28, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+    .fc-progress-fill { transition: none; }
+    .fc-progress-over { transition: none; width: 48px; }
+}
+/* Over goal: the funding container's straight right border is replaced by
+   two angled stubs — one from the top-right corner sloping down-right, one
+   from the bottom-right corner sloping up-right, each 45% of the card's
+   actual height, with a 10% gap in the middle for the overflow stub. */
+.fc-fund { position: relative; }
+.fc-fund.is-broken {
+    border-right-color: transparent; /* the angled stubs replace the right border */
+    overflow: visible;               /* let the overflow stub + stubs spill out */
+}
+.fc-fund-break {
+    position: absolute;
+    top: -1px;                       /* meet the top/bottom container borders cleanly */
+    right: -18px;                    /* local x=2 lands on the box's right edge */
+    width: 20px;
+    /* SVG elements with width + viewBox use the viewBox aspect ratio for
+       `height: auto`, which would clamp this to 100px regardless of the
+       parent's height. Explicit calc forces the SVG to actually span the
+       full funding card (+1px top and +1px bottom to meet the borders). */
+    height: calc(100% + 2px);
+    color: var(--color-border, color-mix(in oklab, #0A0A0A 12%, transparent));
+    pointer-events: none;
+    overflow: visible;
+}
+.fc-fund-break path {
+    fill: none;
+    stroke: currentColor;       /* same colour as the container outline */
+    stroke-width: 1;            /* same width as the 1px container border */
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+    vector-effect: non-scaling-stroke;
+}
+
+
+/* ── Spotlight dot panels ─────────────────────────────────────────────────────
+   assets/spotlight-dots.js runs a pixel GOO trail after the cursor — a springy
+   head, a lagging tail, drops that fall through the page and off the screen, a
+   burst on a click — quantised to the 6px cells, with a three-ring outline (2
+   cells each) round all of it. It is painted BEHIND every piece of content: on
+   one canvas under the whole landing page where there is a GPU, else on each
+   section's own. A clipped copy of the type lies over the original so it can
+   change colour inside the goo. Two schemes (the landing page is all paper
+   now, but for the hero's blue panel, which is not lit):
+
+     data-fc-spotlight="blue"  — Speakers, Communities, Footer, the hero's panel
+                         on the blue               inside the disc (white)
+       type            #FAFAF7                   #0A0A0A
+       highlighted     --fc-blue-hi (the         #0033FF
+                       *marked* Qaroxe run, ">")
+       hovered         --fc-blue-hi; highlighted #EE8101
+                       things go #FAFAF7
+       outline  rest   #FAFAF7                   #0033FF
+                hover  --fc-blue-hi              #EE8101
+       [ONLINE]        #FAFAF7 → --fc-blue-hi    #6B6B66 → #EE8101
+       small print     #8CA3FF                   #6B6B66
+       lines           #8CA3FF                   #DDDDDA
+       photo           greyscale, always         colour
+       outline         #FFEE87 at 50/25/10%
+
+     data-fc-spotlight="paper" — every lit section of the landing page, the
+       page's paper and dot field showing through each. The site's own colours
+       outside; inside the goo (blue) the blue panels' colours, as in the
+       left-hand column above. Outline #99D0DE at 50/25/10%.
+
+   "Hovered", on the blue, is the part under the pointer — a name only while the
+   pointer is on its letters, a portrait's ring only while it is on the portrait,
+   the [ONLINE] badge only while it is on the badge — not the whole card. The
+   script sets data-fc-on on that part. Inside a copy, the original's :hover is
+   mirrored as data-fc-hov (see the script). */
+
+/* ─ THE HIGHLIGHT ON THE BLUE ─────────────────────────────────────────────────
+   One colour for everything that is highlighted or hovered on a blue ground: a
+   title's marked Qaroxe run and its ">", a name's outline and a portrait's ring
+   under the pointer, the [ONLINE] badge under the pointer. Declared on :root
+   because the portrait-ring filter lives outside the panels and reads it too.
+
+   Candidates — contrast against the panel blue #0033FF, and how far each sits
+   from the white type (ΔE, CIE76): above ~40 it reads as a third colour rather
+   than a tint of the white, which is what the old #99D0DE (ΔE 27) did not do.
+     #55FFFF   5.9:1   ΔE 45   VGA / DOS bright cyan — the pixel face's own era
+     #00F5D4   5.2:1   ΔE 56   aquamarine — the furthest from both the white and
+                               the small-print blue
+     #66FFE3   5.8:1   ΔE 47   mint aqua
+     #2EF2FF   5.2:1   ΔE 46   bright sky cyan
+     #34E2E2   4.5:1   ΔE 46   the GNOME / Tango terminal's bright cyan
+     #00E5FF   4.7:1   ΔE 47   electric cyan
+     #99D0DE   4.3:1   ΔE 27   the previous one, for comparison
+   To try one on the live page without editing this file, add ?fc-hi=00F5D4 (any
+   six-digit hex) to the address. */
+:root { --fc-blue-hi: #55FFFF; }
+
+/* ─ structure, both schemes ───────────────────────────────────────────────── */
+/* isolation + a NEGATIVE z-index puts the layers above the section's own
+   background but under all of its content, without touching how any child is
+   positioned. Ground first, the goo canvas over it. */
+[data-fc-spotlight] { position: relative; isolation: isolate; }
+[data-fc-spotlight] > .fc-spot-ground,
+[data-fc-spotlight] > .fc-spot-core {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    display: block;
+}
+[data-fc-spotlight] > .fc-spot-core { overflow: hidden; }
+.fc-spot-core > .fc-spot-core-img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    will-change: transform;
+}
+/* A blue panel's dots: the page background's own field (assets/wave-bg.js) in
+   blue, on a canvas the WINDOW's size that the script holds position: fixed,
+   so it stands still under a scroll exactly as the background does. The clip
+   is what keeps a fixed child inside its section — overflow would not. */
+[data-fc-spotlight] > .fc-spot-ground { clip-path: inset(0); }
+
+/* ─ one ground under the landing page ────────────────────────────────────────
+   The page's paper with the one dot field (assets/wave-bg.js) and the trail
+   under it, showing through every lit section. The sections with a paper
+   ground of their own (bg-paper: Manifesto, Schedule, Venue, Get Involved,
+   FAQ) are not lit: white panels in front of all of it. (Cards, strips and
+   bars inside the lit sections keep their own paper — the trail runs on under
+   them.) */
+/* The seam along a section's top, drawn UNDER the trail: the 1px border becomes
+   1px of padding and an inset line in the same pixel row, which paints with
+   the section's background, below its z-index -1 goo — so the goo runs over the
+   line rather than a grey hairline cutting across the blue. The layout does not
+   move by a pixel (every lit section has no top padding of its own). */
+[data-fc-spotlight="paper"].border-t {
+    border-top-width: 0;
+    padding-top: 1px;
+    box-shadow: inset 0 1px 0 var(--color-border, #DDDDDA);
+}
+/* With the GPU drawing the goo — one canvas under EVERY section, not one in
+   each — this line paints over it all the same; there the script lays a copy
+   of it over the core, in the goo's line colour, as it does for every line in
+   the goo (seamCopy in assets/spotlight-dots.js). */
+
+/* ─ the blue scheme ──────────────────────────────────────────────────────── */
+/* (No section is blue any more — Speakers, Communities and the footer are
+   white with the rest. The scheme stays for a panel marked blue.) */
+[data-fc-spotlight="blue"] {
+    position: relative;
+    isolation: isolate;
+    /* LITERAL, and !important: the accent is redefined just below, and the
+       hero's panel paints itself with var(--color-accent) from a rule printed
+       later than this file. */
+    background-color: #0033FF !important;
+    color: #FAFAF7;
+    /* A hairline in --color-border sits as a dark seam on solid blue. */
+    border-top: 0 !important;
+
+    /* Redefining the VARIABLES rather than chasing each rule — the theme writes
+       var(--color-ink, …) / var(--color-accent, …) throughout, so one override
+       moves headings, names, roles, markers and links together.
+       --color-accent is the HIGHLIGHT colour (the marked run, the ">");
+       --fc-hover-accent is what plain type turns under the pointer;
+       --fc-accent-hot is what a highlighted thing turns — the two swap.
+       Every line and outline on the blue is the small-print blue. */
+    --color-ink: #FAFAF7;
+    --color-ink-muted: #8CA3FF;
+    --color-ink-faint: #8CA3FF;
+    --color-border: #8CA3FF;
+    --color-accent: var(--fc-blue-hi);
+    --fc-accent-hot: #FAFAF7;
+    --fc-hover-accent: var(--fc-blue-hi);
+    --fc-spk-rim: #FAFAF7;
+    --fc-spk-rim-hover: var(--fc-blue-hi);
+    /* assets/dist/fc.css's own accent (.accent-link:hover — the sponsor and Get
+       Involved buttons) — the site blue, which is no colour at all on the blue */
+    --accent: var(--fc-blue-hi);
+}
+/* THE REASON THE OUTLINE NEVER CHANGED ON THE LIVE SITE. sections/speakers.php
+   and sections/communities.php write the dashboard's outline colours INLINE on
+   the row's wrapper, and an inline declaration beats every rule on the section
+   above it. !important is the one thing that outranks inline. */
+[data-fc-spotlight="blue"] .fc-spk-wrap,
+[data-fc-spotlight="blue"] .fc-com-wrap,
+[data-fc-spotlight="blue"] .fc-spk-grid,
+[data-fc-spotlight="blue"] .fc-com-grid {
+    --fc-spk-rim: #FAFAF7 !important;
+    --fc-spk-rim-hover: var(--fc-blue-hi) !important;
+}
+/* The belt lights the whole card (.is-hot), and /speakers/ and /communities/
+   light it on :hover — the belt still holds the row and gives the pointer
+   cursor — but the colours answer only to the part under the pointer: the
+   name's letters ([data-fc-on], from the script) … */
+[data-fc-spotlight="blue"] .fc-spk-card.is-hot,
+[data-fc-spotlight="blue"] .fc-spk-grid .fc-spk-card:hover,
+[data-fc-spotlight="blue"] .fc-com-grid .fc-com-card:hover { --fc-spk-rim: #FAFAF7; }
+
+/* The line the speakers stand on, on the landing page: the top of Communities,
+   in the role blue like every line on the blue. (The rest of the blue panels'
+   top edges stay bare — a line there was a dark seam against the paper.) */
+body.fc-landing #communities[data-fc-spotlight="blue"] { border-top: 1px solid #8CA3FF !important; }
+
+/* /speakers/ and /communities/: blue from the top bar to the bottom of the
+   window, however short the list. */
+#speakers.fc-grid-page, #communities.fc-grid-page { min-height: 100vh; }
+[data-fc-spotlight="blue"] .fc-spk-name[data-fc-on] { --fc-spk-rim: var(--fc-blue-hi); }
+
+/* The hollow line of a name, a touch finer on the blue. Light lines on a dark
+   ground read heavier than the same width dark on light, so the 0.035em the
+   paper uses (the venue's WEST ATTICA, and the names themselves before they
+   were on the blue) came out looking bolder here; 0.028em — a fifth off — puts
+   the hollow names back at that weight. In em, so it scales with the name. */
+@supports (-webkit-text-stroke: 1px black) {
+    [data-fc-spotlight="blue"] .fc-spk-name span.is-outline { -webkit-text-stroke-width: 0.028em; }
+}
+
+[data-fc-spotlight="blue"] .fc-spk-roles,
+[data-fc-spotlight="blue"] .fc-spk-roles li,
+[data-fc-spotlight="blue"] .fc-label { color: #8CA3FF; }
+/* [ONLINE]: white, and the highlight while the pointer is on the badge. The dot
+   and its pulsing ring are currentColor and follow. */
+[data-fc-spotlight="blue"] .fc-spk-online { color: #FAFAF7; }
+[data-fc-spotlight="blue"] .fc-spk-online[data-fc-on] { color: var(--fc-blue-hi); }
+
+/* The progress dots: the track in the small-print blue, the fill in the
+   highlight (it was ink-on-accent, which would be white on white here). */
+[data-fc-spotlight="blue"] .fc-spk-dot,
+[data-fc-spotlight="blue"] .fc-com-dot { background: #8CA3FF; }
+
+/* The section title under the pointer: the words go to the highlight, and the
+   marked run and the ">" — the highlight at rest — go white, the site's swap. */
+[data-fc-spotlight="blue"] .fc-section-heading-link:hover,
+[data-fc-spotlight="blue"] .fc-section-heading-link:focus-visible { color: var(--fc-blue-hi); }
+[data-fc-spotlight="blue"] .fc-section-heading-link:hover .fc-accent.fc-accent,
+[data-fc-spotlight="blue"] .fc-section-heading-link:focus-visible .fc-accent.fc-accent { color: #FAFAF7; }
+
+/* … and the portrait ([data-fc-on] on its box while the pointer is on an opaque pixel
+   of it). The ring moves OFF the photo box and onto the image itself, as the
+   last filter in the list — greyscale first, ring second, so the ring keeps its
+   colour — because the copy inside the disc needs a ring of its own in the
+   disc's colours, and a ring on the box would be drawn round the copy's ring
+   as well. The filters are this script's (#fc-spot-ring-*): the theme's two
+   are flooded with the dashboard colours. */
+[data-fc-spotlight="blue"] .fc-spk-photo { filter: none !important; }
+[data-fc-spotlight="blue"] .fc-spk-shot:not(.fc-spot-dup) {
+    filter: grayscale(1) contrast(1.06) brightness(1.02) url(#fc-spot-ring-rest) !important;
+}
+[data-fc-spotlight="blue"] .fc-spk-photo[data-fc-on] .fc-spk-shot:not(.fc-spot-dup) {
+    filter: grayscale(1) contrast(1.06) brightness(1.02) url(#fc-spot-ring-hot) !important;
+}
+
+/* ─ the copies ───────────────────────────────────────────────────────────────
+   Laid exactly over each original by the script (inline position, so nothing
+   here can drop them into the flow), each in a WRAPPER (<fc-spot>) that the
+   script CLIPS to the goo's core every frame — clip-path: path(), in the
+   wrapper's own px. A photo in reach goes on a layer of its own inside its
+   wrapper, so a new clip redraws the clip's mask and not the photo with the
+   blur its ring is made of.
+
+   A clip and not a mask: a mask does nothing to ink that stands outside the
+   copy's box, and the hero strips' magnified ends do.
+
+   A copy the goo does not reach is clipped to nothing (the inset(50%) below)
+   rather than hidden — visibility is inherited, so hiding and showing a copy
+   restyled every element in it, and on this page that is dear — and its
+   contents are not rendered at all (content-visibility: hidden), so the page's
+   own restyling and painting pass over them. The script undoes both, inline,
+   on each copy the goo reaches. */
+[data-fc-spotlight] .fc-spot-dup { color: var(--color-ink); }
+[data-fc-spotlight] .fc-spot-dupwrap { clip-path: inset(50%); content-visibility: hidden; }
+/* A copy's own animations — a pulsing badge, a strip's carousel — hold still
+   until the goo reaches it; otherwise every unseen copy on the page ticked
+   every frame. The script plays each one on its original's clock when the goo
+   arrives and holds it again when it leaves. */
+[data-fc-spotlight] .fc-spot-dup,
+[data-fc-spotlight] .fc-spot-dup *,
+[data-fc-spotlight] .fc-spot-dup::before,
+[data-fc-spotlight] .fc-spot-dup::after,
+[data-fc-spotlight] .fc-spot-dup *::before,
+[data-fc-spotlight] .fc-spot-dup *::after { animation-play-state: paused !important; }
+
+/* ── blue scheme — the disc is WHITE, so the copies take the paper colours ── */
+[data-fc-spotlight="blue"] .fc-spot-dup {
+    --color-ink: #0A0A0A;
+    --color-ink-muted: #6B6B66;
+    --color-ink-faint: #6B6B66;
+    --color-border: #DDDDDA;
+    --color-accent: #0033FF;
+    --color-paper: #FAFAF7;
+    --fc-accent-hot: #EE8101;
+    /* unset: a mirrored hover takes the site's own accent in here */
+    --fc-hover-accent: initial;
+    --fc-spk-rim: #0033FF;
+    --accent: #0033FF;
+}
+/* The lit name inside the disc: orange. Set ON the copy, because the copy
+   declares its own --fc-spk-rim above, which would otherwise shadow it. */
+[data-fc-spotlight="blue"] .fc-spk-name[data-fc-on] > .fc-spot-dupwrap > .fc-spot-dup { --fc-spk-rim: #EE8101; }
+[data-fc-spotlight="blue"] .fc-spot-dup.fc-spk-roles,
+[data-fc-spotlight="blue"] .fc-spot-dup.fc-spk-roles li,
+[data-fc-spotlight="blue"] .fc-spot-dup .fc-spk-roles,
+[data-fc-spotlight="blue"] .fc-spot-dup .fc-spk-roles li,
+[data-fc-spotlight="blue"] .fc-spot-dup.fc-label,
+[data-fc-spotlight="blue"] .fc-spot-dup .fc-label,
+[data-fc-spotlight="blue"] .fc-spot-dup.fc-spk-online { color: #6B6B66; }
+[data-fc-spotlight="blue"] .fc-spk-online[data-fc-on] > .fc-spot-dupwrap > .fc-spot-dup { color: #EE8101; }
+/* the copy's title under the pointer: the paper behaviour — the words go blue
+   and the *marked* run goes ink */
+[data-fc-spotlight="blue"] .fc-spot-dup .fc-section-heading-link[data-fc-hov] { color: #0033FF; }
+[data-fc-spotlight="blue"] .fc-spot-dup .fc-section-heading-link[data-fc-hov] .fc-accent.fc-accent { color: #0A0A0A; }
+/* the hero's wordmark: ink, the hollow "/26" in the blue */
+[data-fc-spotlight="blue"] .fc-spot-dup.fc-hero-wordmark { color: #0A0A0A; }
+[data-fc-spotlight="blue"] .fc-spot-dup .fc-hero-outline { -webkit-text-stroke-color: #0033FF; }
+@supports not (-webkit-text-stroke: 1px white) {
+    [data-fc-spotlight="blue"] .fc-spot-dup .fc-hero-outline { color: #0033FF; }
+}
+
+/* The photo, in colour, inside the disc only, with the disc's ring (the blue
+   scheme's; the paper scheme's is below). */
+[data-fc-spotlight] .fc-spk-shot.fc-spot-dup {
+    filter: contrast(1.06) brightness(1.02) url(#fc-spot-ring-in-rest) !important;
+    transition: none;
+}
+[data-fc-spotlight] .fc-spk-photo[data-fc-on] .fc-spk-shot.fc-spot-dup {
+    filter: contrast(1.06) brightness(1.02) url(#fc-spot-ring-in-hot) !important;
+}
+
+/* ── paper scheme — the disc is BLUE, so the copies take the blue panels' ── */
+[data-fc-spotlight="paper"] .fc-spot-dup {
+    --color-ink: #FAFAF7;
+    --color-ink-muted: #8CA3FF;
+    --color-ink-faint: #8CA3FF;
+    --color-accent: var(--fc-blue-hi);
+    --color-paper: #0033FF;
+    --color-border: #8CA3FF;
+    --fc-accent-hot: #FAFAF7;
+    --fc-hover-accent: var(--fc-blue-hi);
+    --fc-spk-rim: #FAFAF7;
+    --fc-spk-rim-hover: var(--fc-blue-hi);
+    /* fc.css's accent: a hovered sponsor button's label went the site blue —
+       on the blue disc, invisible */
+    --accent: var(--fc-blue-hi);
+    /* the sponsor tiers' own colour variables, which are resolved where they
+       are declared and so would not follow the ones above: the hollow run in
+       white, like every outline on the blue */
+    --fc-tier-colour: #FAFAF7;
+    --fc-tier-track: rgba(250, 250, 247, 0.5);
+}
+/* A box with a literal paper fill: blue, so it does not hide the disc. */
+[data-fc-spotlight="paper"] .fc-spot-dup.fc-spot-solid { background-color: #0033FF !important; }
+[data-fc-spotlight="paper"] .fc-spot-dup.fc-label,
+[data-fc-spotlight="paper"] .fc-spot-dup .fc-label { color: #8CA3FF; }
+/* the title under the pointer: the words to the highlight, the marked run white */
+[data-fc-spotlight="paper"] .fc-spot-dup .fc-section-heading-link[data-fc-hov] { color: var(--fc-blue-hi); }
+/* A button under the pointer, inside the goo: the label to the highlight (the
+   ">" and any marked run go white by themselves — the house orange, in here).
+   On the white a button's label holds still on hover (see .fc-arrow above);
+   inside the goo it lights, as asked for the hero's buttons, and every button
+   alike: the hero's (whose copy is the link), and the sponsor, Get Involved and
+   news buttons (fc_cta_link, .fc-btn on the link). */
+[data-fc-spotlight="paper"] .fc-spot-dup.fc-hero-cta[data-fc-hov],
+[data-fc-spotlight="paper"] a.fc-spot-dup.fc-btn[data-fc-hov],
+[data-fc-spotlight="paper"] .fc-spot-dup a.fc-btn[data-fc-hov] { color: var(--color-accent); }
+[data-fc-spotlight="paper"] .fc-spot-dup .fc-section-heading-link[data-fc-hov] .fc-accent.fc-accent { color: #FAFAF7; }
+/* a tier's filled marked run and its ">": the highlight */
+[data-fc-spotlight="paper"] .fc-spot-dup.fc-tier-title span.is-accent,
+[data-fc-spotlight="paper"] .fc-spot-dup.fc-tier-title .fc-tier-arrow.fc-tier-arrow { color: var(--fc-blue-hi); }
+/* The funding figure — the section title's marked Qaroxe run — in the highlight,
+   in a small-print glass. The wave is a data: URI with a literal colour in it,
+   which no variable reaches: this is the default's, and the script rewrites the
+   rule with whatever --fc-blue-hi actually is. */
+[data-fc-spotlight="paper"] .fc-spot-dup .fc-fund-digits {
+    background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='24' viewBox='0 0 120 24' preserveAspectRatio='none'%3E%3Cpath d='M0 12 Q15 2 30 12 T60 12 T90 12 T120 12 V24 H0 Z' fill='%2355FFFF'/%3E%3C/svg%3E"),
+        linear-gradient(var(--fc-blue-hi), var(--fc-blue-hi)),
+        linear-gradient(#8CA3FF, #8CA3FF);
+}
+
+/* ── Eyebrows and the sponsors' progress dots, inside the goo ─────────────────
+   An eyebrow under the pointer: the words to the highlight (the number goes
+   white by itself). The small print's colour above outranks the mirrored
+   :hover. */
+[data-fc-spotlight="paper"] .fc-spot-dup.fc-eyebrow[data-fc-hov],
+[data-fc-spotlight="paper"] .fc-spot-dup .fc-eyebrow[data-fc-hov] { color: var(--fc-blue-hi); }
+/* The sponsors' progress dots. In a copy the track (ink) and the tier's colour
+   are both white: the track in the small print and the fill in the highlight,
+   as the speakers' dots. */
+[data-fc-spotlight="paper"] .fc-spot-dup .fc-belt-dot { background: #8CA3FF; }
+[data-fc-spotlight="paper"] .fc-spot-dup .fc-belt-dot-fill { background: var(--fc-blue-hi); }
+
+/* ── Speakers and Communities, white, under the blue goo ──────────────────────
+   Inside the goo they read as the blue panels did: white type and rings, the
+   small print #8CA3FF, the lit card in the highlight. */
+/* The portrait's RING moves off the photo box and onto the image — greyscale
+   first, ring last, so the ring keeps its colour. A filter on the box takes
+   the copy inside it as its input too: it drew a second ring round the copy's,
+   and wiped the goo's dots round the person. */
+[data-fc-spotlight="paper"] .fc-spk-photo { filter: none !important; }
+[data-fc-spotlight="paper"] .fc-spk-shot:not(.fc-spot-dup) {
+    filter: grayscale(1) contrast(1.06) brightness(1.02) url(#fc-spk-rim-rest);
+}
+[data-fc-spotlight="paper"] .fc-spk-card.is-hot .fc-spk-shot:not(.fc-spot-dup) {
+    filter: grayscale(0) contrast(1.06) brightness(1.02) url(#fc-spk-rim-hot);
+}
+/* The copy: the photo in colour, with a WHITE ring — the highlight while the
+   card is lit (the rings are this script's, see ringDefs). */
+[data-fc-spotlight="paper"] .fc-spk-shot.fc-spot-dup {
+    filter: contrast(1.06) brightness(1.02) url(#fc-spot-ring-rest) !important;
+}
+[data-fc-spotlight="paper"] .fc-spk-card.is-hot .fc-spk-shot.fc-spot-dup {
+    filter: contrast(1.06) brightness(1.02) url(#fc-spot-ring-hot) !important;
+}
+/* The lit card (.is-hot, assets/speakers-belt.js): the hollow run and [ONLINE]
+   in the highlight. On the copy itself, which declares its own --fc-spk-rim. */
+[data-fc-spotlight="paper"] .fc-spk-card.is-hot .fc-spot-dup { --fc-spk-rim: var(--fc-blue-hi); }
+[data-fc-spotlight="paper"] .fc-spot-dup.fc-spk-online { color: var(--fc-spk-rim); }
+/* the roles: the small print */
+[data-fc-spotlight="paper"] .fc-spot-dup.fc-spk-roles,
+[data-fc-spotlight="paper"] .fc-spot-dup.fc-spk-roles li,
+[data-fc-spotlight="paper"] .fc-spot-dup .fc-spk-roles,
+[data-fc-spotlight="paper"] .fc-spot-dup .fc-spk-roles li { color: var(--color-ink-muted); }
+/* the hollow line of a name, a fifth finer: a light line on the blue reads
+   heavier than the same width dark on the paper */
+@supports (-webkit-text-stroke: 1px black) {
+    [data-fc-spotlight="paper"] .fc-spot-dup.fc-spk-name span.is-outline,
+    [data-fc-spotlight="paper"] .fc-spot-dup .fc-spk-name span.is-outline { -webkit-text-stroke-width: 0.028em; }
+}
+/* the progress dots: the track in the small print (the fill is the copy's
+   accent, the highlight) */
+[data-fc-spotlight="paper"] .fc-spot-dup .fc-spk-dot,
+[data-fc-spotlight="paper"] .fc-spot-dup .fc-com-dot { background: #8CA3FF; }
+
+/* The hero's strips, inside the disc: each shows the state it is NOT in.
+   At rest, the hover look — white fill, a blue line along each edge, ink words,
+   blue hollow run; under the pointer, the rest look — the blue slab, white
+   words. The fill wipes with the original's, from the same edge. */
+[data-fc-spotlight] .fc-band > .fc-spot-dupwrap > .fc-spot-dup { --color-accent: #0033FF; }
+[data-fc-spotlight] .fc-band > .fc-spot-dupwrap > .fc-spot-dup .fc-band-slab::before { transform: scaleY(1); }
+[data-fc-spotlight] .fc-band > .fc-spot-dupwrap > .fc-spot-dup .fc-band-v { color: #0A0A0A; }
+[data-fc-spotlight] .fc-band > .fc-spot-dupwrap > .fc-spot-dup .fc-band-v .is-outline { -webkit-text-stroke-color: #0033FF; }
+[data-fc-spotlight] .fc-band > .fc-spot-dupwrap > .fc-spot-dup .fc-band-k.fc-label { color: #8CA3FF; }
+/* …and under the pointer, on the blue, the blue slab carries a WHITE line along
+   each edge: the white strip's blue lines, mirrored, wiped in from the same
+   edge as the fill wipes out. */
+[data-fc-spotlight] .fc-band > .fc-spot-dupwrap > .fc-spot-dup .fc-band-slab::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-shadow:
+        inset 0 calc(2px * var(--fc-k)) 0 #fff,
+        inset 0 calc(-2px * var(--fc-k)) 0 #fff;
+    transform: scaleY(0);
+    transform-origin: center var(--fc-band-from, top);
+    transition: transform 150ms cubic-bezier(0.2, 0, 0, 1);
+    pointer-events: none;
+}
+@media (hover: hover) {
+    [data-fc-spotlight] .fc-band:hover > .fc-spot-dupwrap > .fc-spot-dup .fc-band-slab::before { transform: scaleY(0); }
+    [data-fc-spotlight] .fc-band:hover > .fc-spot-dupwrap > .fc-spot-dup .fc-band-slab::after { transform: scaleY(1); }
+    [data-fc-spotlight] .fc-band:hover > .fc-spot-dupwrap > .fc-spot-dup .fc-band-v { color: #fff; }
+    [data-fc-spotlight] .fc-band:hover > .fc-spot-dupwrap > .fc-spot-dup .fc-band-v .is-outline { -webkit-text-stroke-color: #fff; }
+}
+
+/* (With reduced motion the copies stay: the disc still sits under the pointer,
+   and without them the type on it would be ink on blue. Nothing in a copy moves
+   on its own — its animations follow originals that are already still.) */
+
+/* ── Off screen, held still ──────────────────────────────────────────────────
+   A speakers / communities row out of sight is marked data-fc-away by
+   assets/speakers-belt.js, which also holds its belt and dots. Its ONLINE
+   pulses hold too: nobody can see them, and a running animation costs the
+   page a style pass every frame wherever it is. */
+[data-fc-away] .fc-spk-online i::after { animation-play-state: paused; }

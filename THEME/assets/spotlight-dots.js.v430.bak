@@ -1,0 +1,1502 @@
+/* FOSSCOMM 2026 — the pixel-sharp cursor spotlight.
+ *
+ * One disc on the page. Every lit section draws its own share of it, so a disc
+ * straddling a seam is a single circle, and a cursor in the section next door
+ * still lights the part that reaches into this one.
+ *
+ * ONE DOT FIELD. The blue panels draw the page background's own dots
+ * (assets/wave-bg.js): the same columns and rows, fixed to the WINDOW the way
+ * that field is, on the same clock. So the dots run straight across every seam
+ * — blue panel to paper, paper to blue — instead of two grids a few pixels
+ * apart meeting there.
+ *
+ * ── TWO SCHEMES ───────────────────────────────────────────────────────────
+ * data-fc-spotlight="blue"  — Speakers, Communities, Footer, the hero's blue
+ *     panel. A blue dot field with a WHITE disc; inside the disc the type takes
+ *     the paper colours.
+ * data-fc-spotlight="paper" — the sections the wave shows through: the hero's
+ *     paper panel, News, Sponsors. The page's paper and wave outside, and a BLUE
+ *     disc carrying the blue panels' colours inside. It paints no section-sized
+ *     canvas — just a small one the size of the disc, moved with the cursor.
+ *     Sections with an opaque paper ground (Manifesto, Schedule, Venue, Get
+ *     Involved, FAQ) have no spotlight.
+ *
+ *                       blue panel            paper section
+ *     outside the disc  blue / white type     paper / the site's colours
+ *     inside the disc   white / paper type    blue / white type
+ *     halo              #99D0DE 50/25/10%     #BEE7E9 50/25/10%
+ *
+ * ── LAYERS, bottom to top ─────────────────────────────────────────────────
+ *   canvas / core   ground, disc, dots                          z -1
+ *   content         the section's own markup, plus the inverted
+ *                   copies masked to the disc                   z auto / 1
+ *   halo            three rings, each two lattice steps wide,
+ *                   drawn OVER the type                         z 50
+ *
+ * ── THE COPIES ────────────────────────────────────────────────────────────
+ * Each piece of type that inverts is cloned, the clone laid exactly over it
+ * and masked to the disc. Three things keep a clone honest:
+ *
+ *   POSITION — the rows are belts that slide, so a clone's offset is stored
+ *     against its ANCHOR (the belt rail or sticky bar it rides on, else the
+ *     section), and only the anchors are measured each frame.
+ *   CONTENT — a button's label scrambles, a belt clones a card: a
+ *     MutationObserver rebuilds the clone of whatever changed.
+ *   STATE — the pointer never touches a clone, so :hover never reaches one.
+ *     The element under the pointer is mapped to its twin in the clone, which
+ *     gets [data-fc-hov], and every :hover rule on the page is re-issued once
+ *     with [data-fc-hov] in its place. Animations in a clone are run on the original's
+ *     clock, so a marquee or a wave never slips at the rim.
+ *
+ * ── THE HIGHLIGHT ON THE BLUE ─────────────────────────────────────────────
+ * The belt lights a whole card (.is-hot) when the pointer is on any part of
+ * it. Here the parts light themselves: a name only while the pointer is on its
+ * LETTERS, a portrait's ring only while it is on the portrait.
+ *
+ * ── QUANTISED TO THE DOT ──────────────────────────────────────────────────
+ * Every edge — core and rings — steps one DOT (6px) at a time, and the centre
+ * snaps to that lattice in document space, so every section agrees on it. Dots
+ * straddling the rim split pixel by pixel.
+ */
+(function () {
+    'use strict';
+
+    var PITCH = 40, DOT = 6, Q = DOT;
+    var BLUE_GROUND = '#0033FF', BLUE_DOT = 'rgb(56,96,255)';
+    var WHITE_GROUND = '#FAFAF7', WHITE_DOT = '#E2E2DF';
+    var RADIUS = 104;                          // the core, CSS px — the same everywhere
+    var RING_STEPS = 2;                        // each halo ring = 2 lattice steps
+    var HALO = {
+        blue:  ['rgba(255,238,135,0.50)',      // #FFEE87, round the white disc on the blue
+                'rgba(255,238,135,0.25)',
+                'rgba(255,238,135,0.10)'],
+        paper: ['rgba(153,208,222,0.50)',      // #99D0DE, round the blue disc on the white
+                'rgba(153,208,222,0.25)',
+                'rgba(153,208,222,0.10)']
+    };
+    var HALO_R = RADIUS + 3 * RING_STEPS * Q;
+
+    /* What inverts inside the disc. A target inside another target is carried
+     * by the outer one's copy. */
+    var TARGETS = [
+        '.fc-spk-name', '.fc-section-heading', '.fc-spk-roles', '.fc-label', '.fc-copy',
+        '.fc-foot-links', '.fc-spk-online', '.fc-spk-shot', '.fc-tier-title',
+        '.fc-hero-wordmark', '.fc-band', '.fc-hero-cta', '.fc-btn', '.fc-tier-rule',
+        // the News grid whole, so its 1px rules turn with the cards
+        'ol:has(> .fc-news)', '.fc-news'
+    ].join(', ');
+    /* Copies that cover the WHOLE box, not just the type: things with a fill or
+     * a strip of their own. (Anything with an opaque background is added to
+     * these automatically.) */
+    var BOXES = '.fc-news, .fc-band, .fc-tier-rule, ol:has(> .fc-news)';
+    // never copied: modal sheets, inline drawings, and this script's own layers
+    var EXCLUDE = 'dialog, template, noscript, svg, .fc-spot-dup, .fc-spot-halo, .fc-spot-core, .fc-spot-canvas';
+    // things that slide their contents
+    var RAILS = '[data-fc-spk-rail], [data-fc-belt-rail]';
+    // class changes that are only ever state, never content
+    var STATE_CLASSES = { 'is-hot': 1, 'is-holding': 1, 'is-hovered': 1, 'is-dragging': 1 };
+
+    // the wave — same constants as assets/wave-bg.js
+    var AMP_1 = 18, KX_1 = 0.014, SPEED_1 = 0.45;
+    var AMP_2 = 11, KX_2 = 0.027, SPEED_2 = -0.65;
+    var AMP_3 = 5,  KX_3 = 0.060, KY_3 = 0.30 / 16, SPEED_3 = 0.85;
+
+    var reduced = window.matchMedia
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // the pointer, in CLIENT coordinates — scroll is added per frame, so the
+    // disc stays under a still cursor while the page scrolls beneath it
+    var ptr = { cx: 0, cy: 0, on: false };
+
+    function halfWidth(r, dy) {
+        var s = r * r - dy * dy;
+        return s < 0 ? -1 : Math.floor(Math.sqrt(s) / Q);
+    }
+
+    /* ── the page background's dot field ────────────────────────────────────
+     * A replica of assets/wave-bg.js's grid, in VIEWPORT device pixels: the
+     * columns and rows it lays across the window, and each dot's wave offset on
+     * its clock. Worked out once per frame and shared by every panel, so a blue
+     * panel, a paper disc and the background itself all put a dot in exactly the
+     * same place. */
+    function bgAxis(len, p) {
+        var n = Math.floor(len / p);
+        if (n < 1) n = 1;
+        var m = Math.round((len - (n - 1) * p) / 2), out = [];
+        for (var k = 0; k < n; k++) out.push(Math.round(m + p * k));
+        return out;
+    }
+    /* Rows past the window's edges, on the same lattice. The background stops at
+     * one extra row, because it is fixed and never shows more; a blue panel is
+     * not fixed, and on a fast scroll it can show a strip the next frame has not
+     * painted yet — this way that strip carries dots rather than bare blue. */
+    var SPARE_ROWS = 8;
+    var field = { now: NaN, dpr: 0, w: 0, h: 0 };
+    function fieldAt(now, dpr) {
+        var W = Math.round(window.innerWidth * dpr), H = Math.round(window.innerHeight * dpr);
+        if (field.now === now && field.dpr === dpr && field.w === W && field.h === H) return field;
+        var gp = PITCH * dpr, i;
+        if (field.dpr !== dpr || field.w !== W || field.h !== H) {
+            field.cols = bgAxis(W, gp);
+            var ys = bgAxis(H, gp), rows = [];
+            for (i = SPARE_ROWS; i >= 1; i--) rows.push(ys[0] - gp * i);
+            rows = rows.concat(ys);
+            for (i = 1; i <= SPARE_ROWS; i++) rows.push(ys[ys.length - 1] + gp * i);
+            field.rows = rows;
+            field.rowSin = rows.map(function (y) { return Math.sin((y / dpr) * KY_3); });
+            field.rowCos = rows.map(function (y) { return Math.cos((y / dpr) * KY_3); });
+            field.flat = new Float64Array(field.cols.length);
+            field.cS = new Float64Array(field.cols.length);
+            field.cC = new Float64Array(field.cols.length);
+            field.dpr = dpr; field.w = W; field.h = H;
+        }
+        // the background's clock: wave-bg.js publishes its start time, and both
+        // scripts are handed the same rAF timestamp in a frame
+        var t0 = window.FC_WAVE_T0 != null ? window.FC_WAVE_T0 : START;
+        var tg = reduced ? 0 : (now - t0) / 1000;
+        var p1 = tg * SPEED_1, p2 = tg * SPEED_2, p3 = tg * SPEED_3;
+        for (i = 0; i < field.cols.length; i++) {
+            var xCss = field.cols[i] / dpr, a = xCss * KX_3 + p3;
+            field.flat[i] = AMP_1 * Math.sin(xCss * KX_1 + p1) + AMP_2 * Math.sin(xCss * KX_2 + p2);
+            field.cS[i] = Math.sin(a);
+            field.cC[i] = Math.cos(a);
+        }
+        field.now = now;
+        return field;
+    }
+    var START = performance.now();
+
+    /* The field's dots that fall in a box, as one path, in that box's own
+     * device pixels. (ox, oy) is the box's top-left in viewport device px; the
+     * vertical range is clipped to [y0, y1) device px of the box. `still`: the
+     * same grid with the wave left out — the hero's blue panel holds still. */
+    function dotsIn(f, ox, oy, w, y0, y1, still) {
+        var dpr = f.dpr, u = dpr, half = Math.round(DOT * dpr / 2), gp = PITCH * dpr;
+        var reach = (AMP_1 + AMP_2 + AMP_3) * dpr + gp;
+        var path = new Path2D();
+        for (var j = 0; j < f.rows.length; j++) {
+            var yr = f.rows[j] - oy;
+            if (yr < y0 - reach || yr > y1 + reach) continue;
+            var sb = f.rowSin[j], cb = f.rowCos[j];
+            for (var i = 0; i < f.cols.length; i++) {
+                var xr = f.cols[i] - ox;
+                if (xr < -gp || xr > w + gp) continue;
+                var dy = still ? 0 : f.flat[i] + AMP_3 * (f.cS[i] * cb + f.cC[i] * sb);
+                var x = xr - half, y = yr + Math.round(dy * dpr) - half;     // whole device pixels
+                path.rect(x + u, y, u * 4, u);
+                path.rect(x, y + u, u * 6, u * 4);
+                path.rect(x + u, y + u * 5, u * 4, u);
+            }
+        }
+        return path;
+    }
+
+    /* ── THE TRAIL ─────────────────────────────────────────────────────────────
+     *
+     * The highlight is not a circle any more: it is goo. One field over the
+     * page, summed from everything below, thresholded on the 6px cell lattice —
+     * metaballs, so whatever comes close melts together and whatever pulls away
+     * necks and snaps, and every edge is a step of one cell:
+     *
+     *   HEAD    an under-damped spring on the pointer: it lags, overshoots and
+     *           settles. Alone and still it is exactly the old 104px disc.
+     *   TAIL    a rope of shrinking blobs, each chasing the one ahead with its
+     *           own slower spring and never further than a link away — the
+     *           delay you see when the pointer moves, the snake when it is fast.
+     *   DROPS   flung off a fast head; they fall, hit the walls — the sections
+     *           with no spotlight, the sidebar, the top bar, the window's sides —
+     *           bounce, slide, splash into sparks, shrink, and the ones still
+     *           close are drawn back into the head and swallowed.
+     *   CLICK   a burst of drops and a pixel shockwave running out from the head.
+     *
+     * The outline is three rings of two cells each, measured as true distance
+     * from the goo (an exact distance transform on the cells), so it follows the
+     * shape everywhere: round the head, along the neck, round every drop.
+     *
+     * Everything is in DOCUMENT px, so the page scrolling never drags it, and
+     * every section paints only its own share: one trail across the seams. */
+    var T_ISO = 0.25;                                       // the goo's surface
+    var R_HEAD = RADIUS / Math.sqrt(1 - Math.cbrt(T_ISO));  // 171 → a 104px core
+    var TAIL = 9, LINK = 44;
+    var MAX_PARTS = 56;
+    var GRAVITY = 1700, DRAG = 1.1, REST = 0.52, SLIDE = 0.82;
+    var RINGS = 3, RING_CELLS = 2;                          // the 6px outline: 3 × 2 cells
+    var MARGIN_CELLS = RINGS * RING_CELLS + 1;
+
+    var trail = {
+        head: { x: 0, y: 0, vx: 0, vy: 0 },
+        tail: [],
+        parts: [],          // drops and sparks
+        shocks: [],
+        alive: 0,           // 0..1 — grows in when the pointer arrives, out when it leaves
+        pulse: 0,           // a click's squash, decaying
+        placed: false,
+        emit: 0,
+        t: 0
+    };
+    for (var ti = 0; ti < TAIL; ti++) {
+        trail.tail.push({ x: 0, y: 0, vx: 0, vy: 0, R: 110 * Math.pow(0.88, ti) });
+    }
+
+    function rnd(a, b) { return a + Math.random() * (b - a); }
+
+    function spawn(x, y, vx, vy, R, life, g, kind) {
+        if (trail.parts.length >= MAX_PARTS) trail.parts.shift();
+        trail.parts.push({ x: x, y: y, vx: vx, vy: vy, R: R, age: 0, life: life, g: g, kind: kind });
+    }
+
+    // a drop flung off the back of a moving head
+    function fling() {
+        var h = trail.head, n = trail.tail[Math.floor(Math.random() * 4)];
+        var a = Math.atan2(h.vy, h.vx) + Math.PI + rnd(-1.15, 1.15), s = rnd(160, 470);
+        spawn(n.x, n.y, n.vx * 0.4 + Math.cos(a) * s, n.vy * 0.4 + Math.sin(a) * s - 120,
+              rnd(46, 78), rnd(0.7, 1.5), 1, 'drop');
+    }
+
+    // a click: drops all round and a ring running out — and the head squashes
+    function burst() {
+        if (reduced || trail.alive < 0.5) return;
+        var h = trail.head;
+        for (var i = 0; i < 16; i++) {
+            var a = i / 16 * Math.PI * 2 + rnd(-0.2, 0.2), s = rnd(480, 980);
+            spawn(h.x + Math.cos(a) * 40, h.y + Math.sin(a) * 40, Math.cos(a) * s + h.vx * 0.3, Math.sin(a) * s + h.vy * 0.3 - 160,
+                  rnd(44, 74), rnd(0.9, 1.5), 0.75, 'drop');
+        }
+        trail.shocks.push({ x: h.x, y: h.y, age: 0, life: 0.55 });
+        trail.pulse = 1;
+    }
+
+    // a drop meeting a wall: out of the wall, the push reversed and damped, the
+    // slide along it slowed — and a hard enough hit throws sparks
+    function bounce(p, nx, ny) {
+        var vn = p.vx * nx + p.vy * ny;
+        if (vn >= 0) return;
+        var tx = p.vx - vn * nx, ty = p.vy - vn * ny;
+        p.vx = tx * SLIDE - vn * REST * nx;
+        p.vy = ty * SLIDE - vn * REST * ny;
+        if (-vn > 280 && p.kind === 'drop' && trail.parts.length < MAX_PARTS - 3) {
+            var n = 2 + Math.floor(Math.random() * 2);
+            for (var i = 0; i < n; i++) {
+                var a = Math.atan2(ny, nx) + rnd(-1.1, 1.1), s = -vn * rnd(0.35, 0.7);
+                spawn(p.x, p.y, Math.cos(a) * s + tx * 0.3, Math.sin(a) * s + ty * 0.3, rnd(22, 34), rnd(0.25, 0.55), 1.1, 'spark');
+            }
+        }
+    }
+
+    function collide(p, walls, view) {
+        var rc = p.R * 0.55;
+        if (p.x - rc < view.x0) { p.x = view.x0 + rc; bounce(p, 1, 0); }
+        if (p.x + rc > view.x1) { p.x = view.x1 - rc; bounce(p, -1, 0); }
+        for (var i = 0; i < walls.length; i++) {
+            var w = walls[i];
+            if (p.x < w.x0 - rc || p.x > w.x1 + rc || p.y < w.y0 - rc || p.y > w.y1 + rc) continue;
+            // out through the nearest face
+            var dl = p.x - (w.x0 - rc), dr = (w.x1 + rc) - p.x, dt = p.y - (w.y0 - rc), db = (w.y1 + rc) - p.y;
+            var m = Math.min(dl, dr, dt, db);
+            if (m === dt) { p.y = w.y0 - rc; bounce(p, 0, -1); }
+            else if (m === db) { p.y = w.y1 + rc; bounce(p, 0, 1); }
+            else if (m === dl) { p.x = w.x0 - rc; bounce(p, -1, 0); }
+            else { p.x = w.x1 + rc; bounce(p, 1, 0); }
+        }
+    }
+
+    function stepTrail(dt, tx, ty, on, walls, view) {
+        var tr = trail, h = tr.head, i, n;
+        tr.t += dt;
+        if (on && !tr.placed) {
+            // arriving: the goo is born at the pointer, not dragged across the page
+            h.x = tx; h.y = ty; h.vx = h.vy = 0;
+            for (i = 0; i < TAIL; i++) { n = tr.tail[i]; n.x = tx; n.y = ty; n.vx = n.vy = 0; }
+            tr.placed = true;
+        }
+        tr.alive += ((on ? 1 : 0) - tr.alive) * Math.min(1, dt * (on ? 10 : 6));
+        if (!on && tr.alive < 0.02) { tr.alive = 0; tr.placed = false; }
+        tr.pulse *= Math.exp(-dt * 6);
+
+        if (reduced) {
+            // no motion asked for: the head sits on the pointer, nothing flies
+            h.x = tx; h.y = ty;
+            for (i = 0; i < TAIL; i++) { n = tr.tail[i]; n.x = tx; n.y = ty; }
+            tr.parts.length = 0; tr.shocks.length = 0;
+            return;
+        }
+
+        // the head: an under-damped spring — it lags, overshoots, settles
+        var K = 420, C = 20;
+        h.vx += ((tx - h.x) * K - h.vx * C) * dt;
+        h.vy += ((ty - h.y) * K - h.vy * C) * dt;
+        h.x += h.vx * dt; h.y += h.vy * dt;
+
+        // the tail: each blob chases the one ahead, on a rope
+        var prev = h;
+        for (i = 0; i < TAIL; i++) {
+            n = tr.tail[i];
+            var k = 560 * Math.pow(0.84, i), c = 2 * 0.62 * Math.sqrt(k);
+            n.vx += ((prev.x - n.x) * k - n.vx * c) * dt;
+            n.vy += ((prev.y - n.y) * k - n.vy * c) * dt;
+            n.x += n.vx * dt; n.y += n.vy * dt;
+            var dx = n.x - prev.x, dy = n.y - prev.y, d = Math.sqrt(dx * dx + dy * dy);
+            if (d > LINK) { n.x = prev.x + dx / d * LINK; n.y = prev.y + dy / d * LINK; }
+            prev = n;
+        }
+
+        // drops fling off a fast head
+        var sp = Math.sqrt(h.vx * h.vx + h.vy * h.vy);
+        if (on && sp > 650) {
+            tr.emit += dt * (sp - 650) / 42;
+            while (tr.emit >= 1) { tr.emit -= 1; fling(); }
+        } else tr.emit = 0;
+
+        for (i = tr.parts.length - 1; i >= 0; i--) {
+            var p = tr.parts[i];
+            p.age += dt;
+            if (p.age >= p.life) { tr.parts.splice(i, 1); continue; }
+            p.vy += GRAVITY * p.g * dt;
+            var f = Math.exp(-DRAG * dt);
+            p.vx *= f; p.vy *= f;
+            // a drop that is still near the head, after a moment in the air, is
+            // pulled back in and swallowed
+            if (p.age > 0.2 && tr.alive > 0.5) {
+                var hx = h.x - p.x, hy = h.y - p.y, hd = Math.sqrt(hx * hx + hy * hy);
+                if (hd < 160) {
+                    p.vx += hx * 11 * dt; p.vy += hy * 11 * dt - GRAVITY * p.g * dt * 0.8;
+                    if (hd < 30) { tr.parts.splice(i, 1); continue; }
+                }
+            }
+            p.x += p.vx * dt; p.y += p.vy * dt;
+            collide(p, walls, view);
+            if (p.y > view.y1 + 400 || p.y < view.y0 - 800) tr.parts.splice(i, 1);
+        }
+        for (i = tr.shocks.length - 1; i >= 0; i--) {
+            tr.shocks[i].age += dt;
+            if (tr.shocks[i].age >= tr.shocks[i].life) tr.shocks.splice(i, 1);
+        }
+    }
+
+    /* ── the field, on the cells ─────────────────────────────────────────── */
+
+    var cells = null;           // this frame's goo, or null when there is none
+    var EDT_INF = 1e20;
+
+    // the exact 1-D squared distance transform (Felzenszwalb & Huttenlocher)
+    function edt1d(f, n, d, v, z) {
+        var k = 0;
+        v[0] = 0; z[0] = -EDT_INF; z[1] = EDT_INF;
+        for (var q = 1; q < n; q++) {
+            var s = ((f[q] + q * q) - (f[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k]);
+            while (s <= z[k]) {
+                k--;
+                s = ((f[q] + q * q) - (f[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k]);
+            }
+            k++; v[k] = q; z[k] = s; z[k + 1] = EDT_INF;
+        }
+        k = 0;
+        for (q = 0; q < n; q++) {
+            while (z[k + 1] < q) k++;
+            d[q] = (q - v[k]) * (q - v[k]) + f[v[k]];
+        }
+    }
+
+    var bufs = { n: 0 };
+    function buffers(n, side) {
+        if (bufs.n < n) {
+            bufs.n = n;
+            bufs.f = new Float32Array(n);
+            bufs.d = new Float64Array(n);
+            bufs.cls = new Uint8Array(n);
+        }
+        if (!bufs.side || bufs.side < side) {
+            bufs.side = side;
+            bufs.lf = new Float64Array(side); bufs.ld = new Float64Array(side);
+            bufs.lv = new Int32Array(side); bufs.lz = new Float64Array(side + 1);
+        }
+        return bufs;
+    }
+
+    /* The goo of this frame as classes per cell — 1 the core, 2..4 the rings —
+     * and as runs per row, which is what everything downstream draws with.
+     * `view` limits the work to what can be seen. */
+    function fieldCells(view) {
+        var tr = trail, a = tr.alive, ents = [], i, n;
+        if (a > 0.01) {
+            var sa = Math.sqrt(a);
+            var Rh = R_HEAD * sa * (1 + 0.025 * Math.sin(tr.t * 2.4) + 0.22 * tr.pulse);
+            ents.push([tr.head.x, tr.head.y, Rh, 1]);
+            for (i = 0; i < TAIL; i++) { n = tr.tail[i]; ents.push([n.x, n.y, n.R * sa, 1]); }
+        }
+        for (i = 0; i < tr.parts.length; i++) {
+            var p = tr.parts[i], left = 1 - p.age / p.life;
+            ents.push([p.x, p.y, p.R * Math.sqrt(left), 1]);
+        }
+        /* Shockwaves are a RIPPLE in the outline's colours, not goo: a ring of
+         * cells the width of the outline, running out from the click. As goo it
+         * re-cut every copy it crossed on every frame of its run, which is what a
+         * click used to cost. [x, y, radius, fade] */
+        var rings = [];
+        for (i = 0; i < tr.shocks.length; i++) {
+            var s = tr.shocks[i], u = s.age / s.life;
+            rings.push([s.x, s.y, 40 + 520 * Math.sqrt(u), u]);
+        }
+        if (!ents.length && !rings.length) return null;
+
+        // the cells that can matter: everything's reach, plus the outline, clipped
+        // to the window
+        var bx0 = Infinity, by0 = Infinity, bx1 = -Infinity, by1 = -Infinity;
+        for (i = 0; i < ents.length; i++) {
+            var e = ents[i];
+            if (e[2] < 1) continue;
+            bx0 = Math.min(bx0, e[0] - e[2]); bx1 = Math.max(bx1, e[0] + e[2]);
+            by0 = Math.min(by0, e[1] - e[2]); by1 = Math.max(by1, e[1] + e[2]);
+        }
+        var RIPPLE = RINGS * RING_CELLS * Q;
+        for (i = 0; i < rings.length; i++) {
+            var rr = rings[i][2] + RIPPLE;
+            bx0 = Math.min(bx0, rings[i][0] - rr); bx1 = Math.max(bx1, rings[i][0] + rr);
+            by0 = Math.min(by0, rings[i][1] - rr); by1 = Math.max(by1, rings[i][1] + rr);
+        }
+        var M = MARGIN_CELLS;
+        var cx0 = Math.max(Math.floor(bx0 / Q) - M, Math.floor(view.x0 / Q) - M);
+        var cy0 = Math.max(Math.floor(by0 / Q) - M, Math.floor(view.y0 / Q) - M);
+        var cx1 = Math.min(Math.ceil(bx1 / Q) + M, Math.ceil(view.x1 / Q) + M);
+        var cy1 = Math.min(Math.ceil(by1 / Q) + M, Math.ceil(view.y1 / Q) + M);
+        var W = cx1 - cx0, H = cy1 - cy0;
+        if (W <= 0 || H <= 0) return null;
+        var N = W * H, B = buffers(N, Math.max(W, H)), F = B.f, j, x, y;
+        for (i = 0; i < N; i++) F[i] = 0;
+
+        // blobs: the Wyvill kernel, (1 − d²/R²)³ inside R, nothing outside
+        for (i = 0; i < ents.length; i++) {
+            var ex = ents[i][0], ey = ents[i][1], R = ents[i][2], wgt = ents[i][3];
+            if (R < 1) continue;
+            var R2 = R * R;
+            var j0 = Math.max(0, Math.floor((ey - R) / Q - 0.5) - cy0), j1 = Math.min(H - 1, Math.ceil((ey + R) / Q) - cy0);
+            for (j = j0; j <= j1; j++) {
+                var dy = (cy0 + j + 0.5) * Q - ey, dy2 = dy * dy;
+                if (dy2 >= R2) continue;
+                var hw = Math.sqrt(R2 - dy2);
+                var i0 = Math.max(0, Math.floor((ex - hw) / Q - 0.5) - cx0), i1 = Math.min(W - 1, Math.ceil((ex + hw) / Q) - cx0);
+                var row = j * W;
+                for (x = i0; x <= i1; x++) {
+                    var dx = (cx0 + x + 0.5) * Q - ex, t = 1 - (dx * dx + dy2) / R2;
+                    if (t > 0) F[row + x] += wgt * t * t * t;
+                }
+            }
+        }
+        // the core, then every other cell's distance to it
+        var D = B.d, cls = B.cls, any = false;
+        for (i = 0; i < N; i++) {
+            if (F[i] >= T_ISO) { D[i] = 0; any = true; } else D[i] = EDT_INF;
+        }
+        if (!any && !rings.length) return null;
+        var lf = B.lf, ld = B.ld, lv = B.lv, lz = B.lz;
+        for (x = 0; x < W; x++) {                                   // columns
+            for (y = 0; y < H; y++) lf[y] = D[y * W + x];
+            edt1d(lf, H, ld, lv, lz);
+            for (y = 0; y < H; y++) D[y * W + x] = ld[y];
+        }
+        for (y = 0; y < H; y++) {                                   // rows
+            var base = y * W;
+            for (x = 0; x < W; x++) lf[x] = D[base + x];
+            edt1d(lf, W, ld, lv, lz);
+            for (x = 0; x < W; x++) D[base + x] = ld[x];
+        }
+        var lim = [0, RING_CELLS * RING_CELLS, 4 * RING_CELLS * RING_CELLS, 9 * RING_CELLS * RING_CELLS];
+        for (i = 0; i < N; i++) {
+            var d2 = D[i];
+            cls[i] = d2 === 0 ? 1 : d2 <= lim[1] ? 2 : d2 <= lim[2] ? 3 : d2 <= lim[3] ? 4 : 0;
+        }
+        /* The ripples, laid over that: the outline's three bands, strongest at
+         * the leading edge, fading out as the ring runs. A cell keeps whichever
+         * band is stronger, so a ripple crossing the goo leaves it alone. */
+        for (i = 0; i < rings.length; i++) {
+            var rx = rings[i][0], ry = rings[i][1], rho = rings[i][2], fade = rings[i][3];
+            var first = 2 + Math.min(2, Math.floor(fade * 3));       // 50% → 25% → 10% as it runs
+            var out = rho + RIPPLE;
+            var sj0 = Math.max(0, Math.floor((ry - out) / Q) - cy0), sj1 = Math.min(H - 1, Math.ceil((ry + out) / Q) - cy0);
+            var si0 = Math.max(0, Math.floor((rx - out) / Q) - cx0), si1 = Math.min(W - 1, Math.ceil((rx + out) / Q) - cx0);
+            for (j = sj0; j <= sj1; j++) {
+                var qy = (cy0 + j + 0.5) * Q - ry;
+                for (x = si0; x <= si1; x++) {
+                    var qx = (cx0 + x + 0.5) * Q - rx;
+                    var band = Math.floor((rho - Math.sqrt(qx * qx + qy * qy)) / (RING_CELLS * Q));
+                    if (band < 0 || band >= RINGS) continue;               // inside the ring only, behind its edge
+                    var cl = first + band;
+                    if (cl > 4) continue;
+                    var at = j * W + x;
+                    if (!cls[at] || cls[at] > cl) cls[at] = cl;
+                }
+            }
+        }
+
+        // runs per row and class: spans[k][row] = [x0, x1, x0, x1, …] in cells
+        var spans = [null, [], [], [], []], kb = [null, [Infinity, Infinity, -Infinity, -Infinity], null, null, null];
+        var ext = [Infinity, Infinity, -Infinity, -Infinity];
+        for (var k = 1; k <= 4; k++) spans[k] = new Array(H);
+        for (y = 0; y < H; y++) {
+            var rbase = y * W, run = 0, start = 0;
+            for (k = 1; k <= 4; k++) spans[k][y] = null;
+            for (x = 0; x <= W; x++) {
+                var c = x < W ? cls[rbase + x] : 0;
+                if (c !== run) {
+                    if (run) {
+                        (spans[run][y] || (spans[run][y] = [])).push(cx0 + start, cx0 + x);
+                        if (run === 1) {
+                            kb[1][0] = Math.min(kb[1][0], cx0 + start); kb[1][2] = Math.max(kb[1][2], cx0 + x);
+                            kb[1][1] = Math.min(kb[1][1], cy0 + y); kb[1][3] = Math.max(kb[1][3], cy0 + y + 1);
+                        }
+                        ext[0] = Math.min(ext[0], cx0 + start); ext[2] = Math.max(ext[2], cx0 + x);
+                        ext[1] = Math.min(ext[1], cy0 + y); ext[3] = Math.max(ext[3], cy0 + y + 1);
+                    }
+                    run = c; start = x;
+                }
+            }
+        }
+        return {
+            x0: cx0, y0: cy0, w: W, h: H, spans: spans,
+            core: kb[1],                                    // the core's bbox, in cells
+            ext: ext                                        // the outline's bbox, in cells
+        };
+    }
+
+    // a class's runs as one path, in a box's own device px; rows outside
+    // [yLo, yHi) device px are skipped
+    function cellsPath(g, k, ox, oy, dpr, yLo, yHi) {
+        var path = new Path2D(), rows = g.spans[k], s = Q * dpr;
+        for (var y = 0; y < g.h; y++) {
+            var r = rows[y];
+            if (!r) continue;
+            var py = ((g.y0 + y) * Q - oy) * dpr;
+            if (py + s < yLo || py > yHi) continue;
+            for (var i = 0; i < r.length; i += 2) path.rect((r[i] * Q - ox) * dpr, py, (r[i + 1] - r[i]) * Q * dpr, s);
+        }
+        return path;
+    }
+
+    /* The core as a clip-path for one copy, in the copy's own px. Runs that
+     * repeat down the rows are joined into one rectangle, so a round head is a
+     * few dozen subpaths, not a hundred. Null when no core falls near the copy. */
+    function clipFor(g, x0, y0, w, h, pad) {
+        var rows = g.spans[1], open = {}, out = '', any = false;
+        var ylo = Math.floor((y0 - pad) / Q) - g.y0, yhi = Math.ceil((y0 + h + pad) / Q) - g.y0;
+        var xlo = x0 - pad, xhi = x0 + w + pad;
+        function close(key) {
+            var o = open[key];
+            out += 'M' + (o.a * Q - x0) + ' ' + (o.y * Q - y0) + 'H' + (o.b * Q - x0) + 'V' + (o.e * Q - y0) + 'H' + (o.a * Q - x0) + 'Z';
+            delete open[key];
+        }
+        for (var y = Math.max(0, ylo); y <= Math.min(g.h - 1, yhi); y++) {
+            var r = rows[y], seen = {};
+            if (r) {
+                for (var i = 0; i < r.length; i += 2) {
+                    var a = r[i], b = r[i + 1];
+                    if (b * Q < xlo || a * Q > xhi) continue;
+                    var key = a + ',' + b;
+                    seen[key] = 1;
+                    if (open[key]) open[key].e = g.y0 + y + 1;
+                    else open[key] = { a: a, b: b, y: g.y0 + y, e: g.y0 + y + 1 };
+                    any = true;
+                }
+            }
+            for (var kk in open) if (!seen[kk]) close(kk);
+        }
+        for (var k2 in open) close(k2);
+        return any ? 'path("' + out + '")' : null;
+    }
+
+    /* The portrait rings for the blue panels — the theme's own filter
+     * (template-parts/partials/speaker-filters.php), flooded with this scheme's
+     * colours instead of the dashboard's. On the blue: white, and the highlight
+     * (--fc-blue-hi, see assets/site.css) while the pointer is on the portrait.
+     * Inside the disc: blue, and orange. The colours are CSS, not attributes, so
+     * the highlight follows the variable. */
+    function ringDefs() {
+        if (document.getElementById('fc-spot-rings')) return;
+        var rings = { 'rest': '#FAFAF7', 'hot': 'var(--fc-blue-hi, #55FFFF)', 'in-rest': '#0033FF', 'in-hot': '#EE8101' };
+        var html = '';
+        for (var k in rings) {
+            html += '<filter id="fc-spot-ring-' + k + '" x="-10%" y="-10%" width="120%" height="120%"'
+                  + ' color-interpolation-filters="sRGB">'
+                  + '<feGaussianBlur in="SourceAlpha" stdDeviation="3" result="spread"/>'
+                  + '<feComponentTransfer in="spread" result="ring"><feFuncA type="linear" slope="60" intercept="-3.6"/></feComponentTransfer>'
+                  + '<feFlood result="paint" style="flood-color:' + rings[k] + '"/>'
+                  + '<feComposite in="paint" in2="ring" operator="in" result="outline"/>'
+                  + '<feMerge><feMergeNode in="outline"/><feMergeNode in="SourceGraphic"/></feMerge>'
+                  + '</filter>';
+        }
+        var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.id = 'fc-spot-rings';
+        svg.setAttribute('width', '0');
+        svg.setAttribute('height', '0');
+        svg.setAttribute('aria-hidden', 'true');
+        svg.setAttribute('focusable', 'false');
+        svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden';
+        svg.innerHTML = html;
+        document.body.appendChild(svg);
+    }
+
+    /* ── :hover, re-issued as [data-fc-hov] ────────────────────────────────────────
+     * Every rule with :hover in it, written again with [data-fc-hov] in its place, so
+     * a copy can be put in its original's hover state by a class. @media,
+     * @supports, @layer and nesting are kept, so each rule lands where its
+     * original sits in the cascade.
+     *
+     * `var(--color-accent` is wrapped in `var(--fc-hover-accent, …)` on the way:
+     * on the blue scheme the accent is the HIGHLIGHT colour and the hover colour
+     * is set on its own (both #99D0DE now, but they are two decisions). Where
+     * --fc-hover-accent is not set — inside a blue panel's white disc — the
+     * site's own accent is used.
+     *
+     * This script's own rules are left alone: they are written for the copies
+     * already. Sheets from another origin cannot be read and are skipped. */
+    function wrapAccent(text) {
+        var out = '', i = 0, key = 'var(--color-accent';
+        for (;;) {
+            var at = text.indexOf(key, i);
+            if (at < 0) return out + text.slice(i);
+            var depth = 0, j = at;
+            for (; j < text.length; j++) {
+                var ch = text.charAt(j);
+                if (ch === '(') depth++;
+                else if (ch === ')') { depth--; if (depth === 0) break; }
+            }
+            out += text.slice(i, at) + 'var(--fc-hover-accent, ' + text.slice(at, j + 1) + ')';
+            i = j + 1;
+        }
+    }
+    function hoverRule(rule, inHover) {
+        if (rule.selectorText !== undefined) {
+            var sel = rule.selectorText;
+            if (/data-fc-spotlight|fc-spot-/.test(sel)) return '';
+            var has = inHover || sel.indexOf(':hover') >= 0;
+            var inner = '';
+            if (rule.cssRules) for (var i = 0; i < rule.cssRules.length; i++) inner += hoverRule(rule.cssRules[i], has);
+            var decls = has && rule.style ? rule.style.cssText : '';
+            if (!decls && !inner) return '';
+            return sel.replace(/:hover/g, '[data-fc-hov]') + '{' + decls + inner + '}';
+        }
+        if (rule.cssRules) {
+            var head = rule.media ? '@media ' + rule.media.mediaText
+                     : rule.conditionText !== undefined
+                        ? (rule.containerName !== undefined || /Container/.test(rule.constructor && rule.constructor.name)
+                            ? '@container ' : '@supports ') + rule.conditionText
+                     : rule.name !== undefined ? '@layer ' + rule.name
+                     : null;
+            if (!head) return '';
+            var body = '';
+            for (var k = 0; k < rule.cssRules.length; k++) body += hoverRule(rule.cssRules[k], inHover);
+            return body ? head + '{' + body + '}' : '';
+        }
+        // nested bare declarations (CSSNestedDeclarations)
+        if (inHover && rule.style && rule.style.cssText) return rule.style.cssText;
+        return '';
+    }
+    var hoverCount = -1;
+    function buildHoverSheet() {
+        var text = '', sheets = document.styleSheets;
+        for (var s = 0; s < sheets.length; s++) {
+            var sh = sheets[s], rules;
+            if (sh.ownerNode && sh.ownerNode.id === 'fc-spot-hover') continue;
+            try { rules = sh.cssRules; } catch (err) { continue; }
+            if (!rules) continue;
+            for (var r = 0; r < rules.length; r++) text += hoverRule(rules[r], false);
+        }
+        text = wrapAccent(text);
+        if (text.length === hoverCount) return;
+        hoverCount = text.length;
+        var el = document.getElementById('fc-spot-hover');
+        if (!el) {
+            el = document.createElement('style');
+            el.id = 'fc-spot-hover';
+            document.head.appendChild(el);
+        }
+        el.textContent = text;
+    }
+
+    /* ── the inverted copies ─────────────────────────────────────────────── */
+
+    function px(v) { return parseFloat(v) || 0; }
+    function alphaOf(c) {
+        if (!c || c === 'transparent') return 0;
+        var m = c.match(/rgba?\(([^)]+)\)/);
+        if (!m) return 1;
+        var p = m[1].split(/[\s,\/]+/).filter(Boolean);
+        return p.length > 3 ? parseFloat(p[3]) : 1;
+    }
+    function isPaperish(c) {
+        var m = c && c.match(/rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)/);
+        return !!m && alphaOf(c) > 0.5 && +m[1] > 235 && +m[2] > 235 && +m[3] > 230;
+    }
+
+    /* The copy of an element, if it has one: a photo's sits beside it (an <img>
+     * holds no children), anything else's inside it. */
+    function dupOf(el) {
+        if (el.tagName === 'IMG') {
+            var n = el.nextElementSibling;
+            return n && n.classList.contains('fc-spot-dup') ? n : null;
+        }
+        for (var c = el.firstElementChild; c; c = c.nextElementSibling) {
+            if (c.classList.contains('fc-spot-dup')) return c;
+        }
+        return null;
+    }
+
+    /* Take everything out of a clone that would make it act: ids, the data-fc-*
+     * hooks every script binds by, focusability, frames and players. Elements are
+     * REPLACED rather than removed, so a clone's children line up one for one
+     * with its original's — the hover mapping walks them by position. */
+    function scrub(root) {
+        var nested = root.querySelectorAll('.fc-spot-dup');
+        for (var i = nested.length - 1; i >= 0; i--) nested[i].parentNode.removeChild(nested[i]);
+        var all = [root].concat([].slice.call(root.querySelectorAll('*')));
+        for (i = 0; i < all.length; i++) {
+            var n = all[i], t = n.tagName;
+            if (t === 'IFRAME' || t === 'VIDEO' || t === 'CANVAS' || t === 'OBJECT') {
+                var stub = document.createElement('div');
+                stub.className = n.className && n.className.baseVal === undefined ? n.className : '';
+                stub.setAttribute('style', n.getAttribute('style') || '');
+                n.parentNode.replaceChild(stub, n);
+                continue;
+            }
+            if (n.removeAttribute) {
+                n.removeAttribute('id');
+                var at = n.attributes;
+                for (var k = at.length - 1; k >= 0; k--) {
+                    var nm = at[k].name;
+                    if (nm.indexOf('data-fc-') === 0 || nm === 'aria-label' || nm === 'aria-labelledby'
+                        || nm === 'aria-describedby' || nm === 'autofocus') n.removeAttribute(nm);
+                }
+            }
+            if (t === 'A' || t === 'BUTTON' || (n.hasAttribute && n.hasAttribute('tabindex'))) n.setAttribute('tabindex', '-1');
+            if (t === 'IMG') n.removeAttribute('loading');
+            if (t === 'SCRIPT') n.textContent = '';
+            if (t === 'TEMPLATE') n.innerHTML = '';
+        }
+        root.setAttribute('aria-hidden', 'true');
+        root.setAttribute('inert', '');
+    }
+
+    /* Build (or rebuild) the copy of one element.
+     *
+     * The clone keeps its classes — they are what give it the same font, padding
+     * and line breaks — and its layout is written INLINE, because an inline
+     * style beats any non-!important rule and nothing in the theme can then drop
+     * it back into the flow. It goes in as the FIRST child, so structural rules
+     * in the theme (Tailwind's space-y is `> :not(:last-child)`) still see the
+     * original children exactly as before, and a z-index of 1 puts it over any
+     * positioned children all the same. Margins go; padding and borders stay,
+     * and it is pulled out over the original's border, so its content lands on
+     * the original's pixel for pixel. */
+    function build(el) {
+        var old = dupOf(el);
+        var isImg = el.tagName === 'IMG';
+        var cs = getComputedStyle(el);
+        if (!isImg && cs.display === 'inline') {
+            if (old) old.parentNode.removeChild(old);
+            return null;
+        }
+        var host = isImg ? el.parentNode : el;
+        if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+
+        var dup = el.cloneNode(true);
+        scrub(dup);
+        dup.classList.add('fc-spot-dup');
+        var bg = cs.backgroundColor;
+        if (!isImg && isPaperish(bg)) dup.classList.add('fc-spot-solid');
+        var box = !isImg && (el.matches(BOXES) || alphaOf(bg) > 0);
+
+        var s = dup.style;
+        s.removeProperty('--fc-band-from');
+        s.removeProperty('--fc-faq-from');
+        s.position = 'absolute';
+        s.margin = '0';
+        s.pointerEvents = 'none';
+        s.zIndex = '1';
+        if (isImg) {
+            /* Width and height are left to the class: the photo is sized by
+             * width:100% and --fc-spk-photo-h, and overriding either would stop
+             * the copy matching the original pixel for pixel. */
+            s.top = '0'; s.left = '0';
+        } else {
+            s.transform = 'none';
+            s.top = -px(cs.borderTopWidth) + 'px';
+            s.left = -px(cs.borderLeftWidth) + 'px';
+            s.right = -px(cs.borderRightWidth) + 'px';
+            s.bottom = box ? -px(cs.borderBottomWidth) + 'px' : 'auto';
+            s.width = 'auto'; s.height = 'auto';
+            s.maxWidth = 'none'; s.minWidth = '0';
+        }
+        if (old) {
+            // the old copy's clip and visibility are still right; carrying them
+            // over means the new one is cut correctly on its very first frame
+            if (old.style.clipPath) s.clipPath = old.style.clipPath;
+            if (old.style.visibility) s.visibility = old.style.visibility;
+            old.parentNode.replaceChild(dup, old);
+        } else if (isImg) {
+            host.insertBefore(dup, el.nextSibling);
+        } else {
+            el.insertBefore(dup, el.firstChild);
+        }
+        return dup;
+    }
+
+    // the outermost target that holds `node`, inside `section`
+    function outerTarget(node, section) {
+        var el = node && (node.nodeType === 1 ? node : node.parentElement), t = null;
+        for (; el && el !== section; el = el.parentElement) {
+            if (el.classList && el.classList.contains('fc-spot-dup')) return null;
+            if (el.matches && el.matches(TARGETS)) t = el;
+        }
+        return el === section ? t : null;
+    }
+
+    function eligible(el, section) {
+        if (el.closest(EXCLUDE)) return false;
+        if (el.closest('[data-fc-spotlight]') !== section) return false;
+        var anc = el.parentElement && el.parentElement.closest(TARGETS);
+        return !(anc && section.contains(anc) && !anc.closest(EXCLUDE));
+    }
+
+    function mountDups(section) {
+        var els = section.querySelectorAll(TARGETS);
+        for (var i = 0; i < els.length; i++) {
+            var el = els[i];
+            if (!eligible(el, section) || dupOf(el)) continue;
+            build(el);
+        }
+    }
+
+    /* ── a panel ─────────────────────────────────────────────────────────── */
+
+    function Panel(section) {
+        this.section = section;
+        this.scheme = section.getAttribute('data-fc-spotlight');
+        this.paper = this.scheme === 'paper';
+        if (this.paper) {
+            // a window-sized canvas, moved down the section with the view: the
+            // paper panel paints only the goo and its outline, over the page's
+            // own paper and wave
+            this.coreWrap = document.createElement('div');
+            this.coreWrap.className = 'fc-spot-core';
+            this.coreWrap.setAttribute('aria-hidden', 'true');
+            this.coreWrap.style.visibility = 'hidden';
+            section.insertBefore(this.coreWrap, section.firstChild);
+            this.core = null;
+        } else {
+            this.canvas = document.createElement('canvas');
+            this.canvas.className = 'fc-spot-canvas';
+            this.canvas.setAttribute('aria-hidden', 'true');
+            this.ctx = this.canvas.getContext('2d', { alpha: false });
+            section.insertBefore(this.canvas, section.firstChild);
+        }
+        this.halo = HALO[this.scheme] || HALO.blue;
+
+        // the hero's blue panel: plain blue, no dots at all
+        this.plain = section.classList.contains('fc-hero-blue');
+        this.w = 0; this.h = 0; this.dpr = 0;
+        this.copies = [];           // [{ orig, dup, anchor, ai, offX, offY, w, h, next, clip, far, pairs }]
+        this.anchors = [];          // unique anchors other than the section
+        this.anchorRects = [];
+        this.active = false;
+        this.offsetsDirty = true;
+        this.tick = 0;
+        this.rect = null;
+        this.near = false;
+        this.sticky = new WeakMap();
+        this.refresh();
+    }
+
+    // re-scan the DOM: new elements, new belt copies, new anchors
+    Panel.prototype.refresh = function () {
+        mountDups(this.section);
+        this.collect();
+    };
+
+    Panel.prototype.anchorOf = function (el) {
+        var s = this.section;
+        for (var n = el; n && n !== s; n = n.parentElement) {
+            if (n.matches(RAILS)) return n;
+            var st = this.sticky.get(n);
+            if (st === undefined) { st = getComputedStyle(n).position === 'sticky'; this.sticky.set(n, st); }
+            if (st) return n;
+        }
+        return s;
+    };
+
+    Panel.prototype.collect = function () {
+        var s = this.section, list = s.querySelectorAll('.fc-spot-dup'), out = [], anchors = [];
+        for (var i = 0; i < list.length; i++) {
+            var d = list[i];
+            if (d.parentElement.closest('.fc-spot-dup')) continue;       // inside another copy
+            var orig = d.parentElement.classList.contains('fc-spk-photo') || d.tagName === 'IMG'
+                ? d.previousElementSibling : d.parentElement;
+            if (!orig) continue;
+            var a = this.anchorOf(d.tagName === 'IMG' ? d.parentElement : orig);
+            if (a !== s && anchors.indexOf(a) < 0) anchors.push(a);
+            out.push({ orig: orig, dup: d, anchor: a, ai: a === s ? -1 : anchors.indexOf(a),
+                       offX: null, offY: null,
+                       clip: d.style.clipPath || null, far: d.style.visibility === 'hidden' ? true : undefined });
+        }
+        this.copies = out;
+        this.anchors = anchors;
+        this.offsetsDirty = true;
+    };
+
+    /* Where an image's PICTURE is inside its box, as object-fit / -position
+     * place it (the box is often bigger: a portrait stands in a square frame). */
+    var fits = new WeakMap();
+    function pictureBox(img, r) {
+        var nw = img.naturalWidth, nh = img.naturalHeight;
+        if (!nw || !nh) return null;
+        var f = fits.get(img);
+        if (!f) {
+            var cs = getComputedStyle(img), pos = cs.objectPosition.split(' ');
+            var pc = function (v, len, free) {          // '100%' / '12px' -> px
+                return /%$/.test(v) ? free * parseFloat(v) / 100 : parseFloat(v) || 0;
+            };
+            f = { fit: cs.objectFit, px: pos[0] || '50%', py: pos[1] || '50%', pc: pc };
+            fits.set(img, f);
+        }
+        if (f.fit === 'fill' || f.fit === '') return { x: r.left, y: r.top, w: r.width, h: r.height };
+        var s = f.fit === 'cover' ? Math.max(r.width / nw, r.height / nh)
+              : f.fit === 'none' ? 1 : Math.min(r.width / nw, r.height / nh);
+        if (f.fit === 'scale-down') s = Math.min(1, s);
+        var w = nw * s, h = nh * s;
+        return { x: r.left + f.pc(f.px, w, r.width - w), y: r.top + f.pc(f.py, h, r.height - h), w: w, h: h };
+    }
+
+    /* Is (x, y), in client px, on an OPAQUE pixel of this image's picture? The
+     * alpha is read once into a 64×64 map, as assets/speakers-belt.js does for
+     * the row — so a portrait lights only under the person, not over the air
+     * round them, on /speakers/ too, where there is no belt to decide it. A
+     * picture that cannot be read (another origin) counts all over. */
+    var alphaMaps = new WeakMap();
+    function onPicture(img, x, y) {
+        if (!img.complete || !img.naturalWidth) return false;
+        var pb = pictureBox(img, img.getBoundingClientRect());
+        if (!pb) return false;
+        var u = (x - pb.x) / pb.w, v = (y - pb.y) / pb.h;
+        if (u < 0 || u > 1 || v < 0 || v > 1) return false;
+        var map = alphaMaps.get(img);
+        if (map === undefined) {
+            try {
+                var c = document.createElement('canvas');
+                c.width = c.height = 64;
+                var g = c.getContext('2d', { willReadFrequently: true });
+                g.drawImage(img, 0, 0, 64, 64);
+                map = g.getImageData(0, 0, 64, 64).data;
+            } catch (err) { map = null; }
+            alphaMaps.set(img, map);
+        }
+        if (!map) return true;
+        var col = Math.min(63, Math.floor(u * 64)), row = Math.min(63, Math.floor(v * 64));
+        return map[(row * 64 + col) * 4 + 3] > 40;
+    }
+
+    /* One copy's animations paired with its original's, in tree order. Asked
+     * only when a copy comes into view — asking all hundred copies of a row,
+     * every couple of seconds, was a frame of its own. */
+    function cssAnim(a) { return typeof a.animationName === 'string'; }
+    function pairsFor(c) {
+        if (!c.dup.getAnimations) return [];
+        var da = c.dup.getAnimations({ subtree: true }).filter(cssAnim);
+        if (!da.length) return [];
+        var oa = c.orig.getAnimations({ subtree: c.orig.tagName !== 'IMG' }).filter(function (a) {
+            var t = a.effect && a.effect.target;
+            return cssAnim(a) && !(t && t.closest && t.closest('.fc-spot-dup'));
+        });
+        var out = [];
+        for (var k = 0; k < da.length && k < oa.length; k++) {
+            if (da[k].animationName === oa[k].animationName) out.push([oa[k], da[k]]);
+        }
+        return out;
+    }
+
+    Panel.prototype.size = function (w, h, dpr, vh) {
+        this.w = w; this.h = h; this.dpr = dpr; this.vh = vh;
+        if (this.paper) {
+            if (this.core) this.coreWrap.removeChild(this.core.canvas);
+            var ch = Math.max(1, Math.min(h, vh));
+            var cc = document.createElement('canvas');
+            cc.width = w * dpr; cc.height = ch * dpr;
+            cc.style.width = w + 'px'; cc.style.height = ch + 'px';
+            cc.className = 'fc-spot-core-img';
+            this.coreWrap.appendChild(cc);
+            this.core = { canvas: cc, ctx: cc.getContext('2d'), h: ch, top: -1 };
+        } else {
+            this.canvas.width = w * dpr;
+            this.canvas.height = h * dpr;
+            this.canvas.style.width = w + 'px';
+            this.canvas.style.height = h + 'px';
+            // an opaque canvas starts BLACK; the parts not yet painted are blue
+            this.ctx.fillStyle = BLUE_GROUND;
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        }
+    };
+
+    /* READ phase, first half — the section's box. */
+    Panel.prototype.readRect = function (sx, sy, dpr) {
+        /* The PADDING box, not the border box. The canvases are `inset: 0`,
+         * which places them inside the section's border. */
+        var s = this.section, bb = s.getBoundingClientRect();
+        var r = {
+            left: bb.left + s.clientLeft, top: bb.top + s.clientTop,
+            width: s.clientWidth, height: s.clientHeight
+        };
+        r.right = r.left + r.width; r.bottom = r.top + r.height;
+        this.rect = r;
+        this.sx = sx; this.sy = sy;
+        // the canvases' origin in DOCUMENT px, as the browser places them: on
+        // whole device pixels
+        this.docX = Math.round((r.left + sx) * dpr) / dpr;
+        this.docY = Math.round((r.top + sy) * dpr) / dpr;
+    };
+
+    /* READ phase, second half — once the goo of this frame is known: is any of
+     * it in here, and if so, where are the copies. */
+    Panel.prototype.readMore = function () {
+        var r = this.rect, g = cells, sx = this.sx, sy = this.sy;
+        this.near = !!g && g.ext[2] * Q > r.left + sx && g.ext[0] * Q < r.right + sx
+                         && g.ext[3] * Q > r.top + sy && g.ext[1] * Q < r.bottom + sy;
+        if (!this.near) return;
+        this.anchorRects = [];
+        for (var i = 0; i < this.anchors.length; i++) this.anchorRects.push(this.anchors[i].getBoundingClientRect());
+        // re-measure the copies every half second while lit — cheap insurance
+        // against anything that shifts them without a resize or a mutation
+        ++this.tick;
+        if (this.tick % 30 === 0) this.offsetsDirty = true;
+        var k, c, ar;
+        if (this.offsetsDirty) {
+            for (k = 0; k < this.copies.length; k++) {
+                c = this.copies[k];
+                if (!c.dup.isConnected) continue;
+                var dr = c.dup.getBoundingClientRect();
+                ar = c.ai < 0 ? r : this.anchorRects[c.ai];
+                c.offX = dr.left - ar.left;
+                c.offY = dr.top - ar.top;
+                c.w = dr.width;
+                c.h = dr.height;
+            }
+            this.offsetsDirty = false;
+        }
+        /* Each copy's clip for this frame — the core's runs near it, in its own
+         * px, or null when the goo does not reach it. Worked out here, among the
+         * reads, so a copy coming into view can have its animations paired (a
+         * style read) before anything is written this frame. The margin covers
+         * ink that stands outside a copy's box: a strip's slab, a ring. */
+        for (k = 0; k < this.copies.length; k++) {
+            c = this.copies[k];
+            if (c.offX == null) { c.next = null; continue; }
+            ar = c.ai >= 0 ? this.anchorRects[c.ai] : r;
+            c.next = clipFor(g, ar.left + sx + c.offX, ar.top + sy + c.offY, c.w, c.h, 80);
+            if (c.next && !c.pairs) c.pairs = pairsFor(c);
+        }
+    };
+
+    /* WRITE phase — no layout reads from here on. */
+    Panel.prototype.write = function (vh, now, dpr) {
+        var r = this.rect, g = cells, near = this.near;
+        var w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+        if (w !== this.w || h !== this.h || dpr !== this.dpr || (this.paper && vh !== this.vh)) this.size(w, h, dpr, vh);
+
+        if (this.paper) {
+            if (near) this.paintPaper(g, r, now);
+        } else if (r.bottom > -300 && r.top < vh + 300) {
+            this.paint(near ? g : null, r, vh, now);
+        }
+
+        if (near) {
+            /* Each copy, clipped to the goo. A copy the goo does not reach is
+             * HIDDEN, so it cannot show anywhere whatever its ink does outside
+             * its box; the rest take this frame's clip, written only if it
+             * changed. */
+            for (var k = 0; k < this.copies.length; k++) {
+                var c = this.copies[k], clip = c.next, far = !clip;
+                if (far !== c.far) { c.dup.style.visibility = far ? 'hidden' : ''; c.far = far; }
+                if (far) continue;
+                if (clip !== c.clip) { c.dup.style.clipPath = clip; c.clip = clip; }
+                /* …and its animations run on its original's clock — live ones
+                 * only: a cancelled animation (its copy rebuilt, or display:none)
+                 * must never be played again, or it outlives its element and
+                 * piles up. A pair that has gone idle is asked for again. */
+                var pr = c.pairs;
+                for (var a = 0; pr && a < pr.length; a++) {
+                    var o = pr[a][0], d = pr[a][1];
+                    if (o.playState === 'idle' || d.playState === 'idle') { c.pairs = null; break; }
+                    var de = d.effect && d.effect.target;
+                    if (!de || !de.isConnected) { c.pairs = null; break; }
+                    if (o.playState === 'paused') { if (d.playState !== 'paused') d.pause(); }
+                    else if (d.playState === 'paused') d.play();
+                    var ct = o.currentTime;
+                    if (ct != null && d.currentTime !== ct) d.currentTime = ct;
+                }
+            }
+            if (!this.active) {
+                this.section.setAttribute('data-fc-lit', '');
+                if (this.paper) this.coreWrap.style.visibility = 'visible';
+            }
+        } else if (this.active) {
+            this.section.removeAttribute('data-fc-lit');
+            if (this.paper) this.coreWrap.style.visibility = 'hidden';
+        }
+        this.active = near;
+    };
+
+    /* A blue panel: the ground, the page background's own dots on it, and the
+     * goo — its outline over the dots, its core in white with the dots again in
+     * the white's colour, so a dot on the rim is split pixel by pixel.
+     *
+     * The dots are the background's (fieldAt), fixed to the WINDOW as that field
+     * is: a blue panel is a blue window onto the same field, and its dots meet
+     * the paper's across the seam column for column and row for row. */
+    Panel.prototype.paint = function (g, r, vh, now) {
+        var ctx = this.ctx, dpr = this.dpr, W = this.canvas.width;
+
+        /* Only the band that can be seen (plus a margin for fast scrolls) is
+         * repainted. A panel can be well over a screen tall, and repainting the
+         * parts nobody can see was most of the per-frame cost. */
+        var MARGIN = 300;
+        var vy0 = Math.max(0, -r.top - MARGIN), vy1 = Math.min(this.h, vh - r.top + MARGIN);
+        if (vy1 <= vy0) return;
+        var by0 = Math.floor(vy0 * dpr), by1 = Math.ceil(vy1 * dpr);
+
+        ctx.fillStyle = BLUE_GROUND;
+        ctx.fillRect(0, by0, W, by1 - by0);
+        var dots = null;
+        if (!this.plain) {
+            dots = dotsIn(fieldAt(now, dpr), Math.round(r.left * dpr), Math.round(r.top * dpr), W, by0, by1);
+            ctx.fillStyle = BLUE_DOT;
+            ctx.fill(dots);
+        }
+        if (!g) return;
+        var ox = this.docX, oy = this.docY;
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, by0, W, by1 - by0);
+        ctx.clip();
+        for (var k = 2; k <= 4; k++) {
+            ctx.fillStyle = this.halo[k - 2];
+            ctx.fill(cellsPath(g, k, ox, oy, dpr, by0, by1));
+        }
+        ctx.clip(cellsPath(g, 1, ox, oy, dpr, by0, by1));
+        ctx.fillStyle = WHITE_GROUND;
+        ctx.fillRect(0, by0, W, by1 - by0);
+        if (dots) { ctx.fillStyle = WHITE_DOT; ctx.fill(dots); }
+        ctx.restore();
+    };
+
+    /* A paper panel: the goo in BLUE with the page background's dots recoloured
+     * inside it, and its outline — over the page's own paper and wave, which
+     * show through everywhere else. A window's height of canvas, moved down
+     * the section as the view does. */
+    Panel.prototype.paintPaper = function (g, r, now) {
+        var c = this.core, ctx = c.ctx, dpr = this.dpr;
+        var top = Math.round(Math.max(0, Math.min(this.h - c.h, -r.top)));
+        if (top !== c.top) { c.canvas.style.transform = 'translateY(' + top + 'px)'; c.top = top; }
+        var W = c.canvas.width, H = c.canvas.height;
+        ctx.clearRect(0, 0, W, H);
+        var ox = this.docX, oy = this.docY + top;
+        for (var k = 2; k <= 4; k++) {
+            ctx.fillStyle = this.halo[k - 2];
+            ctx.fill(cellsPath(g, k, ox, oy, dpr, 0, H));
+        }
+        var core = cellsPath(g, 1, ox, oy, dpr, 0, H);
+        ctx.fillStyle = BLUE_GROUND;
+        ctx.fill(core);
+        ctx.save();
+        ctx.clip(core);
+        ctx.fillStyle = BLUE_DOT;
+        ctx.fill(dotsIn(fieldAt(now, dpr), Math.round(r.left * dpr), Math.round((r.top + top) * dpr), W, 0, H));
+        ctx.restore();
+    };
+
+    /* ── what is the pointer on? ─────────────────────────────────────────── */
+
+    // is (x, y) on the LETTERS of this element — not the empty end of its line?
+    var range = document.createRange();
+    function onText(host, x, y) {
+        for (var c = host.firstElementChild; c; c = c.nextElementSibling) {
+            if (c.classList.contains('fc-spot-dup')) continue;
+            range.selectNodeContents(c);
+            var rs = range.getClientRects();
+            for (var i = 0; i < rs.length; i++) {
+                var r = rs[i];
+                if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return true;
+            }
+        }
+        return false;
+    }
+
+    // its position among its siblings, not counting copies
+    function indexIn(n) {
+        var i = 0;
+        for (var s = n.previousElementSibling; s; s = s.previousElementSibling) {
+            if (!s.classList.contains('fc-spot-dup')) i++;
+        }
+        return i;
+    }
+
+    /* The element under the pointer, and its twin in the copy: that twin and
+     * everything above it up to the copy's root are what :hover would have lit. */
+    function twins(el, section) {
+        var T = outerTarget(el, section);
+        if (!T) return [];
+        var d = dupOf(T);
+        if (!d) return [];
+        if (T.tagName === 'IMG') return [d];
+        var path = [];
+        for (var n = el; n && n !== T; n = n.parentElement) path.push(indexIn(n));
+        var out = [d], m = d;
+        for (var k = path.length - 1; k >= 0 && m; k--) {
+            m = m.firstElementChild;
+            for (var i = path[k]; m && i > 0; i--) m = m.nextElementSibling;
+            if (m) out.push(m);
+        }
+        return out;
+    }
+
+    function probe() {
+        var el = document.elementFromPoint(ptr.cx, ptr.cy);
+        var section = el && el.closest('[data-fc-spotlight]');
+        if (!section) return null;
+        var hit = { name: null, photo: null, online: null, hov: twins(el, section) };
+        if (section.getAttribute('data-fc-spotlight') === 'blue') {
+            var nm = el.closest('.fc-spk-name');
+            if (nm && !nm.classList.contains('fc-spot-dup') && onText(nm, ptr.cx, ptr.cy)) hit.name = nm;
+            // the [ONLINE] badge hugs its own words (width: fit-content)
+            var ol = el.closest('.fc-spk-online');
+            if (ol && !ol.classList.contains('fc-spot-dup')) hit.online = ol;
+            // a portrait: only on an OPAQUE pixel of it, not the air round it
+            var ph = el.closest('.fc-spk-photo');
+            if (ph) {
+                for (var c = ph.firstElementChild; c; c = c.nextElementSibling) {
+                    if (c.classList.contains('fc-spk-shot') && !c.classList.contains('fc-spot-dup')) {
+                        if (onPicture(c, ptr.cx, ptr.cy)) hit.photo = ph;
+                        break;
+                    }
+                }
+            }
+        }
+        return hit;
+    }
+
+    /* State is written as data-* ATTRIBUTES, never classes. Tailwind's browser
+     * build watches every class on the page and recompiles its whole stylesheet
+     * the first time it sees a new one — a full-page restyle, felt as a stall on
+     * the first hover and the first click. */
+    var lit = { name: null, photo: null, online: null }, hovMarked = [];
+    function apply(hit) {
+        ['name', 'photo', 'online'].forEach(function (k) {
+            var now = hit ? hit[k] : null;
+            if (lit[k] === now) return;
+            if (lit[k]) lit[k].removeAttribute('data-fc-on');
+            if (now) now.setAttribute('data-fc-on', '');
+            lit[k] = now;
+        });
+        var list = hit ? hit.hov : [];
+        var same = list.length === hovMarked.length;
+        for (var i = 0; same && i < list.length; i++) same = list[i] === hovMarked[i];
+        if (same) return;
+        for (i = 0; i < hovMarked.length; i++) hovMarked[i].removeAttribute('data-fc-hov');
+        for (i = 0; i < list.length; i++) list[i].setAttribute('data-fc-hov', '');
+        hovMarked = list;
+    }
+
+    /* ── keeping the copies current ──────────────────────────────────────── */
+
+    // a style attribute with this script's own per-frame values taken out
+    function bareStyle(v) {
+        return (v || '').replace(/--fc-(anchor|off|spot|band-from|faq-from)[\w-]*\s*:[^;]*;?/g, '').replace(/\s+/g, ' ').trim();
+    }
+    function sameState(a, b) {
+        var x = (a || '').split(/\s+/).filter(function (c) { return c && !STATE_CLASSES[c]; }).sort().join(' ');
+        var y = (b || '').split(/\s+/).filter(function (c) { return c && !STATE_CLASSES[c]; }).sort().join(' ');
+        return x === y;
+    }
+    function allDups(nodes) {
+        for (var i = 0; i < nodes.length; i++) {
+            var n = nodes[i];
+            if (n.nodeType !== 1 || !n.classList.contains('fc-spot-dup')) return false;
+        }
+        return true;
+    }
+
+    function watch(p) {
+        if (!window.MutationObserver) return;
+        var queued = false, dirty = [], rescan = false;
+        var mo = new MutationObserver(function (records) {
+            for (var i = 0; i < records.length; i++) {
+                var rec = records[i], tgt = rec.target;
+                var el = tgt.nodeType === 1 ? tgt : tgt.parentElement;
+                if (!el || el.closest('.fc-spot-dup')) continue;
+                if (rec.type === 'childList' && allDups(rec.addedNodes) && allDups(rec.removedNodes)) continue;
+                if (rec.type === 'attributes') {
+                    if (rec.attributeName === 'style' && bareStyle(rec.oldValue) === bareStyle(el.getAttribute('style'))) continue;
+                    if (rec.attributeName === 'class' && sameState(rec.oldValue, el.getAttribute('class'))) continue;
+                }
+                var t = outerTarget(el, p.section);
+                if (t) { if (dirty.indexOf(t) < 0) dirty.push(t); }
+                else if (rec.type === 'childList') rescan = true;     // new cards, new rows
+                else if (rec.type === 'attributes' && rec.attributeName === 'class') rescan = true;
+            }
+            if (queued || (!dirty.length && !rescan)) return;
+            queued = true;
+            requestAnimationFrame(function () {
+                queued = false;
+                var list = dirty; dirty = [];
+                for (var k = 0; k < list.length; k++) {
+                    if (list[k].isConnected && dupOf(list[k])) build(list[k]);
+                }
+                if (rescan) { rescan = false; mountDups(p.section); }
+                p.collect();
+                // a lit name or part copied by a belt keeps its class; drop strays
+                var on = p.section.querySelectorAll('[data-fc-on]');
+                for (k = 0; k < on.length; k++) if (on[k] !== lit.name && on[k] !== lit.photo && on[k] !== lit.online) on[k].removeAttribute('data-fc-on');
+                hovMarked = hovMarked.filter(function (n) { return n.isConnected; });
+                mo.takeRecords();
+            });
+        });
+        mo.observe(p.section, {
+            childList: true, subtree: true, characterData: true,
+            attributes: true, attributeOldValue: true,
+            attributeFilter: ['style', 'class', 'src', 'srcset', 'open', 'hidden', 'aria-expanded']
+        });
+    }
+
+    /* ── wiring ──────────────────────────────────────────────────────────── */
+
+    function init() {
+        ringDefs();
+        var blue = document.querySelectorAll('#speakers, #communities, footer.fc-section-dots, .fc-hero-blue');
+        for (var w = 0; w < blue.length; w++) blue[w].setAttribute('data-fc-spotlight', 'blue');
+        /* The paper sections the wave shows through (.fc-section-dots). The ones
+         * with an opaque paper ground — Manifesto, Schedule, Venue, Get
+         * Involved, FAQ — have no spotlight. Only the landing page: the
+         * standalone pages are documents, not this. */
+        if (document.querySelector('.fc-hero')) {
+            var paper = document.querySelectorAll('main section[id].fc-section-dots, .fc-hero-paper');
+            for (w = 0; w < paper.length; w++) {
+                var sec = paper[w];
+                if (sec.hasAttribute('data-fc-spotlight') || sec.classList.contains('fc-hero')) continue;
+                sec.setAttribute('data-fc-spotlight', 'paper');
+            }
+        }
+        var sections = document.querySelectorAll('[data-fc-spotlight]');
+        if (!sections.length) return;
+
+        buildHoverSheet();
+        window.addEventListener('load', function () {
+            buildHoverSheet();
+            // the Tailwind browser build writes its rules after it has seen the
+            // page, which can be after load — one more look a moment later
+            setTimeout(buildHoverSheet, 1500);
+        });
+
+        /* Trying a highlight colour without editing the stylesheet: add
+         * ?fc-hi=55FFFF (any six-digit hex) to the page's address. */
+        var hi = /[?&]fc-hi=#?([0-9a-f]{6})(?:&|$)/i.exec(location.search);
+        if (hi) document.documentElement.style.setProperty('--fc-blue-hi', '#' + hi[1]);
+        // the funding figure's wave is an SVG with its colour baked in: redraw
+        // it in whatever the highlight is
+        var hiNow = getComputedStyle(document.documentElement).getPropertyValue('--fc-blue-hi').trim();
+        if (/^#[0-9a-f]{6}$/i.test(hiNow)) {
+            var wave = document.createElement('style');
+            wave.id = 'fc-spot-wave';
+            wave.textContent = '[data-fc-spotlight="paper"] .fc-spot-dup .fc-fund-digits{background-image:'
+                + 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'120\' height=\'24\' viewBox=\'0 0 120 24\' preserveAspectRatio=\'none\'%3E%3Cpath d=\'M0 12 Q15 2 30 12 T60 12 T90 12 T120 12 V24 H0 Z\' fill=\'%23'
+                + hiNow.slice(1) + '\'/%3E%3C/svg%3E"),linear-gradient(' + hiNow + ',' + hiNow + '),linear-gradient(#8CA3FF,#8CA3FF)}';
+            document.head.appendChild(wave);
+        }
+
+        var panels = [];
+        for (var i = 0; i < sections.length; i++) panels.push(new Panel(sections[i]));
+        panels.forEach(watch);
+
+        /* THE WALLS the drops hit: every section of the landing page with no
+         * spotlight of its own (the opaque paper ones), the sidebar, and the top
+         * bar — plus the window's two sides, added each frame. */
+        var walls = [];
+        [].forEach.call(document.querySelectorAll('main section[id], main footer'), function (s) {
+            if (!s.hasAttribute('data-fc-spotlight') && !s.querySelector('[data-fc-spotlight]')) walls.push(s);
+        });
+        [].forEach.call(document.querySelectorAll('.fc-nav-rail, .fc-sidebar-strip, header.fc-bar'), function (s) { walls.push(s); });
+        function readWalls(sx, sy) {
+            var out = [];
+            for (var w = 0; w < walls.length; w++) {
+                var b = walls[w].getBoundingClientRect();
+                if (b.width && b.height) out.push({ x0: b.left + sx, y0: b.top + sy, x1: b.right + sx, y1: b.bottom + sy });
+            }
+            return out;
+        }
+
+        /* The pointer is tracked on the WHOLE document, not just the panels: the
+         * goo follows it everywhere and each lit section draws what reaches it.
+         * Capture phase, because the belts stop pointer events propagating. Touch
+         * is ignored — this is a hover effect. */
+        document.addEventListener('pointermove', function (e) {
+            if (e.pointerType === 'touch') { ptr.on = false; return; }
+            ptr.cx = e.clientX; ptr.cy = e.clientY; ptr.on = true;
+        }, { passive: true, capture: true });
+        document.addEventListener('pointerdown', function (e) {
+            if (e.pointerType === 'touch' || e.button !== 0) return;
+            ptr.cx = e.clientX; ptr.cy = e.clientY; ptr.on = true;
+            burst();
+        }, { passive: true, capture: true });
+        document.addEventListener('mouseout', function (e) {
+            if (!e.relatedTarget) ptr.on = false;           // left the window
+        }, { passive: true });
+        window.addEventListener('blur', function () { ptr.on = false; });
+
+        function onResize() { for (var k = 0; k < panels.length; k++) panels[k].offsetsDirty = true; }
+        window.addEventListener('resize', onResize);
+        window.addEventListener('load', onResize);
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(onResize);
+
+        var last = 0;
+        var lastSx = null, lastSy = null;
+        function frame(now) {
+            // a tab that was away comes back to a calm step, not a leap
+            var dt = last ? Math.min(1 / 30, Math.max(0, (now - last) / 1000)) : 1 / 60;
+            last = now;
+            var sx = window.scrollX || window.pageXOffset || 0;
+            var sy = window.scrollY || window.pageYOffset || 0;
+            /* Scrolling carries the head and its tail WITH the screen, so they stay
+             * under a still pointer. Left in page coordinates they chased the
+             * pointer down the whole scroll — a smear the height of the page, and
+             * drops flung at every turn of the wheel. Drops already in the air stay
+             * with the page: they are falling onto its walls. */
+            if (lastSx !== null && trail.placed && (sx !== lastSx || sy !== lastSy)) {
+                var dsx = sx - lastSx, dsy = sy - lastSy;
+                trail.head.x += dsx; trail.head.y += dsy;
+                for (var tn = 0; tn < TAIL; tn++) { trail.tail[tn].x += dsx; trail.tail[tn].y += dsy; }
+            }
+            lastSx = sx; lastSy = sy;
+            var vh = window.innerHeight, vw = document.documentElement.clientWidth || window.innerWidth;
+            var dpr = Math.max(1, Math.min(2, Math.round(window.devicePixelRatio || 1)));
+            var k, any = false;
+            // all reads…
+            for (k = 0; k < panels.length; k++) panels[k].readRect(sx, sy, dpr);
+            var wl = readWalls(sx, sy), view = { x0: sx, x1: sx + vw, y0: sy, y1: sy + vh };
+            // the goo moves (two half steps: stiff springs stay stable at 30fps)
+            var tx = ptr.cx + sx, ty = ptr.cy + sy;
+            stepTrail(dt / 2, tx, ty, ptr.on, wl, view);
+            stepTrail(dt / 2, tx, ty, ptr.on, wl, view);
+            cells = fieldCells({ x0: view.x0 - 60, x1: view.x1 + 60, y0: view.y0 - 60, y1: view.y1 + 60 });
+            for (k = 0; k < panels.length; k++) {
+                panels[k].readMore();
+                any = any || panels[k].near;
+            }
+            var hit = ptr.on && any ? probe() : null;
+            // …then all writes
+            for (k = 0; k < panels.length; k++) panels[k].write(vh, now, dpr);
+            apply(hit);
+            requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init, { once: true });
+    } else {
+        init();
+    }
+})();

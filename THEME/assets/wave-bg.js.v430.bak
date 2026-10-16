@@ -1,0 +1,269 @@
+/* FOSSCOMM 2026 — global wave background.
+ *
+ * A grid of hard-edged dots whose Y position is displaced by a sum of sin()
+ * waves of x, y and time, so the field reads as a slow topographic surface.
+ *
+ * This is the SAME dot standard as the exported background assets
+ * (backgrounds/*.png, see FOSSCOMM-2026-ASSET-RULEBOOK.txt §7): pitch 40,
+ * a 6x6 dot with its four corners off, and a margin of half the pitch. A page
+ * and a poster therefore carry the same texture at the same size.
+ *
+ * Architecture is unchanged: one <canvas> appended to <body>, position fixed,
+ * z-index -1. It paints over <html>'s paper and behind every section. Sections
+ * that should hide it carry bg-paper; sections that show it carry
+ * .fc-section-dots. The paint area is the viewport, so the field stays locked
+ * to the screen while the page scrolls.
+ *
+ * ── THE FOUR THINGS THIS HAS TO GET RIGHT ─────────────────────────────────
+ *
+ * 1. SHARP. Every dot lands on whole DEVICE pixels. The old field was soft for
+ *    two reasons, and both had to go: the dot was 1.6px (a fractional size can
+ *    never be crisp), and the wave offset was a raw float, so each dot sat on a
+ *    fractional y and the renderer antialiased it. Here the canvas is sized at
+ *    an INTEGER devicePixelRatio, the grid is integer, and the wave offset is
+ *    rounded to whole device pixels before use.
+ *
+ * 2. THE SAME DOTS AT ANY SCREEN SIZE. Pitch and dot size are fixed in CSS
+ *    pixels, so a wider screen shows MORE dots, never bigger ones, and nothing
+ *    reflows when the window is resized. On a 2x display the dot is drawn at
+ *    12 device px — the same pixel-doubling the 2x PNG assets use, so it stays
+ *    the same size on screen and stays sharp rather than being smoothed up.
+ *
+ * 3. HALF-GAP EDGES. First dot centre sits half a pitch from the edge, and any
+ *    remainder is split between the two edges (see axis() below) — the rule
+ *    that lets two of these butt together with no visible seam.
+ *
+ * 4. CHEAP. The pitch went 12x16 -> 40x40, which is about an 8x cut in dot
+ *    count: ~10,900 dots on a 1920x1080 desktop down to ~1,400. That pays for
+ *    rendering at device resolution several times over. Per frame only the
+ *    dots that moved to a new pixel are redrawn — a few dozen — and the
+ *    per-dot trigonometry is factored out into per-column and per-row tables
+ *    (see draw()).
+ *
+ * Animation honours prefers-reduced-motion: one static frame, no loop.
+ */
+(function () {
+    'use strict';
+
+    /* ── The dot standard ──────────────────────────────────────────────── */
+    var PITCH = 40;        // centre to centre, CSS px, both axes
+    var DOT   = 6;         // the dot mask is DOT x DOT with the corners off
+    // Ground/dot pair from the exported assets: ink 10% over paper. The old
+    // field used --color-ink-faint (#C9C7BF), which is the hairline grey and
+    // noticeably darker; this is the value the PNG backgrounds actually carry.
+    var COLOUR = '#E2E2DF';
+
+    /* ── The wave ──────────────────────────────────────────────────────────
+     * Amplitudes are unchanged from the previous field, which matters: at the
+     * old 16px row step a 34px swing threw rows PAST each other and the grid
+     * read as halftone ridges. Against a 40px pitch the same 34px is less than
+     * one row, so the grid stays legible and undulates instead of churning —
+     * which is what big dots want.
+     *
+     * KY_3 is the one constant that had to change. It was 0.30 radians PER ROW,
+     * so its vertical wavelength was tied to the row step; at 40px rows that
+     * would have stretched the wave 2.5x. Expressed per PIXEL (0.30/16) the
+     * wavelength stays where it was.
+     */
+    var AMP_1 = 18, KX_1 = 0.014,  SPEED_1 =  0.45;
+    var AMP_2 = 11, KX_2 = 0.027,  SPEED_2 = -0.65;
+    var AMP_3 = 5,  KX_3 = 0.060,  KY_3 = 0.30 / 16, SPEED_3 = 0.85;
+
+    var canvas = document.createElement('canvas');
+    canvas.id = 'fc-waves-canvas';
+    canvas.setAttribute('aria-hidden', 'true');
+    canvas.style.cssText = [
+        'position:fixed', 'inset:0', 'width:100vw', 'height:100vh',
+        'z-index:-1', 'pointer-events:none', 'display:block'
+    ].join(';');
+
+    var ctx, W = 0, H = 0, dpr = 1, startMs = 0;
+    var reducedMotion = window.matchMedia
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* Dot centres on one axis, with any remainder CENTRED.
+     * For a length that is an exact multiple of the pitch this is simply
+     * pitch/2 + pitch*k. For anything else — which a browser viewport almost
+     * always is — the leftover is split between the two edges, so the GAPS
+     * stay exactly one pitch and only the two outer margins absorb the error.
+     * Same rule as the exported assets. */
+    function axis(len, pitch) {
+        /* FLOOR, not round. A viewport is almost never a multiple of the pitch,
+         * and rounding UP squeezes the leftover into the two margins — at
+         * 900px wide that left 10px a side instead of the 20px half-gap, so
+         * the field ran right up to the edge. Flooring instead keeps the GAPS
+         * at exactly one pitch and lets the margin land anywhere in
+         * [pitch/2, pitch): never tighter than the half-gap rule, only ever
+         * looser, and still symmetric because the remainder is split. */
+        var n = Math.floor(len / pitch);
+        if (n < 1) n = 1;
+        var m = Math.round((len - (n - 1) * pitch) / 2);
+        var out = new Float64Array(n);
+        for (var k = 0; k < n; k++) out[k] = m + pitch * k;
+        return out;
+    }
+
+    function mount() {
+        if (document.getElementById('fc-waves-canvas')) return;
+        document.body.appendChild(canvas);
+        ctx = canvas.getContext('2d', { alpha: true });
+        resize();
+        startMs = performance.now();
+        /* Published so assets/spotlight-dots.js can draw a disc whose dots sit
+           exactly on THIS field — same positions, same clock — and the field
+           carries on through the disc's edge pixel for pixel instead of two
+           grids meeting there. Both are rAF callbacks, so in any one frame they
+           are handed the same timestamp. */
+        window.FC_WAVE_T0 = startMs;
+        if (reducedMotion) draw(startMs);
+        else requestAnimationFrame(loop);
+    }
+
+    function loop(t) { draw(t); requestAnimationFrame(loop); }
+
+    var cols = null, rowsBase = null;   // device-px grid, rebuilt on resize
+
+    function resize() {
+        if (!ctx) return;
+        W = window.innerWidth;
+        H = window.innerHeight;
+        /* INTEGER device pixel ratio, capped at 2.
+         * Integer because the dot mask is scaled by it: at a fractional ratio
+         * the 6 mask pixels would land on fractional device pixels and the
+         * whole point — sharpness — would be lost. Capped because past 2x the
+         * extra pixels cost real fill time and buy nothing the eye can see on
+         * a background. */
+        dpr = Math.max(1, Math.min(2, Math.round(window.devicePixelRatio || 1)));
+        canvas.width  = Math.round(W * dpr);
+        canvas.height = Math.round(H * dpr);
+        canvas.style.width  = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+        // grid in DEVICE pixels, integers throughout
+        var p = PITCH * dpr;
+        var xs = axis(canvas.width, p);
+        var ys = axis(canvas.height, p);
+        cols = new Float64Array(xs.length);
+        for (var i = 0; i < xs.length; i++) cols[i] = Math.round(xs[i]);
+        /* One extra row above and below. The wave lifts dots by up to
+         * AMP_1+AMP_2+AMP_3 px, so without them the field would pull away from
+         * the top and bottom edges and leave a bald strip. */
+        rowsBase = new Float64Array(ys.length + 2);
+        rowsBase[0] = Math.round(ys[0] - p);
+        for (var j = 0; j < ys.length; j++) rowsBase[j + 1] = Math.round(ys[j]);
+        rowsBase[ys.length + 1] = Math.round(ys[ys.length - 1] + p);
+
+        haveCols = -1; haveRows = -1;     // force the trig tables to rebuild
+        full = true;                      // a resized canvas starts blank
+        if (reducedMotion) draw(performance.now());
+    }
+
+    /* Scratch buffers, grown once and reused — allocating these per frame
+       would hand the collector a few hundred KB a second for nothing. */
+    var colFlat = null, colSin = null, colCos = null;
+    var rowSin = null, rowCos = null;
+    var haveCols = -1, haveRows = -1;
+    // where each dot is drawn now (device px), and whether the canvas has to be
+    // drawn whole — the first frame, after a resize, after a lost context
+    var shownY = null, full = true;
+
+    function draw(nowMs) {
+        if (!cols || !rowsBase) return;
+        var t = (nowMs - startMs) / 1000;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = COLOUR;
+
+        var nCols = cols.length, nRows = rowsBase.length;
+
+        /* ── separate what varies by column from what varies by row ──────────
+         * Waves 1 and 2 depend on x and t only, so every row was recomputing
+         * the same value. Wave 3 does depend on y, but only as an added phase,
+         * and sin(A+B) = sinA cosB + cosA sinB splits that into a column part
+         * and a row part. Precompute both and the inner loop needs no
+         * transcendental at all: 3*rows*cols sin() calls become 4*cols + 2*rows.
+         */
+        if (nCols !== haveCols) {
+            colFlat = new Float64Array(nCols);
+            colSin  = new Float64Array(nCols);
+            colCos  = new Float64Array(nCols);
+            haveCols = nCols;
+        }
+        if (nRows !== haveRows) {
+            rowSin = new Float64Array(nRows);
+            rowCos = new Float64Array(nRows);
+            haveRows = nRows;
+        }
+
+        var p1 = t * SPEED_1, p2 = t * SPEED_2, p3 = t * SPEED_3;
+        var i;
+        for (i = 0; i < nCols; i++) {
+            var xCss = cols[i] / dpr;                       // waves are specified in CSS px
+            colFlat[i] = AMP_1 * Math.sin(xCss * KX_1 + p1)
+                       + AMP_2 * Math.sin(xCss * KX_2 + p2);
+            var a = xCss * KX_3 + p3;
+            colSin[i] = Math.sin(a);
+            colCos[i] = Math.cos(a);
+        }
+        for (i = 0; i < nRows; i++) {
+            var b = (rowsBase[i] / dpr) * KY_3;
+            rowSin[i] = Math.sin(b);
+            rowCos[i] = Math.cos(b);
+        }
+
+        /* The dot: a DOT x DOT square with the four corners removed, which at
+         * DOT = 6 gives rows of 4,6,6,6,6,4 = 32 pixels — the same mask the PNG
+         * assets rasterise. Three rects express it exactly, and each mask pixel
+         * is dpr device px square, so the shape pixel-doubles on a 2x screen
+         * rather than being resampled. */
+        var u = dpr;                       // one mask pixel, in device px
+        var half = Math.round(DOT * dpr / 2);
+
+        /* ONLY THE DOTS THAT MOVED. A dot drifts at most ~20px a second, and
+         * moves in whole device pixels, so in any one frame only a few dozen of
+         * the ~1,400 land somewhere new. Each of those is cleared where it was
+         * and drawn where it is; the rest of the canvas is left as it is. The
+         * pixels are exactly what a full redraw gives — no two dots' boxes
+         * ever overlap (40px apart; a column's neighbours drift together) —
+         * for a fraction of the work, every frame, on every page. The whole
+         * field is drawn only on the first frame and after a resize. */
+        var path = new Path2D();
+        for (var ri = 0; ri < nRows; ri++) {
+            var sb = rowSin[ri], cb = rowCos[ri];
+            var yb = rowsBase[ri];
+            for (var ci = 0; ci < nCols; ci++) {
+                var dyCss = colFlat[ci] + AMP_3 * (colSin[ci] * cb + colCos[ci] * sb);
+                var y = yb + Math.round(dyCss * dpr) - half;
+                var x = cols[ci] - half;
+                path.rect(x + u,     y,         u * 4, u);
+                path.rect(x,         y + u,     u * 6, u * 4);
+                path.rect(x + u,     y + u * 5, u * 4, u);
+            }
+        }
+        ctx.fill(path);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', mount, { once: true });
+    } else {
+        mount();
+    }
+
+    window.addEventListener('resize', resize);
+    // a GPU reset wipes the canvas: draw it whole again
+    canvas.addEventListener('contextrestored', function () {
+        full = true;
+        if (reducedMotion) draw(performance.now());
+    });
+
+    if (window.matchMedia) {
+        var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+        var listener = function (e) {
+            var wasReduced = reducedMotion;
+            reducedMotion = e.matches;
+            if (wasReduced && !reducedMotion) requestAnimationFrame(loop);
+        };
+        if (mq.addEventListener) mq.addEventListener('change', listener);
+        else if (mq.addListener) mq.addListener(listener);
+    }
+})();
