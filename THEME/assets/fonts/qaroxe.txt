@@ -1,0 +1,37 @@
+QAROXE FONT NOTICE
+
+Font:      Qaroxe
+Designer:  Wahyu Eka Prasetya (wepfont)
+Copyright: Copyright (c) 2024 Wahyu Eka Prasetya. All rights reserved.
+Source:    https://wepfont.com/qaroxe/
+
+NOT INCLUDED
+
+The Qaroxe font file is not included in this repository. The designer's
+license terms do not permit the font to be redistributed in any form.
+
+The Qaroxe font is not owned by the FOSSCOMM 2026 Team and is not covered by
+the license of this repository. No rights to the font are granted by this
+repository or by this notice.
+
+OBTAINING THE FONT
+
+The font and its license must be obtained directly from the designer at:
+
+    https://wepfont.com/qaroxe/
+
+Use of the font on a website requires a license that permits website
+usage. The terms of each license are set by the designer and are available
+at the address above.
+
+USE WITH THIS THEME
+
+This theme references the font at the following path:
+
+    THEME/assets/fonts/Qaroxe.ttf
+
+If a properly licensed copy of the font is placed at that path, the theme
+will use it. If it is not present, the theme falls back to its other fonts.
+
+A licensed copy of the font must not be committed to this repository or
+otherwise redistributed.
