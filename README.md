@@ -14,7 +14,6 @@ Bad time to be here, everyone is slacking.
 - Patrick Fitzgerald
 - Angelos Chouvardas
 - Efstathios Iosifidis
-- Kostas Papadimas
 
 ### Volunteers:
 
