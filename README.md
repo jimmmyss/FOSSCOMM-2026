@@ -11,17 +11,18 @@ Bad time to be here, everyone is slacking.
 - Thanasis Giannoulakis
 
 ### Suporters:
+- Patrick Fitzgerald
+- Angelos Chouvardas
 - Efstathios Iosifidis
 - Kostas Papadimas
-- Patrick Fitzgerald
 
 ### Volunteers:
 
 ## Sponsors:
 ### Diamonds:
-- Typesense, Libre Space Foundation
+- Typesense, Libre Space Foundation, efood
 ### Goldies:
-- efood, Hack the Box, Shopflix
+- Hack the Box, Shopflix
 ### Silvers:
 - Skroutz
 ### Bronze:
