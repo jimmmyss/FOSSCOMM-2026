@@ -47,57 +47,57 @@ Bad time to be here, everyone is slacking.
 
 <h3>Diamonds</h3>
 <p>
-<a href="https://typesense.org/"><img src="IDENTITY/SITE/SPONSORS/DIAMONDS/TYPESENSE-BLACK.svg#gh-light-mode-only" height="26" alt="Typesense"><img src="IDENTITY/SITE/SPONSORS/DIAMONDS/TYPSESENSE.svg#gh-dark-mode-only" height="26" alt="Typesense"></a>&nbsp;&nbsp;&nbsp;
-<a href="https://www.libre.space/"><img src="IDENTITY/SITE/SPONSORS/DIAMONDS/LIBRESPACE.svg#gh-light-mode-only" height="29" alt="Libre Space Foundation"><img src="IDENTITY/SITE/SPONSORS/DIAMONDS/LIBRESPACE-WHITE.svg#gh-dark-mode-only" height="29" alt="Libre Space Foundation"></a>&nbsp;&nbsp;&nbsp;
-<a href="https://www.e-food.gr/"><img src="IDENTITY/SITE/SPONSORS/DIAMONDS/EFOOD.svg#gh-light-mode-only" height="32" alt="efood"><img src="IDENTITY/SITE/SPONSORS/DIAMONDS/EFOOD-WHITE.svg#gh-dark-mode-only" height="32" alt="efood"></a>
+<a href="https://typesense.org/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/DIAMONDS/TYPSESENSE.svg"><img src="IDENTITY/SITE/SPONSORS/DIAMONDS/TYPESENSE-BLACK.svg" height="26" alt="Typesense"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://www.libre.space/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/DIAMONDS/LIBRESPACE-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/DIAMONDS/LIBRESPACE.svg" height="29" alt="Libre Space Foundation"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://www.e-food.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/DIAMONDS/EFOOD-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/DIAMONDS/EFOOD.svg" height="32" alt="efood"></picture></a>
 </p>
 
 <h3>Goldies</h3>
 <p>
-<a href="https://www.hackthebox.com/"><img src="IDENTITY/SITE/SPONSORS/GOLDIES/HACK-THE-BOX.svg#gh-light-mode-only" height="26" alt="Hack The Box"><img src="IDENTITY/SITE/SPONSORS/GOLDIES/HACK-THE-BOX-WHITE.svg#gh-dark-mode-only" height="26" alt="Hack The Box"></a>&nbsp;&nbsp;&nbsp;
-<a href="https://shopflix.gr/"><img src="IDENTITY/SITE/SPONSORS/GOLDIES/SHOPFLIX.svg#gh-light-mode-only" height="21" alt="Shopflix"><img src="IDENTITY/SITE/SPONSORS/GOLDIES/SHOPFLIX-WHITE.svg#gh-dark-mode-only" height="21" alt="Shopflix"></a>
+<a href="https://www.hackthebox.com/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/GOLDIES/HACK-THE-BOX-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/GOLDIES/HACK-THE-BOX.svg" height="26" alt="Hack The Box"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://shopflix.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/GOLDIES/SHOPFLIX-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/GOLDIES/SHOPFLIX.svg" height="21" alt="Shopflix"></picture></a>
 </p>
 
 <h3>Silvers</h3>
 <p>
-<a href="https://www.skroutz.gr/"><img src="IDENTITY/SITE/SPONSORS/SILVERS/SKROUTZ.svg#gh-light-mode-only" height="29" alt="Skroutz"><img src="IDENTITY/SITE/SPONSORS/SILVERS/SKROUTZ-WHITE.svg#gh-dark-mode-only" height="29" alt="Skroutz"></a>
+<a href="https://www.skroutz.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/SILVERS/SKROUTZ-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/SILVERS/SKROUTZ.svg" height="29" alt="Skroutz"></picture></a>
 </p>
 
 <h3>Bronzies</h3>
 <p>
-<a href="https://www.onlyoffice.com/"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/ONLYOFFICE.svg#gh-light-mode-only" height="27" alt="ONLYOFFICE"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/ONLYOFFICE-WHITE.svg#gh-dark-mode-only" height="27" alt="ONLYOFFICE"></a>&nbsp;&nbsp;&nbsp;
-<a href="https://www.epignosishq.com/"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/TALENTLMS.svg#gh-light-mode-only" height="30" alt="Epignosis"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/TALENTLMS-WHITE.svg#gh-dark-mode-only" height="30" alt="Epignosis"></a>&nbsp;&nbsp;&nbsp;
-<a href="https://www.ferryhopper.com/el/"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/FERRYHOPPER.svg#gh-light-mode-only" height="29" alt="Ferryhopper"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/FERRYHOPPER-WHITE.svg#gh-dark-mode-only" height="29" alt="Ferryhopper"></a>&nbsp;&nbsp;&nbsp;
-<a href="https://www.epe.org.gr/?mtm_campaign=fc26"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/EPE.svg#gh-light-mode-only" height="48" alt="Hellenic Informatics Union"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/EPE-WHITE.svg#gh-dark-mode-only" height="48" alt="Hellenic Informatics Union"></a>&nbsp;&nbsp;&nbsp;
-<a href="https://www.lambda-twelve.com/?utm_source=fosscomm&amp;utm_medium=sponsorship&amp;utm_campaign=fosscomm2026"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/LAMDATWELVE.svg#gh-light-mode-only" height="28" alt="Lambda Twelve"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/LAMDATWELVE-WHITE.svg#gh-dark-mode-only" height="28" alt="Lambda Twelve"></a>&nbsp;&nbsp;&nbsp;
-<a href="https://www.jetbrains.com/"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/JETBRAINS.svg#gh-light-mode-only" height="29" alt="JetBrains"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/JETBRAINS-WHITE.svg#gh-dark-mode-only" height="29" alt="JetBrains"></a>
+<a href="https://www.onlyoffice.com/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/BRONZIES/ONLYOFFICE-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/ONLYOFFICE.svg" height="27" alt="ONLYOFFICE"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://www.epignosishq.com/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/BRONZIES/TALENTLMS-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/TALENTLMS.svg" height="30" alt="Epignosis"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://www.ferryhopper.com/el/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/BRONZIES/FERRYHOPPER-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/FERRYHOPPER.svg" height="29" alt="Ferryhopper"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://www.epe.org.gr/?mtm_campaign=fc26"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/BRONZIES/EPE-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/EPE.svg" height="48" alt="Hellenic Informatics Union"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://www.lambda-twelve.com/?utm_source=fosscomm&amp;utm_medium=sponsorship&amp;utm_campaign=fosscomm2026"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/BRONZIES/LAMDATWELVE-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/LAMDATWELVE.svg" height="28" alt="Lambda Twelve"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://www.jetbrains.com/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/BRONZIES/JETBRAINS-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/JETBRAINS.svg" height="29" alt="JetBrains"></picture></a>
 </p>
 
 <h3>Munchies</h3>
 <p>
-<a href="https://kukiworld.com/"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/KUKI.svg#gh-light-mode-only" height="32" alt="Kuki"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/KUKI-WHITE.svg#gh-dark-mode-only" height="32" alt="Kuki"></a>&nbsp;&nbsp;&nbsp;
-<a href="https://nama.gr/"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/NAMA.svg#gh-light-mode-only" height="29" alt="Nama"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/NAMA-WHITE.svg#gh-dark-mode-only" height="29" alt="Nama"></a>&nbsp;&nbsp;&nbsp;
-<a href="https://www.redbull.com/"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/REDBULL.svg#gh-light-mode-only" height="23" alt="Red Bull"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/REDBULL-WHITE.svg#gh-dark-mode-only" height="23" alt="Red Bull"></a>&nbsp;&nbsp;&nbsp;
-<a href="https://www.dominos.gr/"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/DOMINOS-BLUE.svg#gh-light-mode-only" height="29" alt="Domino's"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/DOMINOS-WHITE.svg#gh-dark-mode-only" height="29" alt="Domino's"></a>&nbsp;&nbsp;&nbsp;
-<a href="https://www.fix-beer.gr/"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/FIX-HELLAS.svg#gh-light-mode-only" height="31" alt="FIX Hellas"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/FIX-HELLAS-WHITE.svg#gh-dark-mode-only" height="31" alt="FIX Hellas"></a>
+<a href="https://kukiworld.com/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/MUNCHIES/KUKI-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/KUKI.svg" height="32" alt="Kuki"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://nama.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/MUNCHIES/NAMA-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/NAMA.svg" height="29" alt="Nama"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://www.redbull.com/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/MUNCHIES/REDBULL-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/REDBULL.svg" height="23" alt="Red Bull"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://www.dominos.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/MUNCHIES/DOMINOS-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/DOMINOS-BLUE.svg" height="29" alt="Domino's"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://www.fix-beer.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/MUNCHIES/FIX-HELLAS-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/FIX-HELLAS.svg" height="31" alt="FIX Hellas"></picture></a>
 </p>
 
 <h3>Media</h3>
 <p>
-<a href="https://unistudents.app/"><img src="IDENTITY/SITE/SPONSORS/MEDIA/UNISTUDENTS.svg#gh-light-mode-only" height="27" alt="UniStudents"><img src="IDENTITY/SITE/SPONSORS/MEDIA/UNISTUDENTS-WHITE.svg#gh-dark-mode-only" height="27" alt="UniStudents"></a>&nbsp;&nbsp;&nbsp;
-<a href="https://www.youtube.com/watch?v=mk7jTPlUPA4"><img src="IDENTITY/SITE/SPONSORS/MEDIA/ERT.svg#gh-light-mode-only" height="34" alt="ERT"><img src="IDENTITY/SITE/SPONSORS/MEDIA/ERT-WHITE.svg#gh-dark-mode-only" height="34" alt="ERT"></a>
+<a href="https://unistudents.app/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/MEDIA/UNISTUDENTS-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/MEDIA/UNISTUDENTS.svg" height="27" alt="UniStudents"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://www.youtube.com/watch?v=mk7jTPlUPA4"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/MEDIA/ERT-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/MEDIA/ERT.svg" height="34" alt="ERT"></picture></a>
 </p>
 
 <h3>Patronies</h3>
 <p>
-<a href="https://www.mindigital.gr/"><img src="IDENTITY/SITE/SPONSORS/PATRONIES/MINISTRY-OF-DIGITAL-GOVERNANCE.svg#gh-light-mode-only" height="28" alt="Ministry of Digital Governance"><img src="IDENTITY/SITE/SPONSORS/PATRONIES/MINISTRY-OF-DIGITAL-GOVERNANCE-WHITE.svg#gh-dark-mode-only" height="28" alt="Ministry of Digital Governance"></a>
+<a href="https://www.mindigital.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/PATRONIES/MINISTRY-OF-DIGITAL-GOVERNANCE-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/PATRONIES/MINISTRY-OF-DIGITAL-GOVERNANCE.svg" height="28" alt="Ministry of Digital Governance"></picture></a>
 </p>
 
 <h3>Powered by</h3>
 <p>
-<a href="https://geekos.org/"><img src="IDENTITY/SITE/SPONSORS/POWERED-BY/GEEKO.svg#gh-light-mode-only" height="48" alt="Geeko Foundation"><img src="IDENTITY/SITE/SPONSORS/POWERED-BY/GEEKO-WHITE.svg#gh-dark-mode-only" height="48" alt="Geeko Foundation"></a>&nbsp;&nbsp;&nbsp;
-<a href="https://gfoss.eu/"><img src="IDENTITY/SITE/SPONSORS/POWERED-BY/GFOSS.svg#gh-light-mode-only" height="48" alt="GFOSS"><img src="IDENTITY/SITE/SPONSORS/POWERED-BY/GFOSS-WHITE.svg#gh-dark-mode-only" height="48" alt="GFOSS"></a>&nbsp;&nbsp;&nbsp;
-<a href="https://ice.uniwa.gr/"><img src="IDENTITY/SITE/SPONSORS/POWERED-BY/UNIWA-ICE.svg#gh-light-mode-only" height="48" alt="UniWA, Department of Informatics and Computer Engineering"><img src="IDENTITY/SITE/SPONSORS/POWERED-BY/UNIWA-ICE-WHITE.svg#gh-dark-mode-only" height="48" alt="UniWA, Department of Informatics and Computer Engineering"></a>
+<a href="https://geekos.org/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/POWERED-BY/GEEKO-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/POWERED-BY/GEEKO.svg" height="48" alt="Geeko Foundation"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://gfoss.eu/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/POWERED-BY/GFOSS-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/POWERED-BY/GFOSS.svg" height="48" alt="GFOSS"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://ice.uniwa.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/POWERED-BY/UNIWA-ICE-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/POWERED-BY/UNIWA-ICE.svg" height="48" alt="UniWA, Department of Informatics and Computer Engineering"></picture></a>
 </p>
 
 </div>
