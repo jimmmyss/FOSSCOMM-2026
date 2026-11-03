@@ -1,6 +1,6 @@
 # LOGO
 
-64 x 64 px. Source file [`LOGO.pdn`](LOGO.pdn).
+Source file [`LOGO.pdn`](LOGO.pdn).
 
 ## FILES
 

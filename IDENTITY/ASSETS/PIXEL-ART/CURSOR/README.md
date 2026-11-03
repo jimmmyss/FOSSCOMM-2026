@@ -1,10 +1,8 @@
 # CURSOR
 
-16 x 18 px.
-
 <table>
 <tr><th><code>CURSOR-POINTING</code></th><th><code>CURSOR-POINTING_HIGHLIGHT</code></th><th><code>CURSOR-OPEN</code></th><th><code>CURSOR-CLOSED</code></th></tr>
-<tr><td valign="top" align="center"><img src="CURSOR-POINTING.svg" width="64" alt="CURSOR-POINTING"><br>Default</td><td valign="top" align="center"><img src="CURSOR-POINTING_HIGHLIGHT.svg" width="64" alt="CURSOR-POINTING_HIGHLIGHT"><br>Links and buttons</td><td valign="top" align="center"><img src="CURSOR-OPEN.svg" width="64" alt="CURSOR-OPEN"><br>Grab</td><td valign="top" align="center"><img src="CURSOR-CLOSED.svg" width="64" alt="CURSOR-CLOSED"><br>Grabbing</td></tr>
+<tr><td valign="top" align="center"><img src="CURSOR-POINTING.svg" width="64" alt="CURSOR-POINTING"><br>16 x 18 px<br>Default</td><td valign="top" align="center"><img src="CURSOR-POINTING_HIGHLIGHT.svg" width="64" alt="CURSOR-POINTING_HIGHLIGHT"><br>16 x 18 px<br>Links and buttons</td><td valign="top" align="center"><img src="CURSOR-OPEN.svg" width="64" alt="CURSOR-OPEN"><br>16 x 18 px<br>Grab</td><td valign="top" align="center"><img src="CURSOR-CLOSED.svg" width="64" alt="CURSOR-CLOSED"><br>16 x 18 px<br>Grabbing</td></tr>
 </table>
 
 ## COLORS
