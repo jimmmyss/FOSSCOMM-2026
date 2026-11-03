@@ -17,7 +17,7 @@ One flat color with a grid of small dots in a lighter shade of it. Every backgro
 - **Edge:** the first dot's center is 20 px from every edge, half a step. Put two backgrounds side by side and the grid carries on across the join.
 - **Sizes:** every size is a multiple of 40, so all four edges get the same 20 px. When a platform asks for one that isn't (1200x627, 1920x325), the dots stay 40 px apart and the leftover is split between the two edges.
 - **Two colors only:** every file is exactly ground and dots. The dots are written pixel by pixel, not drawn, so they have no soft edges.
-- **Print:** the same dot, scaled to the piece. See [SIGNAGE](SIGNAGE/README.md).
+- **Print:** the same grid, scaled up. Dot and spacing grow together, so the dot is always 6 to every 40: at 2x it's 12 px every 80 px, at 15x it's 90 px every 600 px. Each piece's scale is in [SIGNAGE](SIGNAGE/README.md).
 
 ## COLORS
 
