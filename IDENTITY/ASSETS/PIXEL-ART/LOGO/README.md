@@ -37,7 +37,7 @@ Each size is the same 64 x 64 drawing with every pixel turned into a solid squar
 
 - 8 px of blue on every side of the 64 x 64 logo, so 12.5% of its width per side.
 - A padded file is 125% of the logo: 80, 320 or 640 px.
-- The blue is `#0033FF`, the same as the [backgrounds](../BACKGROUNDS/README.md#colors).
+- The blue is `#0033FF`, the same as the [backgrounds](../../BACKGROUNDS/README.md#colors).
 
 ## COLORS
 
