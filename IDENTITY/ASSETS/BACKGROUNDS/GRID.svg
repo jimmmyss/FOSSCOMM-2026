@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="320" viewBox="0 0 760 320">
+<title>FOSSCOMM 2026 backgrounds: a dot every 40 px, 20 px from the edge, each dot 6 x 6 px with the corners off</title>
+<rect width="440" height="320" fill="#0033FF"/>
+<path stroke="#FAFAF7" stroke-opacity=".35" stroke-dasharray="4 4" d="M80 30V270"/>
+<path stroke="#FAFAF7" stroke-opacity=".35" stroke-dasharray="4 4" d="M240 30V270"/>
+<path stroke="#FAFAF7" stroke-opacity=".35" stroke-dasharray="4 4" d="M400 30V270"/>
+<path stroke="#FAFAF7" stroke-opacity=".35" stroke-dasharray="4 4" d="M30 80H430"/>
+<path stroke="#FAFAF7" stroke-opacity=".35" stroke-dasharray="4 4" d="M30 240H430"/>
+<path fill="#3860FF" d="M72 68h16v4h4v16h-4v4h-16v-4h-4v-16h4zM72 228h16v4h4v16h-4v4h-16v-4h-4v-16h4zM232 68h16v4h4v16h-4v4h-16v-4h-4v-16h4zM232 228h16v4h4v16h-4v4h-16v-4h-4v-16h4zM392 68h16v4h4v16h-4v4h-16v-4h-4v-16h4zM392 228h16v4h4v16h-4v4h-16v-4h-4v-16h4z"/>
+<path stroke="#FAFAF7" stroke-width="1.5" d="M0 24H240M80 18v12M240 18v12"/>
+<text x="40.0" y="17" fill="#FAFAF7" font-size="15" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">20</text>
+<text x="160.0" y="17" fill="#FAFAF7" font-size="15" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">40</text>
+<path stroke="#FAFAF7" stroke-width="1.5" d="M24 0V240M18 80h12M18 240h12"/>
+<text transform="translate(17 40.0) rotate(-90)" fill="#FAFAF7" font-size="15" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">20</text>
+<text transform="translate(17 160.0) rotate(-90)" fill="#FAFAF7" font-size="15" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">40</text>
+<text x="230" y="300" fill="#FAFAF7" font-size="15" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" fill-opacity=".8">top-left corner, 4x zoom</text>
+<rect x="460" width="300" height="320" fill="#0033FF"/>
+<path fill="#3860FF" d="M550 60h30v30h-30zM580 60h30v30h-30zM610 60h30v30h-30zM640 60h30v30h-30zM520 90h30v30h-30zM550 90h30v30h-30zM580 90h30v30h-30zM610 90h30v30h-30zM640 90h30v30h-30zM670 90h30v30h-30zM520 120h30v30h-30zM550 120h30v30h-30zM580 120h30v30h-30zM610 120h30v30h-30zM640 120h30v30h-30zM670 120h30v30h-30zM520 150h30v30h-30zM550 150h30v30h-30zM580 150h30v30h-30zM610 150h30v30h-30zM640 150h30v30h-30zM670 150h30v30h-30zM520 180h30v30h-30zM550 180h30v30h-30zM580 180h30v30h-30zM610 180h30v30h-30zM640 180h30v30h-30zM670 180h30v30h-30zM550 210h30v30h-30zM580 210h30v30h-30zM610 210h30v30h-30zM640 210h30v30h-30z"/>
+<path fill="none" stroke="#FAFAF7" stroke-opacity=".3" d="M520 60v180M520 60h180M550 60v180M520 90h180M580 60v180M520 120h180M610 60v180M520 150h180M640 60v180M520 180h180M670 60v180M520 210h180M700 60v180M520 240h180"/>
+<path stroke="#FAFAF7" stroke-width="1.5" d="M520 40h180M520 34v12M700 34v12"/>
+<text x="610" y="28" fill="#FAFAF7" font-size="15" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">6</text>
+<path stroke="#FAFAF7" stroke-width="1.5" d="M500 60v180M494 60h12M494 240h12"/>
+<text transform="translate(488 150) rotate(-90)" fill="#FAFAF7" font-size="15" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">6</text>
+<text x="610" y="300" fill="#FAFAF7" font-size="15" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" fill-opacity=".8">one dot, 30x zoom</text>
+</svg>

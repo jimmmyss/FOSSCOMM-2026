@@ -1,49 +1,38 @@
 # BACKGROUNDS
 
-Dots. The same grid on everything.
+One flat color with a grid of small dots in a lighter shade of it. Every background is made the same way.
 
-## SOCIAL
+| Folder | What's in it |
+|---|---|
+| [SOCIAL](SOCIAL) | For screens. One folder per size, each with `BLACK`, `BLUE` and `WHITE`. |
+| [SIGNAGE](SIGNAGE) | For print. One folder per printed piece. Sizes and bleeds are in [its README](SIGNAGE/README.md). |
+| [COLORS](COLORS) | The swatches shown below. |
 
-For screens, RGB. The folder name is the size; the brackets give the aspect ratio and, if it has one, where it goes. Each folder has `BLACK`, `BLUE` and `WHITE`.
+## THE DOTS
 
-## SIGNAGE
+<img src="GRID.svg" alt="A dot every 40 px, the first one 20 px from the edge, each dot 6 x 6 px with the corners off">
 
-For print. `.png` is the screen version, `-CMYK.tif` is what went to the printer. Every CMYK file is made for Coated FOGRA39. Print blue is C97 M73 Y0 K0, and the dots are always a close tint of their ground.
+- **Grid:** one dot every 40 px, across and down.
+- **Dot:** a 6 x 6 px square with its 4 corners off.
+- **Edge:** the first dot's center is 20 px from every edge, half a step. Put two backgrounds side by side and the grid carries on across the join.
+- **Sizes:** every size is a multiple of 40, so all four edges get the same 20 px. When a platform asks for one that isn't (1200x627, 1920x325), the dots stay 40 px apart and the leftover is split between the two edges.
+- **Two colors only:** every file is exactly ground and dots. The dots are written pixel by pixel, not drawn, so they have no soft edges.
+- **Print:** the same dot, scaled to the piece. See [SIGNAGE](SIGNAGE/README.md).
 
-### CARDS — `90x60mm (CARDS)`
+## COLORS
 
-- The card is 85.68 × 54.02 mm. The file is 90 × 60 mm, so about 2.2 mm of bleed left and right and 3 mm top and bottom. 600 dpi.
-- Attendee: black K97, dots K70.
-- Contributor: blue C97 M73, dots C76 M57.
-- Curator: white, dots K22.
-- Volunteer: yellow C0 M27 Y100, dots C0 M14 Y50.
+Screen colors are RGB. Print colors are CMYK for Coated FOGRA39, and their swatches show how they look on paper.
 
-### LANYARDS — `930x20mm (LANYARDS)`
+| | SCREEN | RGB | PRINT | CMYK |
+|---|:-:|---|:-:|---|
+| **BLUE** | <img src="COLORS/BLUE.svg" width="120" alt="Blue"> | `#0033FF`<br>dots `#3860FF` | <img src="COLORS/BLUE-CMYK.svg" width="120" alt="Blue, print"> | `C97 M73 Y0 K0`<br>dots `C76 M57 Y0 K0`<br><sub>cards, lanyards, poster, roll-up</sub> |
+| **BLACK** | <img src="COLORS/BLACK.svg" width="120" alt="Black"> | `#0A0A0A`<br>dots `#3F3F3E` | <img src="COLORS/BLACK-K70-CMYK.svg" width="120" alt="Black, print, K70 dots"> | `C0 M0 Y0 K97`<br>dots `C0 M0 Y0 K70`<br><sub>cards</sub> |
+| | | | <img src="COLORS/BLACK-K85-CMYK.svg" width="120" alt="Black, print, K85 dots"> | `C0 M0 Y0 K97`<br>dots `C0 M0 Y0 K85`<br><sub>lanyards, roll-up</sub> |
+| **WHITE** | <img src="COLORS/WHITE.svg" width="120" alt="White"> | `#FAFAF7`<br>dots `#E2E2DF` | <img src="COLORS/WHITE-K22-CMYK.svg" width="120" alt="White, print, K22 dots"> | `C0 M0 Y0 K0` (the paper)<br>dots `C0 M0 Y0 K22`<br><sub>cards</sub> |
+| | | | <img src="COLORS/WHITE-K15-CMYK.svg" width="120" alt="White, print, K15 dots"> | `C0 M0 Y0 K0` (the paper)<br>dots `C0 M0 Y0 K15`<br><sub>lanyards, roll-up</sub> |
+| **YELLOW** | <img src="COLORS/YELLOW.svg" width="120" alt="Yellow"> | `#F7BF03`<br>dots `#FFDB35` | <img src="COLORS/YELLOW-Y50-CMYK.svg" width="120" alt="Yellow, print, Y50 dots"> | `C0 M27 Y100 K0`<br>dots `C0 M14 Y50 K0`<br><sub>cards</sub> |
+| | | | <img src="COLORS/YELLOW-Y84-CMYK.svg" width="120" alt="Yellow, print, Y84 dots"> | `C0 M27 Y100 K0`<br>dots `C0 M12 Y84 K0`<br><sub>lanyards</sub> |
+| **NAVY-BLACK** | | | <img src="COLORS/NAVY-BLACK-CMYK.svg" width="120" alt="Navy-black, print"> | `C90 M80 Y15 K95`<br>dots `C66 M58 Y11 K69`<br><sub>lanyards</sub> |
+| **WARM-BLACK** | | | <img src="COLORS/WARM-BLACK-CMYK.svg" width="120" alt="Warm-black, print"> | `C40 M50 Y90 K100`<br>dots `C34 M43 Y77 K86`<br><sub>lanyards</sub> |
 
-- The whole 930 × 20 mm strip, 300 dpi.
-- Attendee and Contributor: `BLUE` with `NAVY-BLACK`.
-- Volunteer: `YELLOW` with `WARM-BLACK`.
-- Why two blacks: every lanyard fades from its colour into black. Plain K black turns that fade muddy, grey on the blue side and olive on the yellow. Navy-black (C90 M80 Y15 K95) is a cold black built from the blue's own inks, so the fade stays blue. Warm-black (C40 M50 Y90 K100) is built from the yellow's, so it stays golden.
-- `BLACK` (K97) and `WHITE` are here too, but no lanyard uses them.
-
-### POSTER — `297x420mm (POSTER)`
-
-- A3, 297 × 420 mm, no bleed. 300 dpi.
-- Blue C97 M73, dots C76 M57.
-
-### ROLL-UP — `870x2270mm (ROLL-UP)`
-
-- The visible area is 850 × 2000 mm. Bleed is 1 cm left, right and top and 7 cm at the bottom, so the page is 870 × 2080 mm. The background runs on to 2270 mm and the page crops it. 304.8 ppi.
-- Blue on top, white below. Blue dots C76 M57, white dots K15.
-- `BLACK` (K97, dots K85) is here too, but the roll-up doesn't use it.
-
-## How they're made
-
-On screens: a 40 px grid, each dot a 6×6 square with its corners off, 20 px in from every edge, so two tiles butt together without a seam. Print uses the same pattern at print resolution.
-
-| | Ground | Dots |
-|---|---|---|
-| Blue | `#0033FF` | `#3860FF` |
-| Black | `#0A0A0A` | `#3F3F3E` |
-| White | `#FAFAF7` | `#E2E2DF` |
-| Yellow | `#F7BF03` | `#FFDB35` |
+`#0033FF` is brighter than any ink can print, so print uses `C97 M73 Y0 K0` instead.
