@@ -1,6 +1,6 @@
 # FLAG
 
-Source file for the HTB flags [`FLAG-HTB.pdn`](FLAG-HTB.pdn).
+Source file [`FLAG.pdn`](FLAG.pdn).
 
 <table>
 <tr><th><code>FLAG</code></th><th><code>FLAG-CENTERED</code></th><th><code>FLAG-WHITE</code></th><th><code>FLAG-WHITE-CENTERED</code></th><th><code>FLAG-HTB</code></th><th><code>FLAG-HTB-CENTERED</code></th></tr>
