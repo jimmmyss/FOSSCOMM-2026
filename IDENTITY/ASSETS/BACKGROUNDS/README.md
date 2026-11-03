@@ -2,8 +2,8 @@
 
 Dots. The same grid on everything.
 
-- **SOCIAL** — for screens, RGB. The name is the size, the brackets say where it goes.
-- **SIGNAGE** — for print. `.png` for screens, `-CMYK.tif` for the printer. `GLOBE` is the one on the poster, `GLOBE-WHITE` the one on the roll-up.
+- **SOCIAL** — for screens, RGB. The name is the size; the brackets give the aspect ratio and, if it has one, where it goes.
+- **SIGNAGE** — for print. `.png` for screens, `-CMYK.tif` for the printer.
 
 How they're made: on screens, a 40 px grid, each dot a 6×6 square with its corners off, 20 px in from every edge, so two tiles butt together without a seam. Print uses the same pattern at print resolution.
 
