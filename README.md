@@ -77,7 +77,7 @@ Bad time to be here, everyone is slacking.
 <p>
 <a href="https://kukiworld.com/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/MUNCHIES/KUKI-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/KUKI.svg" height="32" alt="Kuki"></picture></a>&nbsp;&nbsp;&nbsp;
 <a href="https://nama.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/MUNCHIES/NAMA-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/NAMA.svg" height="29" alt="Nama"></picture></a>&nbsp;&nbsp;&nbsp;
-<a href="https://www.redbull.com/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/MUNCHIES/REDBULL-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/REDBULL.svg" height="23" alt="Red Bull"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://www.redbull.com/"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/REDBULL.svg" height="23" alt="Red Bull"></a>&nbsp;&nbsp;&nbsp;
 <a href="https://www.dominos.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/MUNCHIES/DOMINOS-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/DOMINOS-BLUE.svg" height="29" alt="Domino's"></picture></a>&nbsp;&nbsp;&nbsp;
 <a href="https://www.fix-beer.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/MUNCHIES/FIX-HELLAS-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/FIX-HELLAS.svg" height="31" alt="FIX Hellas"></picture></a>
 </p>
@@ -97,7 +97,7 @@ Bad time to be here, everyone is slacking.
 <p>
 <a href="https://geekos.org/"><img src="IDENTITY/SITE/SPONSORS/POWERED-BY/GEEKO.svg" height="48" alt="Geeko Foundation"></a>&nbsp;&nbsp;&nbsp;
 <a href="https://gfoss.eu/"><img src="IDENTITY/SITE/SPONSORS/POWERED-BY/GFOSS.svg" height="48" alt="GFOSS"></a>&nbsp;&nbsp;&nbsp;
-<a href="https://ice.uniwa.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/POWERED-BY/UNIWA-ICE-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/POWERED-BY/UNIWA-ICE.svg" height="48" alt="UniWA, Department of Informatics and Computer Engineering"></picture></a>
+<a href="https://ice.uniwa.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/POWERED-BY/UNIWA-ICE-WHITE-COLOR.svg"><img src="IDENTITY/SITE/SPONSORS/POWERED-BY/UNIWA-ICE.svg" height="48" alt="UniWA, Department of Informatics and Computer Engineering"></picture></a>
 </p>
 
 </div>
