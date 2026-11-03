@@ -1,0 +1,6 @@
+# POWERED-BY
+
+<table>
+<tr><th><code>GEEKO</code></th><th><code>GFOSS</code></th><th><code>UNIWA</code></th><th><code>UNIWA-ICE</code></th></tr>
+<tr><td valign="top" align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/POWERED-BY/GEEKO-WHITE.svg?v=d0adef83"><img src="GEEKO.svg" width="45" alt="GEEKO"></picture><br>-BLACK<br>-WHITE</td><td valign="top" align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/POWERED-BY/GFOSS-WHITE.svg?v=f6a4a507"><img src="GFOSS.svg" width="48" alt="GFOSS"></picture><br>-BLACK<br>-WHITE</td><td valign="top" align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/POWERED-BY/UNIWA-WHITE.svg?v=c749219b"><img src="UNIWA.svg" width="48" alt="UNIWA"></picture><br>-BLACK<br>-WHITE</td><td valign="top" align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/POWERED-BY/UNIWA-ICE-WHITE-COLOR.svg?v=53d9e9f7"><img src="UNIWA-ICE.svg" width="48" alt="UNIWA-ICE"></picture><br>-WHITE<br>-WHITE-COLOR</td></tr>
+</table>
