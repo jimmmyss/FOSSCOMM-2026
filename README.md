@@ -13,6 +13,7 @@ Bad time to be here, everyone is slacking.
 ### Suporters:
 - Angelos Chouvardas
 - Efstathios Iosifidis
+- Ioannis Vogiatzis
 - Patrick Fitzgerald
 - Theodoros Karounos
 
