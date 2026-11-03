@@ -9,5 +9,5 @@
 
 <table>
 <tr><th>Size</th><th>Bleed</th><th>Resolution</th><th>RGB</th><th>CMYK</th></tr>
-<tr><td valign="top">300 x 400 mm</td><td valign="top">none</td><td valign="top">600 dpi <code>.psd</code><br>300 dpi <code>.png</code></td><td valign="top"><code>.png</code> <code>.psd</code> <code>.svg</code></td><td valign="top"><code>-CMYK.pdf</code><br>Coated FOGRA39</td></tr>
+<tr><td valign="top">300 x 400 mm</td><td valign="top">none</td><td valign="top">600 dpi<br>300 dpi <code>.png</code></td><td valign="top"><code>.png</code> <code>.psd</code> <code>.svg</code></td><td valign="top"><code>-CMYK.pdf</code> <code>-CMYK.psd</code><br>Coated FOGRA39</td></tr>
 </table>
