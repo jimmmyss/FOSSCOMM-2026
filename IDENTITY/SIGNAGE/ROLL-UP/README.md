@@ -2,7 +2,7 @@
 
 <table>
 <tr><th><code>ROLL-UP</code></th></tr>
-<tr><td valign="top" align="center"><img src="PREVIEW/ROLL-UP.png" width="300" alt="ROLL-UP"><br>10440 x 24960 px</td></tr>
+<tr><td valign="top" align="center"><img src="ROLL-UP.png" width="300" alt="ROLL-UP"><br>10440 x 24960 px</td></tr>
 </table>
 
 ## PRINT
