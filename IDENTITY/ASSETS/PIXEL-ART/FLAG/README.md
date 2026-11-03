@@ -3,12 +3,8 @@
 Source file for the HTB flags [`FLAG-HTB.pdn`](FLAG-HTB.pdn).
 
 <table>
-<tr><th><code>FLAG</code></th><th><code>FLAG-CENTERED</code></th></tr>
-<tr><td valign="top" align="center"><img src="FLAG.svg" width="92" alt="FLAG"><br>46 x 64 px</td><td valign="top" align="center"><img src="FLAG-CENTERED.svg" width="164" alt="FLAG-CENTERED"><br>82 x 64 px</td></tr>
-<tr><th><code>FLAG-WHITE</code></th><th><code>FLAG-WHITE-CENTERED</code></th></tr>
-<tr><td valign="top" align="center"><img src="FLAG-WHITE.svg" width="92" alt="FLAG-WHITE"><br>46 x 64 px</td><td valign="top" align="center"><img src="FLAG-WHITE-CENTERED.svg" width="164" alt="FLAG-WHITE-CENTERED"><br>82 x 64 px</td></tr>
-<tr><th><code>FLAG-HTB</code></th><th><code>FLAG-HTB-CENTERED</code></th></tr>
-<tr><td valign="top" align="center"><img src="FLAG-HTB.svg" width="92" alt="FLAG-HTB"><br>46 x 64 px</td><td valign="top" align="center"><img src="FLAG-HTB-CENTERED.svg" width="164" alt="FLAG-HTB-CENTERED"><br>82 x 64 px</td></tr>
+<tr><th><code>FLAG</code></th><th><code>FLAG-CENTERED</code></th><th><code>FLAG-WHITE</code></th><th><code>FLAG-WHITE-CENTERED</code></th><th><code>FLAG-HTB</code></th><th><code>FLAG-HTB-CENTERED</code></th></tr>
+<tr><td valign="top" align="center"><img src="FLAG.svg" width="69" alt="FLAG"><br>46 x 64 px</td><td valign="top" align="center"><img src="FLAG-CENTERED.svg" width="123" alt="FLAG-CENTERED"><br>82 x 64 px</td><td valign="top" align="center"><img src="FLAG-WHITE.svg" width="69" alt="FLAG-WHITE"><br>46 x 64 px</td><td valign="top" align="center"><img src="FLAG-WHITE-CENTERED.svg" width="123" alt="FLAG-WHITE-CENTERED"><br>82 x 64 px</td><td valign="top" align="center"><img src="FLAG-HTB.svg" width="69" alt="FLAG-HTB"><br>46 x 64 px</td><td valign="top" align="center"><img src="FLAG-HTB-CENTERED.svg" width="123" alt="FLAG-HTB-CENTERED"><br>82 x 64 px</td></tr>
 </table>
 
 ## COLORS
