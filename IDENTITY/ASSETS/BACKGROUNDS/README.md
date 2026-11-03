@@ -10,14 +10,23 @@ One flat color with a grid of small dots in a lighter shade of it. Every backgro
 
 ## THE DOTS
 
-<img src="GRID.svg" alt="A dot every 40 px, the first one 20 px from the edge, each dot 6 x 6 px with the corners off">
+<img src="GRID.svg" alt="A dot every 40 units, the first one 20 units from the edge, each dot 6 x 6 units with the corners off">
 
-- **Grid:** one dot every 40 px, across and down.
-- **Dot:** a 6 x 6 px square with its 4 corners off.
-- **Edge:** the first dot's center is 20 px from every edge, half a step. Put two backgrounds side by side and the grid carries on across the join.
-- **Sizes:** every size is a multiple of 40, so all four edges get the same 20 px. When a platform asks for one that isn't (1200x627, 1920x325), the dots stay 40 px apart and the leftover is split between the two edges.
+The numbers are grid units, the same on every background. Only the size of a unit changes:
+
+| | 1 unit | Dot | Step |
+|---|---|---|---|
+| Screens ([SOCIAL](SOCIAL)) | 1 px | 6 px | 40 px |
+| Lanyards | 1 px | 6 px | 40 px |
+| Cards | 2 px | 12 px | 80 px |
+| Poster | 4 px | 24 px | 160 px |
+| Roll-up | 15 px | 90 px | 600 px |
+
+- **Grid:** one dot every 40 units, across and down.
+- **Dot:** 6 x 6 units with the 4 corners off, so always 15% of the step.
+- **Edge:** the grid is centered on the file. When the size is a whole number of steps, the first dot's center is 20 units (half a step) from every edge, and two backgrounds side by side carry the grid on across the join.
+- **Other sizes:** when it isn't (1200x627, 1920x325 and every print piece), the dots stay one step apart and the leftover is split evenly between opposite edges.
 - **Two colors only:** every file is exactly ground and dots. The dots are written pixel by pixel, not drawn, so they have no soft edges.
-- **Print:** the same grid, scaled up. Dot and spacing grow together, so the dot is always 6 to every 40: at 2x it's 12 px every 80 px, at 15x it's 90 px every 600 px. Each piece's scale is in [SIGNAGE](SIGNAGE/README.md).
 
 ## COLORS
 
