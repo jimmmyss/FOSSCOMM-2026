@@ -78,7 +78,7 @@ Bad time to be here, everyone is slacking.
 <a href="https://kukiworld.com/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/MUNCHIES/KUKI-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/KUKI.svg" height="32" alt="Kuki"></picture></a>&nbsp;&nbsp;&nbsp;
 <a href="https://nama.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/MUNCHIES/NAMA-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/NAMA.svg" height="29" alt="Nama"></picture></a>&nbsp;&nbsp;&nbsp;
 <a href="https://www.redbull.com/"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/REDBULL.svg" height="23" alt="Red Bull"></a>&nbsp;&nbsp;&nbsp;
-<a href="https://www.dominos.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/MUNCHIES/DOMINOS-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/DOMINOS-BLUE.svg" height="29" alt="Domino's"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://www.dominos.gr/"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/DOMINOS-BLUE.svg" height="29" alt="Domino's"></a>&nbsp;&nbsp;&nbsp;
 <a href="https://www.fix-beer.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/MUNCHIES/FIX-HELLAS-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/MUNCHIES/FIX-HELLAS.svg" height="31" alt="FIX Hellas"></picture></a>
 </p>
 
