@@ -31,7 +31,7 @@ Bad time to be here, everyone is slacking.
 - Marilia Lymperi
 - Maritina Kalorriza
 - Myrto Anastasiadi Alexiou
-- Panagiotis Evaggelou
+- Panagiotis Evangelou
 - Panagiotis Papatheodorou
 - Penny Mitsiou
 - Petros Stratis
