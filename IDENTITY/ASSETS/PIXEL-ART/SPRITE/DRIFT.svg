@@ -1,5 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" shape-rendering="crispEdges">
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
 <title>FOSSCOMM 2026 mascot - DRIFT</title>
+<defs><clipPath id="frame"><rect width="32" height="32"/></clipPath></defs>
+<rect x=".25" y=".25" width="47.5" height="47.5" rx="2" fill="none" stroke="#8B949E" stroke-opacity=".4" stroke-width=".5"/>
+<text x="24.0" y="43.5" text-anchor="middle" font-size="5.6" fill="#8B949E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">DRIFT</text>
+<g transform="translate(8 3)" clip-path="url(#frame)" shape-rendering="crispEdges">
 <path fill="#FFEE87" d="M12 8h8v1h-8zM9 9h14v1h-14zM7 10h18v1h-18zM6 11h6v1h-6zM14 11h1v1h-1zM17 11h1v1h-1zM20 11h6v1h-6zM8 12h4v1h-4zM13 12h1v1h-1zM15 12h2v1h-2zM18 12h1v1h-1zM23 12h3v1h-3zM5 13h3v1h-3zM9 13h3v1h-3zM13 13h5v1h-5zM20 13h7v1h-7zM5 14h4v1h-4zM10 14h3v1h-3zM14 14h2v1h-2zM19 14h8v1h-8zM5 15h1v1h-1zM11 15h2v1h-2zM14 15h1v1h-1zM23 15h4v1h-4zM5 16h9v1h-9zM15 16h2v1h-2zM18 16h9v1h-9zM5 17h8v1h-8zM15 17h2v1h-2zM18 17h9v1h-9zM7 18h4v1h-4zM14 18h1v1h-1zM17 18h4v1h-4zM24 18h2v1h-2zM7 19h3v1h-3zM11 19h3v1h-3zM17 19h4v1h-4zM24 19h1v1h-1zM7 20h8v1h-8zM17 20h8v1h-8z"/>
 <path fill="#EE8101" d="M12 4h8v1h-8zM9 5h3v1h-3zM20 5h3v1h-3zM7 6h2v1h-2zM23 6h2v1h-2zM6 7h1v1h-1zM25 7h1v1h-1zM5 8h1v1h-1zM26 8h1v1h-1zM4 9h1v1h-1zM27 9h1v1h-1zM4 10h1v1h-1zM27 10h1v1h-1zM3 11h1v1h-1zM28 11h1v1h-1zM3 12h1v1h-1zM28 12h1v1h-1zM2 13h1v1h-1zM29 13h1v1h-1zM2 14h1v1h-1zM29 14h1v1h-1zM2 15h1v1h-1zM29 15h1v1h-1zM2 16h1v1h-1zM29 16h1v1h-1zM2 17h1v1h-1zM29 17h1v1h-1zM2 18h1v1h-1zM29 18h1v1h-1zM3 19h1v1h-1zM28 19h1v1h-1zM3 20h1v1h-1zM28 20h1v1h-1zM4 21h1v1h-1zM27 21h1v1h-1zM5 22h2v1h-2zM25 22h2v1h-2zM7 23h11v1h-11zM21 23h4v1h-4z"/>
 <path fill="#FECE01" d="M12 5h8v1h-8zM9 6h14v1h-14zM7 7h5v1h-5zM20 7h5v1h-5zM6 8h3v1h-3zM23 8h3v1h-3zM5 9h2v1h-2zM25 9h2v1h-2zM5 10h1v1h-1zM26 10h1v1h-1zM4 11h1v1h-1zM27 11h1v1h-1zM4 12h1v1h-1zM27 12h1v1h-1zM3 13h1v1h-1zM28 13h1v1h-1zM3 14h1v1h-1zM28 14h1v1h-1zM3 15h1v1h-1zM28 15h1v1h-1zM3 16h1v1h-1zM28 16h1v1h-1zM3 17h1v1h-1zM28 17h1v1h-1zM3 18h1v1h-1zM28 18h1v1h-1zM27 19h1v1h-1zM4 20h2v1h-2zM26 20h2v1h-2zM5 21h10v1h-10zM17 21h10v1h-10zM7 22h8v1h-8zM17 22h8v1h-8z"/>
@@ -21,4 +25,5 @@
 <path fill="#F7BF03" d="M15 22h2v1h-2z"/>
 <path fill="#787878" d="M22 26h1v1h-1z"/>
 <path fill="#B4B4B4" d="M11 28h1v1h-1z"/>
+</g>
 </svg>

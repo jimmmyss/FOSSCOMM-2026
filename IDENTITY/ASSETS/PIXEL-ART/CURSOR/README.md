@@ -2,12 +2,10 @@
 
 16 x 18 px.
 
-| Cursor | On the site | |
-|---|---|:-:|
-| `CURSOR-POINTING` | Default | <img src="CURSOR-POINTING.svg" width="64" alt="CURSOR-POINTING"> |
-| `CURSOR-POINTING_HIGHLIGHT` | Links and buttons | <img src="CURSOR-POINTING_HIGHLIGHT.svg" width="64" alt="CURSOR-POINTING_HIGHLIGHT"> |
-| `CURSOR-OPEN` | Grab: the mascot, the venue globe | <img src="CURSOR-OPEN.svg" width="64" alt="CURSOR-OPEN"> |
-| `CURSOR-CLOSED` | Grabbing | <img src="CURSOR-CLOSED.svg" width="64" alt="CURSOR-CLOSED"> |
+<table>
+<tr><th><code>CURSOR-POINTING</code></th><th><code>CURSOR-POINTING_HIGHLIGHT</code></th><th><code>CURSOR-OPEN</code></th><th><code>CURSOR-CLOSED</code></th></tr>
+<tr><td valign="top" align="center"><img src="CURSOR-POINTING.svg" width="64" alt="CURSOR-POINTING"><br>Default</td><td valign="top" align="center"><img src="CURSOR-POINTING_HIGHLIGHT.svg" width="64" alt="CURSOR-POINTING_HIGHLIGHT"><br>Links and buttons</td><td valign="top" align="center"><img src="CURSOR-OPEN.svg" width="64" alt="CURSOR-OPEN"><br>Grab</td><td valign="top" align="center"><img src="CURSOR-CLOSED.svg" width="64" alt="CURSOR-CLOSED"><br>Grabbing</td></tr>
+</table>
 
 ## COLORS
 

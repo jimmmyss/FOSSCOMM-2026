@@ -1,13 +1,9 @@
 # FLAG
 
-| Flag | Size | |
-|---|---|:-:|
-| `FLAG` | 46 x 58 px | <img src="FLAG.svg" width="92" alt="FLAG"> |
-| `FLAG-CENTERED` | 82 x 58 px | <img src="FLAG-CENTERED.svg" width="164" alt="FLAG-CENTERED"> |
-| `FLAG-SPOTLIGHT` | 46 x 64 px | <img src="FLAG-SPOTLIGHT.svg" width="92" alt="FLAG-SPOTLIGHT"> |
-| `FLAG-SPOTLIGHT-WHITE` | 46 x 64 px | <img src="FLAG-SPOTLIGHT-WHITE.svg" width="92" alt="FLAG-SPOTLIGHT-WHITE"> |
-| `FLAG-SPOTLIGHT-CENTERED` | 82 x 64 px | <img src="FLAG-SPOTLIGHT-CENTERED.svg" width="164" alt="FLAG-SPOTLIGHT-CENTERED"> |
-| `FLAG-SPOTLIGHT-64` | 64 x 64 px | <img src="FLAG-SPOTLIGHT-64.svg" width="128" alt="FLAG-SPOTLIGHT-64"> |
+<table>
+<tr><td valign="top" align="center"><img src="FLAG.svg" width="92" alt="FLAG"><br><code>FLAG</code><br>46 x 58 px</td><td valign="top" align="center"><img src="FLAG-CENTERED.svg" width="164" alt="FLAG-CENTERED"><br><code>FLAG-CENTERED</code><br>82 x 58 px</td><td valign="top" align="center"><img src="FLAG-SPOTLIGHT.svg" width="92" alt="FLAG-SPOTLIGHT"><br><code>FLAG-SPOTLIGHT</code><br>46 x 64 px</td></tr>
+<tr><td valign="top" align="center"><img src="FLAG-SPOTLIGHT-WHITE.svg" width="92" alt="FLAG-SPOTLIGHT-WHITE"><br><code>FLAG-SPOTLIGHT-WHITE</code><br>46 x 64 px</td><td valign="top" align="center"><img src="FLAG-SPOTLIGHT-CENTERED.svg" width="164" alt="FLAG-SPOTLIGHT-CENTERED"><br><code>FLAG-SPOTLIGHT-CENTERED</code><br>82 x 64 px</td><td valign="top" align="center"><img src="FLAG-SPOTLIGHT-64.svg" width="128" alt="FLAG-SPOTLIGHT-64"><br><code>FLAG-SPOTLIGHT-64</code><br>64 x 64 px</td></tr>
+</table>
 
 ## COLORS
 

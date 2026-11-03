@@ -1,5 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" shape-rendering="crispEdges">
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
 <title>FOSSCOMM 2026 mascot - ANGRY</title>
+<defs><clipPath id="frame"><rect width="32" height="32"/></clipPath></defs>
+<rect x=".25" y=".25" width="47.5" height="47.5" rx="2" fill="none" stroke="#8B949E" stroke-opacity=".4" stroke-width=".5"/>
+<text x="24.0" y="43.5" text-anchor="middle" font-size="5.6" fill="#8B949E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">ANGRY</text>
+<g transform="translate(8 3)" clip-path="url(#frame)" shape-rendering="crispEdges">
 <g>
 <animateTransform attributeName="transform" type="translate" calcMode="discrete" repeatCount="indefinite" dur="480ms" values="0 0;-32 0;-64 0;-96 0" keyTimes="0;0.25;0.5;0.75"/>
 <path fill="#EE8101" d="M12 5h8v1h-8zM44 5h8v1h-8zM76 5h8v1h-8zM108 5h8v1h-8zM9 6h3v1h-3zM20 6h3v1h-3zM41 6h3v1h-3zM52 6h3v1h-3zM73 6h3v1h-3zM84 6h3v1h-3zM105 6h3v1h-3zM116 6h3v1h-3zM7 7h2v1h-2zM23 7h2v1h-2zM39 7h2v1h-2zM55 7h2v1h-2zM71 7h2v1h-2zM87 7h2v1h-2zM103 7h2v1h-2zM119 7h2v1h-2zM6 8h1v1h-1zM25 8h1v1h-1zM38 8h1v1h-1zM57 8h1v1h-1zM70 8h1v1h-1zM89 8h1v1h-1zM102 8h1v1h-1zM121 8h1v1h-1zM5 9h1v1h-1zM26 9h1v1h-1zM37 9h1v1h-1zM58 9h1v1h-1zM69 9h1v1h-1zM90 9h1v1h-1zM101 9h1v1h-1zM122 9h1v1h-1zM4 10h1v1h-1zM27 10h1v1h-1zM36 10h1v1h-1zM59 10h1v1h-1zM68 10h1v1h-1zM91 10h1v1h-1zM100 10h1v1h-1zM123 10h1v1h-1zM4 11h1v1h-1zM27 11h1v1h-1zM36 11h1v1h-1zM59 11h1v1h-1zM68 11h1v1h-1zM91 11h1v1h-1zM100 11h1v1h-1zM123 11h1v1h-1zM3 12h1v1h-1zM28 12h1v1h-1zM35 12h1v1h-1zM60 12h1v1h-1zM67 12h1v1h-1zM92 12h1v1h-1zM99 12h1v1h-1zM124 12h1v1h-1zM3 13h1v1h-1zM28 13h1v1h-1zM35 13h1v1h-1zM60 13h1v1h-1zM67 13h1v1h-1zM92 13h1v1h-1zM99 13h1v1h-1zM124 13h1v1h-1zM2 14h1v1h-1zM29 14h1v1h-1zM34 14h1v1h-1zM61 14h1v1h-1zM66 14h1v1h-1zM93 14h1v1h-1zM98 14h1v1h-1zM125 14h1v1h-1zM2 15h1v1h-1zM29 15h1v1h-1zM34 15h1v1h-1zM61 15h1v1h-1zM66 15h1v1h-1zM93 15h1v1h-1zM98 15h1v1h-1zM125 15h1v1h-1zM2 16h1v1h-1zM29 16h1v1h-1zM34 16h1v1h-1zM61 16h1v1h-1zM66 16h1v1h-1zM93 16h1v1h-1zM98 16h1v1h-1zM125 16h1v1h-1zM2 17h1v1h-1zM29 17h1v1h-1zM34 17h1v1h-1zM61 17h1v1h-1zM66 17h1v1h-1zM93 17h1v1h-1zM98 17h1v1h-1zM125 17h1v1h-1zM2 18h1v1h-1zM29 18h1v1h-1zM34 18h1v1h-1zM61 18h1v1h-1zM66 18h1v1h-1zM93 18h1v1h-1zM98 18h1v1h-1zM125 18h1v1h-1zM2 19h1v1h-1zM29 19h1v1h-1zM34 19h1v1h-1zM61 19h1v1h-1zM66 19h1v1h-1zM93 19h1v1h-1zM98 19h1v1h-1zM125 19h1v1h-1zM3 20h1v1h-1zM28 20h1v1h-1zM35 20h1v1h-1zM60 20h1v1h-1zM67 20h1v1h-1zM92 20h1v1h-1zM99 20h1v1h-1zM124 20h1v1h-1zM3 21h1v1h-1zM28 21h1v1h-1zM35 21h1v1h-1zM60 21h1v1h-1zM67 21h1v1h-1zM92 21h1v1h-1zM99 21h1v1h-1zM124 21h1v1h-1zM4 22h1v1h-1zM27 22h1v1h-1zM36 22h1v1h-1zM59 22h1v1h-1zM68 22h1v1h-1zM91 22h1v1h-1zM100 22h1v1h-1zM123 22h1v1h-1zM5 23h2v1h-2zM25 23h2v1h-2zM37 23h2v1h-2zM57 23h2v1h-2zM69 23h2v1h-2zM89 23h2v1h-2zM101 23h2v1h-2zM121 23h2v1h-2zM7 24h18v1h-18zM39 24h18v1h-18zM71 24h18v1h-18zM103 24h18v1h-18z"/>
@@ -21,5 +25,6 @@
 <path fill="#969696" d="M15 25h2v1h-2zM47 25h2v1h-2zM79 25h2v1h-2zM111 25h2v1h-2zM15 27h2v1h-2zM47 27h2v1h-2zM79 27h2v1h-2zM111 27h2v1h-2z"/>
 <path fill="#B4B4B4" d="M42 25h1v1h-1zM74 25h1v1h-1zM9 27h2v1h-2zM41 27h2v1h-2zM73 27h2v1h-2zM105 27h2v1h-2z"/>
 <path fill="#787878" d="M53 25h1v1h-1zM85 25h1v1h-1zM21 27h2v1h-2zM53 27h2v1h-2zM85 27h2v1h-2zM117 27h2v1h-2z"/>
+</g>
 </g>
 </svg>

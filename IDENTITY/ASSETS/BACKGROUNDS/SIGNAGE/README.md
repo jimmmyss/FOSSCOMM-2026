@@ -1,52 +1,16 @@
 # SIGNAGE
 
-Backgrounds for print. One folder per piece, named by the file's size.
+`.png` RGB. `-CMYK.tif` CMYK, Coated FOGRA39.
 
-- `.png` is the screen version (RGB).
-- `-CMYK.tif` is the file for the printer, made for Coated FOGRA39.
+<table>
+<tr><th></th><th><a href="90x60mm%20%28CARDS%29">CARDS</a></th><th><a href="930x20mm%20%28LANYARDS%29">LANYARDS</a></th><th><a href="297x420mm%20%28POSTER%29">POSTER</a></th><th><a href="870x2270mm%20%28ROLL-UP%29">ROLL-UP</a></th></tr>
+<tr><th align="left">Size</th><td valign="top">85.68 x 54.02 mm</td><td valign="top">930 x 20 mm</td><td valign="top">297 x 420 mm (A3)</td><td valign="top">850 x 2000 mm</td></tr>
+<tr><th align="left">Bleed</th><td valign="top">2.2 mm sides<br>3 mm top, bottom</td><td valign="top">none</td><td valign="top">none</td><td valign="top">10 mm sides, top<br>70 mm bottom</td></tr>
+<tr><th align="left">File</th><td valign="top">90 x 60 mm</td><td valign="top">930 x 20 mm</td><td valign="top">297 x 420 mm</td><td valign="top">870 x 2270 mm<br>(page 870 x 2080 mm)</td></tr>
+<tr><th align="left">Resolution</th><td valign="top">600 dpi</td><td valign="top">300 dpi</td><td valign="top">300 dpi</td><td valign="top">304.8 dpi</td></tr>
+<tr><th align="left">Dots</th><td valign="top">2x<br>0.51 mm every 3.39 mm</td><td valign="top">1x<br>0.51 mm every 3.39 mm</td><td valign="top">4x<br>2.03 mm every 13.55 mm</td><td valign="top">15x<br>7.5 mm every 50 mm</td></tr>
+<tr><th align="left">Uses</th><td valign="top">ATTENDEE<br><img src="../COLORS/C0-M0-Y0-K97.svg" width="20" height="20" align="middle" alt="C0-M0-Y0-K97"> <code>BLACK</code><br>CONTRIBUTOR<br><img src="../COLORS/C97-M73-Y0-K0.svg" width="20" height="20" align="middle" alt="C97-M73-Y0-K0"> <code>BLUE</code><br>CURATOR<br><img src="../COLORS/C0-M0-Y0-K0.svg" width="20" height="20" align="middle" alt="C0-M0-Y0-K0"> <code>WHITE</code><br>VOLUNTEER<br><img src="../COLORS/C0-M27-Y100-K0.svg" width="20" height="20" align="middle" alt="C0-M27-Y100-K0"> <code>YELLOW</code></td><td valign="top">ATTENDEE, CONTRIBUTOR<br><img src="../COLORS/C97-M73-Y0-K0.svg" width="20" height="20" align="middle" alt="C97-M73-Y0-K0"> <code>BLUE</code><br><img src="../COLORS/C90-M80-Y15-K95.svg" width="20" height="20" align="middle" alt="C90-M80-Y15-K95"> <code>NAVY-BLACK</code><br>VOLUNTEER<br><img src="../COLORS/C0-M27-Y100-K0.svg" width="20" height="20" align="middle" alt="C0-M27-Y100-K0"> <code>YELLOW</code><br><img src="../COLORS/C40-M50-Y90-K100.svg" width="20" height="20" align="middle" alt="C40-M50-Y90-K100"> <code>WARM-BLACK</code></td><td valign="top"><img src="../COLORS/C97-M73-Y0-K0.svg" width="20" height="20" align="middle" alt="C97-M73-Y0-K0"> <code>BLUE</code></td><td valign="top"><img src="../COLORS/C97-M73-Y0-K0.svg" width="20" height="20" align="middle" alt="C97-M73-Y0-K0"> <code>BLUE</code> top<br><img src="../COLORS/C0-M0-Y0-K0.svg" width="20" height="20" align="middle" alt="C0-M0-Y0-K0"> <code>WHITE</code> bottom</td></tr>
+<tr><th align="left">Unused</th><td valign="top"></td><td valign="top"><code>BLACK</code> <code>WHITE</code></td><td valign="top"><code>BLACK</code> <code>WHITE</code> (screen only)</td><td valign="top"><code>BLACK</code></td></tr>
+</table>
 
-The colors are in [BACKGROUNDS](../README.md#colors).
-
-## SIZES
-
-| | Finished size | Bleed | File size | Resolution | Grid | Dots |
-|---|---|---|---|---|---|---|
-| [CARDS](90x60mm%20%28CARDS%29) | 85.68 x 54.02 mm | 2.2 mm left and right, 3 mm top and bottom | 90 x 60 mm | 600 dpi | 2x | 0.51 mm, one every 3.39 mm |
-| [LANYARDS](930x20mm%20%28LANYARDS%29) | 930 x 20 mm | none | 930 x 20 mm | 300 dpi | 1x | 0.51 mm, one every 3.39 mm |
-| [POSTER](297x420mm%20%28POSTER%29) | 297 x 420 mm (A3) | none | 297 x 420 mm | 300 dpi | 4x | 2.03 mm, one every 13.55 mm |
-| [ROLL-UP](870x2270mm%20%28ROLL-UP%29) | 850 x 2000 mm | 10 mm left, right and top, 70 mm bottom | 870 x 2270 mm | 304.8 dpi | 15x | 7.5 mm, one every 50 mm |
-
-- **Grid** is the screen grid scaled up: at 2x a dot is 12 px and the spacing 80 px. The dot is always 6 to every 40.
-- The grid is centered on each piece, so opposite edges get the same margin.
-- The roll-up page with its bleed is 870 x 2080 mm. The background is taller, and the page crops it.
-- The cards, lanyards and roll-up printed for 2026 had slightly different dot spacing. These files are corrected to the exact ratio.
-
-## CARDS
-
-| Card | Background |
-|---|---|
-| ATTENDEE | `BLACK` |
-| CONTRIBUTOR | `BLUE` |
-| CURATOR | `WHITE` |
-| VOLUNTEER | `YELLOW` |
-
-## LANYARDS
-
-Every lanyard fades from its color into black.
-
-| Lanyard | From | Into |
-|---|---|---|
-| ATTENDEE, CONTRIBUTOR | `BLUE` | `NAVY-BLACK` |
-| VOLUNTEER | `YELLOW` | `WARM-BLACK` |
-
-Why not plain black? A fade into plain black goes muddy in the middle: grey on the blue, olive on the yellow. `NAVY-BLACK` is a cold black mixed from the blue's own inks, so the fade stays blue. `WARM-BLACK` is mixed from the yellow's, so it stays golden.
-
-`BLACK` and `WHITE` are here too, but no lanyard uses them.
-
-## POSTER
-
-`BLUE`, at 4x so the grid still shows from across a room. `BLACK` and `WHITE` are screen only (`.png`).
-
-## ROLL-UP
-
-`BLUE` on top, `WHITE` below. `BLACK` is here too, but the roll-up doesn't use it.
+Lanyards fade into a tinted black: plain black would turn the fade grey on blue and olive on yellow.
