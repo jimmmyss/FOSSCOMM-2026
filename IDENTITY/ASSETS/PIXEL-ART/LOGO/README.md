@@ -1,11 +1,11 @@
 # LOGO
 
-64 x 64 px. Source: [`LOGO.pdn`](LOGO.pdn).
+64 x 64 px. Source file [`LOGO.pdn`](LOGO.pdn).
 
 ## FILES
 
 <table>
-<tr><th>PNG</th><th>BACKGROUND</th><th>BACKGROUND-PADDING (125%)</th><th>SVG</th></tr>
+<tr><th><code>LOGO-*.png</code></th><th><code>LOGO-*-BACKGROUND.png</code></th><th><code>LOGO-*-BACKGROUND-PADDING.png</code> (125%)</th><th><code>LOGO-*.svg</code></th></tr>
 <tr><td valign="top" align="center"><img src="LOGO-ON-512.png" width="128" alt="LOGO-ON-512.png"><br><img src="LOGO-OFF-512.png" width="128" alt="LOGO-OFF-512.png"><br>64 x 64 px<br>256 x 256 px (400%)<br>512 x 512 px (800%)</td><td valign="top" align="center"><img src="LOGO-ON-512-BACKGROUND.png" width="128" alt="LOGO-ON-512-BACKGROUND.png"><br><img src="LOGO-OFF-512-BACKGROUND.png" width="128" alt="LOGO-OFF-512-BACKGROUND.png"><br>64 x 64 px<br>256 x 256 px (400%)<br>512 x 512 px (800%)</td><td valign="top" align="center"><img src="LOGO-ON-512-BACKGROUND-PADDING.png" width="160" alt="LOGO-ON-512-BACKGROUND-PADDING.png"><br><img src="LOGO-OFF-512-BACKGROUND-PADDING.png" width="160" alt="LOGO-OFF-512-BACKGROUND-PADDING.png"><br>80 x 80 px<br>320 x 320 px<br>640 x 640 px</td><td valign="top" align="center"><img src="LOGO-ON.svg" height="128" alt="LOGO-ON.svg"><br><img src="LOGO-OFF.svg" height="128" alt="LOGO-OFF.svg"><br>any size</td></tr>
 </table>
 

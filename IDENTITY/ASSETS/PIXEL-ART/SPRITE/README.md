@@ -4,30 +4,16 @@
 
 ## ANIMATIONS
 
-<p>
-<img src="ANGRY.svg" width="96" alt="ANGRY">
-<img src="ANGRY-FLASH.svg" width="96" alt="ANGRY-FLASH">
-<img src="BLINK.svg" width="96" alt="BLINK">
-<img src="DISSAGREE.svg" width="96" alt="DISSAGREE">
-<img src="DISSAPOINTED.svg" width="96" alt="DISSAPOINTED">
-<img src="DIZZY.svg" width="96" alt="DIZZY">
-<img src="DRIFT.svg" width="96" alt="DRIFT">
-<img src="DROWSY.svg" width="96" alt="DROWSY">
-<img src="FALLING.svg" width="96" alt="FALLING">
-<img src="HELD.svg" width="96" alt="HELD">
-<img src="IDLE.svg" width="96" alt="IDLE">
-<img src="JUMP.svg" width="96" alt="JUMP">
-<img src="SAD.svg" width="96" alt="SAD">
-<img src="SAD-OLD.svg" width="96" alt="SAD-OLD">
-<img src="SHOCKED.svg" width="96" alt="SHOCKED">
-<img src="SHOCKED-FLASH.svg" width="96" alt="SHOCKED-FLASH">
-<img src="SHY.svg" width="96" alt="SHY">
-<img src="SLEEP.svg" width="96" alt="SLEEP">
-<img src="SLEEP-STATIC.svg" width="96" alt="SLEEP-STATIC">
-<img src="TRIP.svg" width="96" alt="TRIP">
-<img src="WALK.svg" width="96" alt="WALK">
-<img src="WAVE.svg" width="96" alt="WAVE">
-</p>
+<table>
+<tr><th><code>ANGRY</code></th><th><code>ANGRY-FLASH</code></th><th><code>BLINK</code></th><th><code>DISSAGREE</code></th><th><code>DISSAPOINTED</code></th><th><code>DIZZY</code></th></tr>
+<tr><td valign="top" align="center"><img src="ANGRY.svg" width="96" alt="ANGRY"></td><td valign="top" align="center"><img src="ANGRY-FLASH.svg" width="96" alt="ANGRY-FLASH"></td><td valign="top" align="center"><img src="BLINK.svg" width="96" alt="BLINK"></td><td valign="top" align="center"><img src="DISSAGREE.svg" width="96" alt="DISSAGREE"></td><td valign="top" align="center"><img src="DISSAPOINTED.svg" width="96" alt="DISSAPOINTED"></td><td valign="top" align="center"><img src="DIZZY.svg" width="96" alt="DIZZY"></td></tr>
+<tr><th><code>DRIFT</code></th><th><code>DROWSY</code></th><th><code>FALLING</code></th><th><code>HELD</code></th><th><code>IDLE</code></th><th><code>JUMP</code></th></tr>
+<tr><td valign="top" align="center"><img src="DRIFT.svg" width="96" alt="DRIFT"></td><td valign="top" align="center"><img src="DROWSY.svg" width="96" alt="DROWSY"></td><td valign="top" align="center"><img src="FALLING.svg" width="96" alt="FALLING"></td><td valign="top" align="center"><img src="HELD.svg" width="96" alt="HELD"></td><td valign="top" align="center"><img src="IDLE.svg" width="96" alt="IDLE"></td><td valign="top" align="center"><img src="JUMP.svg" width="96" alt="JUMP"></td></tr>
+<tr><th><code>SAD</code></th><th><code>SAD-OLD</code></th><th><code>SHOCKED</code></th><th><code>SHOCKED-FLASH</code></th><th><code>SHY</code></th><th><code>SLEEP</code></th></tr>
+<tr><td valign="top" align="center"><img src="SAD.svg" width="96" alt="SAD"></td><td valign="top" align="center"><img src="SAD-OLD.svg" width="96" alt="SAD-OLD"></td><td valign="top" align="center"><img src="SHOCKED.svg" width="96" alt="SHOCKED"></td><td valign="top" align="center"><img src="SHOCKED-FLASH.svg" width="96" alt="SHOCKED-FLASH"></td><td valign="top" align="center"><img src="SHY.svg" width="96" alt="SHY"></td><td valign="top" align="center"><img src="SLEEP.svg" width="96" alt="SLEEP"></td></tr>
+<tr><th><code>SLEEP-STATIC</code></th><th><code>TRIP</code></th><th><code>WALK</code></th><th><code>WAVE</code></th></tr>
+<tr><td valign="top" align="center"><img src="SLEEP-STATIC.svg" width="96" alt="SLEEP-STATIC"></td><td valign="top" align="center"><img src="TRIP.svg" width="96" alt="TRIP"></td><td valign="top" align="center"><img src="WALK.svg" width="96" alt="WALK"></td><td valign="top" align="center"><img src="WAVE.svg" width="96" alt="WAVE"></td></tr>
+</table>
 
 ## COLORS
 

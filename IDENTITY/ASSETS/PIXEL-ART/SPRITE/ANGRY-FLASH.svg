@@ -1,9 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
 <title>FOSSCOMM 2026 mascot - ANGRY-FLASH</title>
 <defs><clipPath id="frame"><rect width="32" height="32"/></clipPath></defs>
-<rect x=".25" y=".25" width="47.5" height="47.5" rx="2" fill="none" stroke="#8B949E" stroke-opacity=".4" stroke-width=".5"/>
-<text x="24.0" y="43.5" text-anchor="middle" font-size="5.6" fill="#8B949E" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">ANGRY-FLASH</text>
-<g transform="translate(8 3)" clip-path="url(#frame)" shape-rendering="crispEdges">
+<g transform="translate(0 0)" clip-path="url(#frame)" shape-rendering="crispEdges">
 <g>
 <animateTransform attributeName="transform" type="translate" calcMode="discrete" repeatCount="indefinite" dur="480ms" values="0 0;-32 0;-64 0;-96 0" keyTimes="0;0.25;0.5;0.75"/>
 <path fill="#3C3C3C" d="M10 25h1v1h-1zM21 25h1v1h-1zM41 25h1v1h-1zM54 25h1v1h-1zM73 25h1v1h-1zM86 25h1v1h-1zM106 25h1v1h-1zM117 25h1v1h-1zM9 26h1v1h-1zM11 26h1v1h-1zM20 26h1v1h-1zM22 26h1v1h-1zM40 26h1v1h-1zM43 26h1v1h-1zM52 26h1v1h-1zM55 26h1v1h-1zM72 26h1v1h-1zM75 26h1v1h-1zM84 26h1v1h-1zM87 26h1v1h-1zM105 26h1v1h-1zM107 26h1v1h-1zM116 26h1v1h-1zM118 26h1v1h-1zM8 27h1v1h-1zM11 27h1v1h-1zM20 27h1v1h-1zM23 27h1v1h-1zM40 27h1v1h-1zM43 27h1v1h-1zM52 27h1v1h-1zM55 27h1v1h-1zM72 27h1v1h-1zM75 27h1v1h-1zM84 27h1v1h-1zM87 27h1v1h-1zM104 27h1v1h-1zM107 27h1v1h-1zM116 27h1v1h-1zM119 27h1v1h-1zM8 28h1v1h-1zM11 28h1v1h-1zM20 28h1v1h-1zM23 28h1v1h-1zM41 28h3v1h-3zM52 28h3v1h-3zM73 28h3v1h-3zM84 28h3v1h-3zM104 28h1v1h-1zM107 28h1v1h-1zM116 28h1v1h-1zM119 28h1v1h-1zM9 29h3v1h-3zM14 29h4v1h-4zM20 29h3v1h-3zM43 29h1v1h-1zM46 29h4v1h-4zM52 29h1v1h-1zM75 29h1v1h-1zM78 29h4v1h-4zM84 29h1v1h-1zM105 29h3v1h-3zM110 29h4v1h-4zM116 29h3v1h-3zM11 30h1v1h-1zM14 30h1v1h-1zM17 30h1v1h-1zM20 30h1v1h-1zM44 30h2v1h-2zM49 30h1v1h-1zM52 30h1v1h-1zM75 30h1v1h-1zM78 30h1v1h-1zM81 30h1v1h-1zM84 30h1v1h-1zM108 30h2v1h-2zM113 30h1v1h-1zM116 30h1v1h-1zM12 31h2v1h-2zM18 31h2v1h-2zM50 31h2v1h-2zM76 31h2v1h-2zM82 31h2v1h-2zM114 31h2v1h-2z"/>
