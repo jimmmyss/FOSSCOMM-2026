@@ -3,3 +3,4 @@ IDENTITY/SOCIAL/INSTAGRAM/NAMA.mp4 filter=lfs diff=lfs merge=lfs -text
 IDENTITY/SOCIAL/YOUTUBE/BRB.mov filter=lfs diff=lfs merge=lfs -text
 IDENTITY/SOCIAL/YOUTUBE/OVERLAY-1.mov filter=lfs diff=lfs merge=lfs -text
 IDENTITY/SOCIAL/YOUTUBE/OVERLAY-2.mov filter=lfs diff=lfs merge=lfs -text
+IDENTITY/SIGNAGE/ROLL-UP/ROLL-UP-CMYK.pdf filter=lfs diff=lfs merge=lfs -text
