@@ -2,18 +2,12 @@
 
 32 x 32 px.
 
-## SPRITE SHEET
-
-<img src="SPRITE-SHEET.png" alt="SPRITE-SHEET">
-
 ## ANIMATIONS
 
 <table>
-<tr><td align="center"><img src="ANGRY.svg" width="96" alt="ANGRY"><br><b>ANGRY</b></td><td align="center"><img src="ANGRY-FLASH.svg" width="96" alt="ANGRY-FLASH"><br><b>ANGRY-FLASH</b></td><td align="center"><img src="BLINK.svg" width="96" alt="BLINK"><br><b>BLINK</b></td><td align="center"><img src="DISSAGREE.svg" width="96" alt="DISSAGREE"><br><b>DISSAGREE</b></td><td align="center"><img src="DISSAPOINTED.svg" width="96" alt="DISSAPOINTED"><br><b>DISSAPOINTED</b></td></tr>
-<tr><td align="center"><img src="DIZZY.svg" width="96" alt="DIZZY"><br><b>DIZZY</b></td><td align="center"><img src="DRIFT.svg" width="96" alt="DRIFT"><br><b>DRIFT</b></td><td align="center"><img src="DROWSY.svg" width="96" alt="DROWSY"><br><b>DROWSY</b></td><td align="center"><img src="FALLING.svg" width="96" alt="FALLING"><br><b>FALLING</b></td><td align="center"><img src="HELD.svg" width="96" alt="HELD"><br><b>HELD</b></td></tr>
-<tr><td align="center"><img src="IDLE.svg" width="96" alt="IDLE"><br><b>IDLE</b></td><td align="center"><img src="JUMP.svg" width="96" alt="JUMP"><br><b>JUMP</b></td><td align="center"><img src="SAD.svg" width="96" alt="SAD"><br><b>SAD</b></td><td align="center"><img src="SAD-OLD.svg" width="96" alt="SAD-OLD"><br><b>SAD-OLD</b></td><td align="center"><img src="SHOCKED.svg" width="96" alt="SHOCKED"><br><b>SHOCKED</b></td></tr>
-<tr><td align="center"><img src="SHOCKED-FLASH.svg" width="96" alt="SHOCKED-FLASH"><br><b>SHOCKED-FLASH</b></td><td align="center"><img src="SHY.svg" width="96" alt="SHY"><br><b>SHY</b></td><td align="center"><img src="SLEEP.svg" width="96" alt="SLEEP"><br><b>SLEEP</b></td><td align="center"><img src="SLEEP-STATIC.svg" width="96" alt="SLEEP-STATIC"><br><b>SLEEP-STATIC</b></td><td align="center"><img src="TRIP.svg" width="96" alt="TRIP"><br><b>TRIP</b></td></tr>
-<tr><td align="center"><img src="WALK.svg" width="96" alt="WALK"><br><b>WALK</b></td><td align="center"><img src="WAVE.svg" width="96" alt="WAVE"><br><b>WAVE</b></td></tr>
+<tr><td align="center"><img src="ANGRY.svg" width="80" alt="ANGRY"><br><sub>ANGRY</sub></td><td align="center"><img src="ANGRY-FLASH.svg" width="80" alt="ANGRY-FLASH"><br><sub>ANGRY-FLASH</sub></td><td align="center"><img src="BLINK.svg" width="80" alt="BLINK"><br><sub>BLINK</sub></td><td align="center"><img src="DISSAGREE.svg" width="80" alt="DISSAGREE"><br><sub>DISSAGREE</sub></td><td align="center"><img src="DISSAPOINTED.svg" width="80" alt="DISSAPOINTED"><br><sub>DISSAPOINTED</sub></td><td align="center"><img src="DIZZY.svg" width="80" alt="DIZZY"><br><sub>DIZZY</sub></td><td align="center"><img src="DRIFT.svg" width="80" alt="DRIFT"><br><sub>DRIFT</sub></td><td align="center"><img src="DROWSY.svg" width="80" alt="DROWSY"><br><sub>DROWSY</sub></td></tr>
+<tr><td align="center"><img src="FALLING.svg" width="80" alt="FALLING"><br><sub>FALLING</sub></td><td align="center"><img src="HELD.svg" width="80" alt="HELD"><br><sub>HELD</sub></td><td align="center"><img src="IDLE.svg" width="80" alt="IDLE"><br><sub>IDLE</sub></td><td align="center"><img src="JUMP.svg" width="80" alt="JUMP"><br><sub>JUMP</sub></td><td align="center"><img src="SAD.svg" width="80" alt="SAD"><br><sub>SAD</sub></td><td align="center"><img src="SAD-OLD.svg" width="80" alt="SAD-OLD"><br><sub>SAD-OLD</sub></td><td align="center"><img src="SHOCKED.svg" width="80" alt="SHOCKED"><br><sub>SHOCKED</sub></td><td align="center"><img src="SHOCKED-FLASH.svg" width="80" alt="SHOCKED-FLASH"><br><sub>SHOCKED-FLASH</sub></td></tr>
+<tr><td align="center"><img src="SHY.svg" width="80" alt="SHY"><br><sub>SHY</sub></td><td align="center"><img src="SLEEP.svg" width="80" alt="SLEEP"><br><sub>SLEEP</sub></td><td align="center"><img src="SLEEP-STATIC.svg" width="80" alt="SLEEP-STATIC"><br><sub>SLEEP-STATIC</sub></td><td align="center"><img src="TRIP.svg" width="80" alt="TRIP"><br><sub>TRIP</sub></td><td align="center"><img src="WALK.svg" width="80" alt="WALK"><br><sub>WALK</sub></td><td align="center"><img src="WAVE.svg" width="80" alt="WAVE"><br><sub>WAVE</sub></td></tr>
 </table>
 
 ## COLORS
