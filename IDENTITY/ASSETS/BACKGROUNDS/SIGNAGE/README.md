@@ -2,7 +2,7 @@
 
 <table>
 <tr><th></th><th><a href="90x60mm%20%28CARDS%29"><code>CARDS</code></a></th><th><a href="930x20mm%20%28LANYARDS%29"><code>LANYARDS</code></a></th><th><a href="297x420mm%20%28POSTER%29"><code>POSTER</code></a></th><th><a href="870x2270mm%20%28ROLL-UP%29"><code>ROLL-UP</code></a></th></tr>
-<tr><th align="left">Size</th><td valign="top">85.68 x 54.02 mm</td><td valign="top">930 x 20 mm</td><td valign="top">297 x 420 mm</td><td valign="top">850 x 2000 mm</td></tr>
+<tr><th align="left">Size</th><td valign="top">85.6 x 54 mm</td><td valign="top">930 x 20 mm</td><td valign="top">297 x 420 mm</td><td valign="top">850 x 2000 mm</td></tr>
 <tr><th align="left">Bleed</th><td valign="top">2.2 mm sides<br>3 mm top and bottom</td><td valign="top">none</td><td valign="top">none</td><td valign="top">10 mm sides and top<br>70 mm bottom</td></tr>
 <tr><th align="left">Resolution</th><td valign="top">600 dpi</td><td valign="top">300 dpi</td><td valign="top">300 dpi</td><td valign="top">304.8 dpi</td></tr>
 <tr><th align="left">Dots</th><td valign="top">2x</td><td valign="top">1x</td><td valign="top">4x</td><td valign="top">15x</td></tr>
