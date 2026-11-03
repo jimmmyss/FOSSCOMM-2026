@@ -43,7 +43,9 @@ Each size is the same 64 x 64 drawing with every pixel turned into a solid squar
 
 | Part | Colors |
 |---|---|
-| F and C | fill `#F0F0F0` `#F8F8F8` `#FFFFFF`, shade `#D8D8D8` `#C0C0C0`, edge `#646464` |
-| Lit arc (`ON`) | fill `#FFEE87` `#FFDB35`, shade `#FECE01`, edge `#EE8101`, glow `#FFEE87` at 20%, 10% and 4% |
-| Unlit arc (`OFF`) | fill `#BEE7E9` `#F6FFFF`, shade `#99D0DE`, edge `#5A9D9D` |
-| Shadow | `#000000` at 39% and 20% |
+| F and C | fill <img src="../COLORS/F0F0F0.svg" width="16" height="16" alt="#F0F0F0"> `#F0F0F0` &nbsp; <img src="../COLORS/F8F8F8.svg" width="16" height="16" alt="#F8F8F8"> `#F8F8F8` &nbsp; <img src="../COLORS/FFFFFF.svg" width="16" height="16" alt="#FFFFFF"> `#FFFFFF`<br>shade <img src="../COLORS/D8D8D8.svg" width="16" height="16" alt="#D8D8D8"> `#D8D8D8` &nbsp; <img src="../COLORS/C0C0C0.svg" width="16" height="16" alt="#C0C0C0"> `#C0C0C0`<br>edge <img src="../COLORS/646464.svg" width="16" height="16" alt="#646464"> `#646464` |
+| Lit arc (`ON`) | fill <img src="../COLORS/FFEE87.svg" width="16" height="16" alt="#FFEE87"> `#FFEE87` &nbsp; <img src="../COLORS/FFDB35.svg" width="16" height="16" alt="#FFDB35"> `#FFDB35`<br>shade <img src="../COLORS/FECE01.svg" width="16" height="16" alt="#FECE01"> `#FECE01`<br>edge <img src="../COLORS/EE8101.svg" width="16" height="16" alt="#EE8101"> `#EE8101`<br>glow <img src="../COLORS/FFEE87-20.svg" width="16" height="16" alt="#FFEE87"> `#FFEE87` at 20% &nbsp; <img src="../COLORS/FFEE87-10.svg" width="16" height="16" alt="#FFEE87"> `#FFEE87` at 10% &nbsp; <img src="../COLORS/FFEE87-4.svg" width="16" height="16" alt="#FFEE87"> `#FFEE87` at 4% |
+| Unlit arc (`OFF`) | fill <img src="../COLORS/BEE7E9.svg" width="16" height="16" alt="#BEE7E9"> `#BEE7E9` &nbsp; <img src="../COLORS/F6FFFF.svg" width="16" height="16" alt="#F6FFFF"> `#F6FFFF`<br>shade <img src="../COLORS/99D0DE.svg" width="16" height="16" alt="#99D0DE"> `#99D0DE`<br>edge <img src="../COLORS/5A9D9D.svg" width="16" height="16" alt="#5A9D9D"> `#5A9D9D` |
+| Shadow | <img src="../COLORS/000000-39.svg" width="16" height="16" alt="#000000"> `#000000` at 39% &nbsp; <img src="../COLORS/000000-20.svg" width="16" height="16" alt="#000000"> `#000000` at 20% |
+
+The see-through colors are shown over a checkerboard.
