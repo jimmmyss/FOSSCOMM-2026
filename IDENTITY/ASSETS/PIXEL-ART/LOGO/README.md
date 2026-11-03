@@ -1,29 +1,21 @@
 # LOGO
 
-The FOSSCOMM 2026 logo, drawn in pixels: an F and a C on a 64 x 64 grid. The arc at the top right is a light. In `ON` it's lit, in `OFF` it isn't.
+64 x 64 px. Source: [`LOGO.pdn`](LOGO.pdn) (`ON` = layers 2, 4, 5. `OFF` = layers 2, 5, 9).
 
 | ON | OFF |
 |:-:|:-:|
-| <img src="LOGO-ON-512-BACKGROUND.png" width="256" alt="Logo, ON"> | <img src="LOGO-OFF-512-BACKGROUND.png" width="256" alt="Logo, OFF"> |
+| <img src="LOGO-ON-512-BACKGROUND.png" width="256" alt="ON"> | <img src="LOGO-OFF-512-BACKGROUND.png" width="256" alt="OFF"> |
 
 ## FILES
 
-Every file comes in `ON` and `OFF`, and in 3 sizes: `64`, `256` and `512`. Shown here at 512.
-
 | | ON | OFF |
 |---|:-:|:-:|
-| **Transparent**<br>`LOGO-ON-512.png` | <img src="LOGO-ON-512.png" width="128" alt="ON, transparent"> | <img src="LOGO-OFF-512.png" width="128" alt="OFF, transparent"> |
-| **On blue**<br>`LOGO-ON-512-BACKGROUND.png` | <img src="LOGO-ON-512-BACKGROUND.png" width="128" alt="ON, on blue"> | <img src="LOGO-OFF-512-BACKGROUND.png" width="128" alt="OFF, on blue"> |
-| **On blue, with padding**<br>`LOGO-ON-512-BACKGROUND-PADDING.png` | <img src="LOGO-ON-512-BACKGROUND-PADDING.png" width="160" alt="ON, on blue with padding"> | <img src="LOGO-OFF-512-BACKGROUND-PADDING.png" width="160" alt="OFF, on blue with padding"> |
-| **Vector**<br>`LOGO-ON.svg` | <img src="LOGO-ON.svg" height="128" alt="ON, vector"> | <img src="LOGO-OFF.svg" height="128" alt="OFF, vector"> |
-
-The logo is white, so the transparent files are made for dark grounds.
-
-**Source file:** [`LOGO.pdn`](LOGO.pdn) (Paint.NET). Every PNG is made from it: `ON` is Layer 2 + Layer 4 + Layer 5, `OFF` is Layer 2 + Layer 5 + Layer 9.
+| `LOGO-*-512.png` | <img src="LOGO-ON-512.png" width="128" alt="LOGO-ON-512.png"> | <img src="LOGO-OFF-512.png" width="128" alt="LOGO-OFF-512.png"> |
+| `LOGO-*-512-BACKGROUND.png` | <img src="LOGO-ON-512-BACKGROUND.png" width="128" alt="LOGO-ON-512-BACKGROUND.png"> | <img src="LOGO-OFF-512-BACKGROUND.png" width="128" alt="LOGO-OFF-512-BACKGROUND.png"> |
+| `LOGO-*-512-BACKGROUND-PADDING.png` | <img src="LOGO-ON-512-BACKGROUND-PADDING.png" width="160" alt="LOGO-ON-512-BACKGROUND-PADDING.png"> | <img src="LOGO-OFF-512-BACKGROUND-PADDING.png" width="160" alt="LOGO-OFF-512-BACKGROUND-PADDING.png"> |
+| `LOGO-*.svg` | <img src="LOGO-ON.svg" height="128" alt="LOGO-ON.svg"> | <img src="LOGO-OFF.svg" height="128" alt="LOGO-OFF.svg"> |
 
 ## SIZES
-
-Each size is the same 64 x 64 drawing with every pixel turned into a solid square, never smoothed, so every size is equally sharp.
 
 | Size | Scale | 1 logo pixel | File | With padding |
 |---|---|---|---|---|
@@ -33,19 +25,16 @@ Each size is the same 64 x 64 drawing with every pixel turned into a solid squar
 
 ## PADDING
 
-<img src="PADDING.svg" width="400" alt="8 px of blue on every side of the 64 x 64 logo">
+<img src="PADDING.svg" width="400" alt="PADDING">
 
-- 8 px of blue on every side of the 64 x 64 logo, so 12.5% of its width per side.
-- A padded file is 125% of the logo: 80, 320 or 640 px.
-- The blue is `#0033FF`, the same as the [backgrounds](../../BACKGROUNDS/README.md#colors).
+8 px per side at 64 (12.5%), so a padded file is 125%. Blue `#0033FF`.
 
 ## COLORS
 
-| Part | Colors |
-|---|---|
-| F and C | fill <img src="../COLORS/F0F0F0.svg" width="16" height="16" alt="#F0F0F0"> `#F0F0F0` &nbsp; <img src="../COLORS/F8F8F8.svg" width="16" height="16" alt="#F8F8F8"> `#F8F8F8` &nbsp; <img src="../COLORS/FFFFFF.svg" width="16" height="16" alt="#FFFFFF"> `#FFFFFF`<br>shade <img src="../COLORS/D8D8D8.svg" width="16" height="16" alt="#D8D8D8"> `#D8D8D8` &nbsp; <img src="../COLORS/C0C0C0.svg" width="16" height="16" alt="#C0C0C0"> `#C0C0C0`<br>edge <img src="../COLORS/646464.svg" width="16" height="16" alt="#646464"> `#646464` |
-| Lit arc (`ON`) | fill <img src="../COLORS/FFEE87.svg" width="16" height="16" alt="#FFEE87"> `#FFEE87` &nbsp; <img src="../COLORS/FFDB35.svg" width="16" height="16" alt="#FFDB35"> `#FFDB35`<br>shade <img src="../COLORS/FECE01.svg" width="16" height="16" alt="#FECE01"> `#FECE01`<br>edge <img src="../COLORS/EE8101.svg" width="16" height="16" alt="#EE8101"> `#EE8101`<br>glow <img src="../COLORS/FFEE87-20.svg" width="16" height="16" alt="#FFEE87"> `#FFEE87` at 20% &nbsp; <img src="../COLORS/FFEE87-10.svg" width="16" height="16" alt="#FFEE87"> `#FFEE87` at 10% &nbsp; <img src="../COLORS/FFEE87-4.svg" width="16" height="16" alt="#FFEE87"> `#FFEE87` at 4% |
-| Unlit arc (`OFF`) | fill <img src="../COLORS/BEE7E9.svg" width="16" height="16" alt="#BEE7E9"> `#BEE7E9` &nbsp; <img src="../COLORS/F6FFFF.svg" width="16" height="16" alt="#F6FFFF"> `#F6FFFF`<br>shade <img src="../COLORS/99D0DE.svg" width="16" height="16" alt="#99D0DE"> `#99D0DE`<br>edge <img src="../COLORS/5A9D9D.svg" width="16" height="16" alt="#5A9D9D"> `#5A9D9D` |
-| Shadow | <img src="../COLORS/000000-39.svg" width="16" height="16" alt="#000000"> `#000000` at 39% &nbsp; <img src="../COLORS/000000-20.svg" width="16" height="16" alt="#000000"> `#000000` at 20% |
-
-The see-through colors are shown over a checkerboard.
+| | F and C | Lit arc (`ON`) | Unlit arc (`OFF`) |
+|---|---|---|---|
+| **Fill** | <img src="../COLORS/F0F0F0.svg" width="32" height="32" align="middle" alt="#F0F0F0"> `#F0F0F0`<br><img src="../COLORS/F8F8F8.svg" width="32" height="32" align="middle" alt="#F8F8F8"> `#F8F8F8`<br><img src="../COLORS/FFFFFF.svg" width="32" height="32" align="middle" alt="#FFFFFF"> `#FFFFFF` | <img src="../COLORS/FFEE87.svg" width="32" height="32" align="middle" alt="#FFEE87"> `#FFEE87`<br><img src="../COLORS/FFDB35.svg" width="32" height="32" align="middle" alt="#FFDB35"> `#FFDB35` | <img src="../COLORS/BEE7E9.svg" width="32" height="32" align="middle" alt="#BEE7E9"> `#BEE7E9`<br><img src="../COLORS/F6FFFF.svg" width="32" height="32" align="middle" alt="#F6FFFF"> `#F6FFFF` |
+| **Shade** | <img src="../COLORS/D8D8D8.svg" width="32" height="32" align="middle" alt="#D8D8D8"> `#D8D8D8`<br><img src="../COLORS/C0C0C0.svg" width="32" height="32" align="middle" alt="#C0C0C0"> `#C0C0C0` | <img src="../COLORS/FECE01.svg" width="32" height="32" align="middle" alt="#FECE01"> `#FECE01` | <img src="../COLORS/99D0DE.svg" width="32" height="32" align="middle" alt="#99D0DE"> `#99D0DE` |
+| **Edge** | <img src="../COLORS/646464.svg" width="32" height="32" align="middle" alt="#646464"> `#646464` | <img src="../COLORS/EE8101.svg" width="32" height="32" align="middle" alt="#EE8101"> `#EE8101` | <img src="../COLORS/5A9D9D.svg" width="32" height="32" align="middle" alt="#5A9D9D"> `#5A9D9D` |
+| **Glow** |  | <img src="../COLORS/FFEE87-20.svg" width="32" height="32" align="middle" alt="#FFEE87"> `#FFEE87` 20%<br><img src="../COLORS/FFEE87-10.svg" width="32" height="32" align="middle" alt="#FFEE87"> `#FFEE87` 10%<br><img src="../COLORS/FFEE87-4.svg" width="32" height="32" align="middle" alt="#FFEE87"> `#FFEE87` 4% |  |
+| **Shadow** | <img src="../COLORS/000000-39.svg" width="32" height="32" align="middle" alt="#000000"> `#000000` 39%<br><img src="../COLORS/000000-20.svg" width="32" height="32" align="middle" alt="#000000"> `#000000` 20% |  | <img src="../COLORS/000000-39.svg" width="32" height="32" align="middle" alt="#000000"> `#000000` 39%<br><img src="../COLORS/000000-20.svg" width="32" height="32" align="middle" alt="#000000"> `#000000` 20% |

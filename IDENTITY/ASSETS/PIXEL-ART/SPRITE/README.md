@@ -1,57 +1,26 @@
 # SPRITE
 
-The mascot, a light bulb, drawn in pixels. Every animation is one file: its frames side by side, each 32 x 32 px, played left to right.
+32 x 32 px.
 
 ## SPRITE SHEET
 
-[`SPRITE-SHEET.png`](SPRITE-SHEET.png) has every animation in one file: one row each, in the order of the table below, frames from the left. 9 x 22 cells of 32 x 32 px, so 288 x 704 px. Empty cells are transparent.
-
-<img src="SPRITE-SHEET.png" alt="Every animation, one row each">
+<img src="SPRITE-SHEET.png" alt="SPRITE-SHEET">
 
 ## ANIMATIONS
 
-Shown at 2x. The 18 marked "yes" are the exact files the site uses.
-
-| Row | Animation | Frames | On the site |
-|---|---|---|---|
-| 1 | **ANGRY**<br>4 frames | <img src="ANGRY.svg" height="64" alt="ANGRY"> | no, ANGRY-FLASH is used |
-| 2 | **ANGRY-FLASH**<br>4 frames | <img src="ANGRY-FLASH.svg" height="64" alt="ANGRY-FLASH"> | yes |
-| 3 | **BLINK**<br>4 frames | <img src="BLINK.svg" height="64" alt="BLINK"> | yes |
-| 4 | **DISSAGREE**<br>9 frames | <img src="DISSAGREE.svg" height="64" alt="DISSAGREE"> | yes |
-| 5 | **DISSAPOINTED**<br>1 frame | <img src="DISSAPOINTED.svg" height="64" alt="DISSAPOINTED"> | yes |
-| 6 | **DIZZY**<br>1 frame | <img src="DIZZY.svg" height="64" alt="DIZZY"> | yes |
-| 7 | **DRIFT**<br>1 frame | <img src="DRIFT.svg" height="64" alt="DRIFT"> | yes |
-| 8 | **DROWSY**<br>5 frames | <img src="DROWSY.svg" height="64" alt="DROWSY"> | yes |
-| 9 | **FALLING**<br>2 frames | <img src="FALLING.svg" height="64" alt="FALLING"> | yes |
-| 10 | **HELD**<br>2 frames | <img src="HELD.svg" height="64" alt="HELD"> | yes |
-| 11 | **IDLE**<br>1 frame | <img src="IDLE.svg" height="64" alt="IDLE"> | yes |
-| 12 | **JUMP**<br>1 frame | <img src="JUMP.svg" height="64" alt="JUMP"> | yes |
-| 13 | **SAD**<br>2 frames | <img src="SAD.svg" height="64" alt="SAD"> | yes |
-| 14 | **SAD-OLD**<br>1 frame | <img src="SAD-OLD.svg" height="64" alt="SAD-OLD"> | no, an older SAD |
-| 15 | **SHOCKED**<br>4 frames | <img src="SHOCKED.svg" height="64" alt="SHOCKED"> | yes |
-| 16 | **SHOCKED-FLASH**<br>4 frames | <img src="SHOCKED-FLASH.svg" height="64" alt="SHOCKED-FLASH"> | no, SHOCKED is used |
-| 17 | **SHY**<br>2 frames | <img src="SHY.svg" height="64" alt="SHY"> | yes |
-| 18 | **SLEEP**<br>2 frames | <img src="SLEEP.svg" height="64" alt="SLEEP"> | yes |
-| 19 | **SLEEP-STATIC**<br>1 frame | <img src="SLEEP-STATIC.svg" height="64" alt="SLEEP-STATIC"> | no, it heads the repo README |
-| 20 | **TRIP**<br>3 frames | <img src="TRIP.svg" height="64" alt="TRIP"> | yes |
-| 21 | **WALK**<br>8 frames | <img src="WALK.svg" height="64" alt="WALK"> | yes |
-| 22 | **WAVE**<br>4 frames | <img src="WAVE.svg" height="64" alt="WAVE"> | yes |
-
-## FILES
-
-- `<NAME>.png` is the animation: 32 px tall, one 32 x 32 frame after another.
-- `<NAME>.svg` has the same pixels as a vector, sharp at any size.
-- `SPRITE-SHEET.png` and `.svg` hold every animation in one sheet.
-- `COLOR-MAP.png` and `.svg` are the palette below.
+<table>
+<tr><td align="center"><img src="ANGRY.svg" width="96" alt="ANGRY"><br><b>ANGRY</b></td><td align="center"><img src="ANGRY-FLASH.svg" width="96" alt="ANGRY-FLASH"><br><b>ANGRY-FLASH</b></td><td align="center"><img src="BLINK.svg" width="96" alt="BLINK"><br><b>BLINK</b></td><td align="center"><img src="DISSAGREE.svg" width="96" alt="DISSAGREE"><br><b>DISSAGREE</b></td><td align="center"><img src="DISSAPOINTED.svg" width="96" alt="DISSAPOINTED"><br><b>DISSAPOINTED</b></td></tr>
+<tr><td align="center"><img src="DIZZY.svg" width="96" alt="DIZZY"><br><b>DIZZY</b></td><td align="center"><img src="DRIFT.svg" width="96" alt="DRIFT"><br><b>DRIFT</b></td><td align="center"><img src="DROWSY.svg" width="96" alt="DROWSY"><br><b>DROWSY</b></td><td align="center"><img src="FALLING.svg" width="96" alt="FALLING"><br><b>FALLING</b></td><td align="center"><img src="HELD.svg" width="96" alt="HELD"><br><b>HELD</b></td></tr>
+<tr><td align="center"><img src="IDLE.svg" width="96" alt="IDLE"><br><b>IDLE</b></td><td align="center"><img src="JUMP.svg" width="96" alt="JUMP"><br><b>JUMP</b></td><td align="center"><img src="SAD.svg" width="96" alt="SAD"><br><b>SAD</b></td><td align="center"><img src="SAD-OLD.svg" width="96" alt="SAD-OLD"><br><b>SAD-OLD</b></td><td align="center"><img src="SHOCKED.svg" width="96" alt="SHOCKED"><br><b>SHOCKED</b></td></tr>
+<tr><td align="center"><img src="SHOCKED-FLASH.svg" width="96" alt="SHOCKED-FLASH"><br><b>SHOCKED-FLASH</b></td><td align="center"><img src="SHY.svg" width="96" alt="SHY"><br><b>SHY</b></td><td align="center"><img src="SLEEP.svg" width="96" alt="SLEEP"><br><b>SLEEP</b></td><td align="center"><img src="SLEEP-STATIC.svg" width="96" alt="SLEEP-STATIC"><br><b>SLEEP-STATIC</b></td><td align="center"><img src="TRIP.svg" width="96" alt="TRIP"><br><b>TRIP</b></td></tr>
+<tr><td align="center"><img src="WALK.svg" width="96" alt="WALK"><br><b>WALK</b></td><td align="center"><img src="WAVE.svg" width="96" alt="WAVE"><br><b>WAVE</b></td></tr>
+</table>
 
 ## COLORS
 
-<img src="COLOR-MAP.svg" width="231" alt="The color map: lit bulb, unlit bulb, base and face">
+<img src="COLOR-MAP.svg" width="231" alt="COLOR-MAP">
 
-| Part | Colors |
-|---|---|
-| Lit bulb | <img src="../COLORS/FFEE87.svg" width="16" height="16" alt="#FFEE87"> `#FFEE87` &nbsp; <img src="../COLORS/FECE01.svg" width="16" height="16" alt="#FECE01"> `#FECE01` &nbsp; <img src="../COLORS/EE8101.svg" width="16" height="16" alt="#EE8101"> `#EE8101` &nbsp; <img src="../COLORS/FFDB35.svg" width="16" height="16" alt="#FFDB35"> `#FFDB35`<br><img src="../COLORS/FEDC51.svg" width="16" height="16" alt="#FEDC51"> `#FEDC51` &nbsp; <img src="../COLORS/FCDD58.svg" width="16" height="16" alt="#FCDD58"> `#FCDD58` &nbsp; <img src="../COLORS/F7BF03.svg" width="16" height="16" alt="#F7BF03"> `#F7BF03` &nbsp; <img src="../COLORS/F7BF01.svg" width="16" height="16" alt="#F7BF01"> `#F7BF01` |
-| Unlit bulb<br><sub>ANGRY-FLASH, SHOCKED-FLASH</sub> | <img src="../COLORS/BEE7E9.svg" width="16" height="16" alt="#BEE7E9"> `#BEE7E9` &nbsp; <img src="../COLORS/99D0DE.svg" width="16" height="16" alt="#99D0DE"> `#99D0DE` &nbsp; <img src="../COLORS/5A9D9D.svg" width="16" height="16" alt="#5A9D9D"> `#5A9D9D` &nbsp; <img src="../COLORS/9BBFC1.svg" width="16" height="16" alt="#9BBFC1"> `#9BBFC1` |
-| Base | <img src="../COLORS/3C3C3C.svg" width="16" height="16" alt="#3C3C3C"> `#3C3C3C` &nbsp; <img src="../COLORS/646464.svg" width="16" height="16" alt="#646464"> `#646464` &nbsp; <img src="../COLORS/A0A0A0.svg" width="16" height="16" alt="#A0A0A0"> `#A0A0A0` &nbsp; <img src="../COLORS/969696.svg" width="16" height="16" alt="#969696"> `#969696`<br><img src="../COLORS/AAAAAA.svg" width="16" height="16" alt="#AAAAAA"> `#AAAAAA` &nbsp; <img src="../COLORS/8C8C8C.svg" width="16" height="16" alt="#8C8C8C"> `#8C8C8C` &nbsp; <img src="../COLORS/B4B4B4.svg" width="16" height="16" alt="#B4B4B4"> `#B4B4B4` &nbsp; <img src="../COLORS/828282.svg" width="16" height="16" alt="#828282"> `#828282`<br><img src="../COLORS/787878.svg" width="16" height="16" alt="#787878"> `#787878` &nbsp; <img src="../COLORS/BEBEBE.svg" width="16" height="16" alt="#BEBEBE"> `#BEBEBE` &nbsp; <img src="../COLORS/6E6E6E.svg" width="16" height="16" alt="#6E6E6E"> `#6E6E6E` |
-| Face | eyes <img src="../COLORS/1E1E1E.svg" width="16" height="16" alt="#1E1E1E"> `#1E1E1E`<br>shine <img src="../COLORS/FEFEF1.svg" width="16" height="16" alt="#FEFEF1"> `#FEFEF1` &nbsp; <img src="../COLORS/F6FFFF.svg" width="16" height="16" alt="#F6FFFF"> `#F6FFFF`<br>cheeks <img src="../COLORS/FFBAE3.svg" width="16" height="16" alt="#FFBAE3"> `#FFBAE3` &nbsp; <img src="../COLORS/FF6BC3.svg" width="16" height="16" alt="#FF6BC3"> `#FF6BC3` |
-| Extras<br><sub>not in the color map</sub> | angry <img src="../COLORS/FF4673.svg" width="16" height="16" alt="#FF4673"> `#FF4673` <sub>ANGRY, ANGRY-FLASH</sub><br>tears <img src="../COLORS/64E7E9.svg" width="16" height="16" alt="#64E7E9"> `#64E7E9` <sub>DISSAPOINTED, SAD-OLD, TRIP</sub><br>blush <img src="../COLORS/FFA5DB.svg" width="16" height="16" alt="#FFA5DB"> `#FFA5DB` <sub>SHY</sub> |
+<table>
+<tr><th>Lit bulb</th><th>Unlit bulb</th><th>Base</th><th>Face</th><th>Extras</th></tr>
+<tr><td valign="top"><img src="../COLORS/FFEE87.svg" width="32" height="32" align="middle" alt="#FFEE87"> <code>#FFEE87</code><br><img src="../COLORS/FECE01.svg" width="32" height="32" align="middle" alt="#FECE01"> <code>#FECE01</code><br><img src="../COLORS/EE8101.svg" width="32" height="32" align="middle" alt="#EE8101"> <code>#EE8101</code><br><img src="../COLORS/FFDB35.svg" width="32" height="32" align="middle" alt="#FFDB35"> <code>#FFDB35</code><br><img src="../COLORS/FEDC51.svg" width="32" height="32" align="middle" alt="#FEDC51"> <code>#FEDC51</code><br><img src="../COLORS/FCDD58.svg" width="32" height="32" align="middle" alt="#FCDD58"> <code>#FCDD58</code><br><img src="../COLORS/F7BF03.svg" width="32" height="32" align="middle" alt="#F7BF03"> <code>#F7BF03</code><br><img src="../COLORS/F7BF01.svg" width="32" height="32" align="middle" alt="#F7BF01"> <code>#F7BF01</code></td><td valign="top"><img src="../COLORS/BEE7E9.svg" width="32" height="32" align="middle" alt="#BEE7E9"> <code>#BEE7E9</code><br><img src="../COLORS/99D0DE.svg" width="32" height="32" align="middle" alt="#99D0DE"> <code>#99D0DE</code><br><img src="../COLORS/5A9D9D.svg" width="32" height="32" align="middle" alt="#5A9D9D"> <code>#5A9D9D</code><br><img src="../COLORS/9BBFC1.svg" width="32" height="32" align="middle" alt="#9BBFC1"> <code>#9BBFC1</code></td><td valign="top"><img src="../COLORS/3C3C3C.svg" width="32" height="32" align="middle" alt="#3C3C3C"> <code>#3C3C3C</code><br><img src="../COLORS/646464.svg" width="32" height="32" align="middle" alt="#646464"> <code>#646464</code><br><img src="../COLORS/6E6E6E.svg" width="32" height="32" align="middle" alt="#6E6E6E"> <code>#6E6E6E</code><br><img src="../COLORS/787878.svg" width="32" height="32" align="middle" alt="#787878"> <code>#787878</code><br><img src="../COLORS/828282.svg" width="32" height="32" align="middle" alt="#828282"> <code>#828282</code><br><img src="../COLORS/8C8C8C.svg" width="32" height="32" align="middle" alt="#8C8C8C"> <code>#8C8C8C</code><br><img src="../COLORS/969696.svg" width="32" height="32" align="middle" alt="#969696"> <code>#969696</code><br><img src="../COLORS/A0A0A0.svg" width="32" height="32" align="middle" alt="#A0A0A0"> <code>#A0A0A0</code><br><img src="../COLORS/AAAAAA.svg" width="32" height="32" align="middle" alt="#AAAAAA"> <code>#AAAAAA</code><br><img src="../COLORS/B4B4B4.svg" width="32" height="32" align="middle" alt="#B4B4B4"> <code>#B4B4B4</code><br><img src="../COLORS/BEBEBE.svg" width="32" height="32" align="middle" alt="#BEBEBE"> <code>#BEBEBE</code></td><td valign="top"><img src="../COLORS/1E1E1E.svg" width="32" height="32" align="middle" alt="#1E1E1E"> <code>#1E1E1E</code> <sub>eyes</sub><br><img src="../COLORS/FEFEF1.svg" width="32" height="32" align="middle" alt="#FEFEF1"> <code>#FEFEF1</code> <sub>shine</sub><br><img src="../COLORS/F6FFFF.svg" width="32" height="32" align="middle" alt="#F6FFFF"> <code>#F6FFFF</code> <sub>shine</sub><br><img src="../COLORS/FFBAE3.svg" width="32" height="32" align="middle" alt="#FFBAE3"> <code>#FFBAE3</code> <sub>cheeks</sub><br><img src="../COLORS/FF6BC3.svg" width="32" height="32" align="middle" alt="#FF6BC3"> <code>#FF6BC3</code> <sub>cheeks</sub></td><td valign="top"><img src="../COLORS/FF4673.svg" width="32" height="32" align="middle" alt="#FF4673"> <code>#FF4673</code> <sub>angry</sub><br><img src="../COLORS/64E7E9.svg" width="32" height="32" align="middle" alt="#64E7E9"> <code>#64E7E9</code> <sub>tears</sub><br><img src="../COLORS/FFA5DB.svg" width="32" height="32" align="middle" alt="#FFA5DB"> <code>#FFA5DB</code> <sub>blush</sub></td></tr>
+</table>
