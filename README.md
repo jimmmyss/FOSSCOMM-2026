@@ -11,11 +11,34 @@ Bad time to be here, everyone is slacking.
 - [Thanasis Giannoulakis](https://github.com/Thanoulakis)
 
 ### Suporters:
-- Patrick Fitzgerald
 - Angelos Chouvardas
 - Efstathios Iosifidis
+- Patrick Fitzgerald
 
 ### Volunteers:
+- Anastasios Michailidis
+- Anastasis Koliopoulos
+- Andrei Rusu
+- Chrysoula Lada
+- Despoina Asvestopoulou
+- Dimitrios Tzouvelekis
+- Dimitris Vogiatzis
+- Foivi Fetalidou
+- Giorgos Nakas
+- Giorgos Sotiropoulos
+- Konstantina Kalliga
+- Margarita Kalorriza
+- Marilia Lymperi
+- Maritina Kalorriza
+- Myrto Anastasiadi Alexiou
+- Panagiotis Evaggelou
+- Panagiotis Papatheodorou
+- Penny Mitsiou
+- Petros Stratis
+- Revekka Asvestopoulou
+- Valeria Diaconu
+- Xristos Ntounis
+- Zoi Ertsou
 
 ## Sponsors:
 ### Diamonds:
