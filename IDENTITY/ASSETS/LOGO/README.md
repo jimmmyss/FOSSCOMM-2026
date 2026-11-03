@@ -19,6 +19,8 @@ Every file comes in `ON` and `OFF`, and in 3 sizes: `64`, `256` and `512`. Shown
 
 The logo is white, so the transparent files are made for dark grounds.
 
+**Source file:** [`LOGO.pdn`](LOGO.pdn) (Paint.NET). Every PNG is made from it: `ON` is Layer 2 + Layer 4 + Layer 5, `OFF` is Layer 2 + Layer 5 + Layer 9.
+
 ## SIZES
 
 Each size is the same 64 x 64 drawing with every pixel turned into a solid square, never smoothed, so every size is equally sharp.
