@@ -48,8 +48,8 @@ Bad time to be here, everyone is slacking.
 <h3>Diamonds</h3>
 <p>
 <a href="https://typesense.org/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/DIAMONDS/TYPSESENSE.svg"><img src="IDENTITY/SITE/SPONSORS/DIAMONDS/TYPESENSE-BLACK.svg" height="26" alt="Typesense"></picture></a>&nbsp;&nbsp;&nbsp;
-<a href="https://www.libre.space/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/DIAMONDS/LIBRESPACE-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/DIAMONDS/LIBRESPACE.svg" height="29" alt="Libre Space Foundation"></picture></a>&nbsp;&nbsp;&nbsp;
-<a href="https://www.e-food.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/DIAMONDS/EFOOD-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/DIAMONDS/EFOOD.svg" height="32" alt="efood"></picture></a>
+<a href="https://www.libre.space/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/DIAMONDS/LIBRESPACE-WHITE-COLOR.svg"><img src="IDENTITY/SITE/SPONSORS/DIAMONDS/LIBRESPACE.svg" height="29" alt="Libre Space Foundation"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://www.e-food.gr/"><img src="IDENTITY/SITE/SPONSORS/DIAMONDS/EFOOD.svg" height="32" alt="efood"></a>
 </p>
 
 <h3>Goldies</h3>
@@ -60,12 +60,12 @@ Bad time to be here, everyone is slacking.
 
 <h3>Silvers</h3>
 <p>
-<a href="https://www.skroutz.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/SILVERS/SKROUTZ-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/SILVERS/SKROUTZ.svg" height="29" alt="Skroutz"></picture></a>
+<a href="https://www.skroutz.gr/"><img src="IDENTITY/SITE/SPONSORS/SILVERS/SKROUTZ.svg" height="29" alt="Skroutz"></a>
 </p>
 
 <h3>Bronzies</h3>
 <p>
-<a href="https://www.onlyoffice.com/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/BRONZIES/ONLYOFFICE-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/ONLYOFFICE.svg" height="27" alt="ONLYOFFICE"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://www.onlyoffice.com/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/BRONZIES/ONLYOFFICE-WHITE-COLOR.svg"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/ONLYOFFICE.svg" height="27" alt="ONLYOFFICE"></picture></a>&nbsp;&nbsp;&nbsp;
 <a href="https://www.epignosishq.com/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/BRONZIES/TALENTLMS-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/TALENTLMS.svg" height="30" alt="Epignosis"></picture></a>&nbsp;&nbsp;&nbsp;
 <a href="https://www.ferryhopper.com/el/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/BRONZIES/FERRYHOPPER-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/FERRYHOPPER.svg" height="29" alt="Ferryhopper"></picture></a>&nbsp;&nbsp;&nbsp;
 <a href="https://www.epe.org.gr/?mtm_campaign=fc26"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/BRONZIES/EPE-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/BRONZIES/EPE.svg" height="48" alt="Hellenic Informatics Union"></picture></a>&nbsp;&nbsp;&nbsp;
@@ -95,8 +95,8 @@ Bad time to be here, everyone is slacking.
 
 <h3>Powered by</h3>
 <p>
-<a href="https://geekos.org/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/POWERED-BY/GEEKO-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/POWERED-BY/GEEKO.svg" height="48" alt="Geeko Foundation"></picture></a>&nbsp;&nbsp;&nbsp;
-<a href="https://gfoss.eu/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/POWERED-BY/GFOSS-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/POWERED-BY/GFOSS.svg" height="48" alt="GFOSS"></picture></a>&nbsp;&nbsp;&nbsp;
+<a href="https://geekos.org/"><img src="IDENTITY/SITE/SPONSORS/POWERED-BY/GEEKO.svg" height="48" alt="Geeko Foundation"></a>&nbsp;&nbsp;&nbsp;
+<a href="https://gfoss.eu/"><img src="IDENTITY/SITE/SPONSORS/POWERED-BY/GFOSS.svg" height="48" alt="GFOSS"></a>&nbsp;&nbsp;&nbsp;
 <a href="https://ice.uniwa.gr/"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jimmmyss/FOSSCOMM-2026/main/IDENTITY/SITE/SPONSORS/POWERED-BY/UNIWA-ICE-WHITE.svg"><img src="IDENTITY/SITE/SPONSORS/POWERED-BY/UNIWA-ICE.svg" height="48" alt="UniWA, Department of Informatics and Computer Engineering"></picture></a>
 </p>
 
