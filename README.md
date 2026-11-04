@@ -2,12 +2,12 @@
 
 Bad time to be here, everyone is slacking.
 
-## Made by those humans (A-Z):
+## Made by those humans (A-Z, except curators):
 
 ### Curators:
 - [Dimitris Athanasopoulos](https://github.com/jimmmyss)
-- [Nikolas Pissas](https://github.com/NikolasPissas)
 - [Nikos Tsekos](https://github.com/nikostsekos)
+- [Nikolas Pissas](https://github.com/NikolasPissas)
 - [Thanasis Giannoulakis](https://github.com/Thanoulakis)
 
 ### Suporters:
