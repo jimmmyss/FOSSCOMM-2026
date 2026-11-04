@@ -12,6 +12,6 @@
 ## VIDEOS
 
 <table>
-<tr><th><a href="CALL-FOR-VOLUNTEERS.mp4"><code>CALL-FOR-VOLUNTEERS</code></a></th><th><a href="JJK.mp4"><code>JJK</code></a></th><th><a href="NAMA.mp4"><code>NAMA</code></a></th><th><a href="REGISTRATION-IS-NOW-OPEN.mp4"><code>REGISTRATION-IS-NOW-OPEN</code></a></th></tr>
-<tr><td valign="top" align="center">1080 x 1920 px<br>17.6 s<br><a href="STORY.psd"><code>STORY.psd</code></a></td><td valign="top" align="center">1920 x 1080 px<br>32.1 s</td><td valign="top" align="center">1080 x 1920 px<br>23.8 s</td><td valign="top" align="center">1080 x 1920 px<br>25.2 s<br><a href="STORY.psd"><code>STORY.psd</code></a></td></tr>
+<tr><th><a href="CALL-FOR-VOLUNTEERS.mp4"><code>CALL-FOR-VOLUNTEERS</code></a></th><th><a href="HUSTLE-HOUSE.mp4"><code>HUSTLE-HOUSE</code></a></th><th><a href="JJK.mp4"><code>JJK</code></a></th><th><a href="NAMA.mp4"><code>NAMA</code></a></th><th><a href="REGISTRATION-IS-NOW-OPEN.mp4"><code>REGISTRATION-IS-NOW-OPEN</code></a></th></tr>
+<tr><td valign="top" align="center">1080 x 1920 px<br>17.6 s<br><a href="STORY.psd"><code>STORY.psd</code></a></td><td valign="top" align="center">1080 x 1920 px<br>18.1 s</td><td valign="top" align="center">1920 x 1080 px<br>32.1 s</td><td valign="top" align="center">1080 x 1920 px<br>23.8 s</td><td valign="top" align="center">1080 x 1920 px<br>25.2 s<br><a href="STORY.psd"><code>STORY.psd</code></a></td></tr>
 </table>
