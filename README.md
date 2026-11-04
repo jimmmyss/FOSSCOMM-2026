@@ -2,7 +2,7 @@
 
 Bad time to be here, everyone is slacking.
 
-## Made by those humans (A-Z, except curators):
+## Made by those humans:
 
 ### Curators:
 - [Dimitris Athanasopoulos](https://github.com/jimmmyss)
