@@ -1,0 +1,6 @@
+# IDENTITY
+
+<table>
+<tr><th><a href="ASSETS"><code>ASSETS</code></a></th><th><a href="SIGNAGE"><code>SIGNAGE</code></a></th><th><a href="SITE"><code>SITE</code></a></th><th><a href="SOCIAL"><code>SOCIAL</code></a></th><th><a href="SPONSOR-BROCHURE"><code>SPONSOR-BROCHURE</code></a></th></tr>
+<tr><td valign="top" align="center"><img src="ASSETS/PIXEL-ART/LOGO/LOGO-ON-512-BACKGROUND.png" width="96" alt="ASSETS"><br>The backgrounds, pixel art, globe and QR codes.</td><td valign="top" align="center"><img src="SIGNAGE/CARDS/ATTENDEE-FRONT.png" width="150" alt="SIGNAGE"><br>Everything printed, cards, lanyards, poster, roll-up, stickers and T-shirt.</td><td valign="top" align="center"><img src="SITE/SPEAKERS/DANIEL-STENBERG.png" width="86" alt="SITE"><br>What the site shows, speakers, communities, sponsors and announcements.</td><td valign="top" align="center"><img src="SOCIAL/INSTAGRAM/BANNER-1.png" width="72" alt="SOCIAL"> <img src="SOCIAL/LINKEDIN/CALL-FOR-VOLUNTEERS.png" width="184" alt="SOCIAL"><br>The posts, banners and videos for Instagram, LinkedIn and YouTube.</td><td valign="top" align="center"><img src="SPONSOR-BROCHURE/LOGOS/JETBRAINS.png" width="120" alt="SPONSOR-BROCHURE"><br><img src="SPONSOR-BROCHURE/LOGOS/REDHAT.png" width="120" alt="SPONSOR-BROCHURE"><br>The sponsor brochure, its pages, its PDF and the logos in it.</td></tr>
+</table>
