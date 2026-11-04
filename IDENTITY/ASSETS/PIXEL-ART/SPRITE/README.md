@@ -17,9 +17,19 @@ Source file [`FLAG.pdn`](FLAG.pdn).
 <tr><td valign="top" align="center"><img src="SHY.svg" width="96" alt="SHY"><br>32 x 32 px<br>2 frames<br>250 ms each</td><td valign="top" align="center"><img src="SLEEP.svg" width="96" alt="SLEEP"><br>32 x 32 px<br>2 frames<br>1000 ms each</td><td valign="top" align="center"><img src="SLEEP-STATIC.svg" width="96" alt="SLEEP-STATIC"><br>32 x 32 px<br>1 frame</td><td valign="top" align="center"><img src="TRIP.svg" width="96" alt="TRIP"><br>32 x 32 px<br>3 frames<br>150, 150, 600 ms</td><td valign="top" align="center"><img src="WALK.svg" width="96" alt="WALK"><br>32 x 32 px<br>8 frames<br>100 ms each</td><td valign="top" align="center"><img src="WAVE.svg" width="96" alt="WAVE"><br>32 x 32 px<br>4 frames<br>150 ms each</td></tr>
 </table>
 
+## SHEET
+
+<table>
+<tr><th><a href="SPRITE-SHEET.png"><code>SPRITE-SHEET.png</code></a></th></tr>
+<tr><td valign="top" align="center"><img src="SPRITE-SHEET.png" width="288" alt="SPRITE-SHEET"><br>288 x 704 px</td></tr>
+</table>
+
 ## COLORS
 
-<img src="COLOR-MAP.svg" width="231" alt="COLOR-MAP">
+<table>
+<tr><th><code>COLOR-MAP</code></th></tr>
+<tr><td valign="top" align="center"><img src="COLOR-MAP.svg" width="231" alt="COLOR-MAP"><br>77 x 71 px<br><a href="COLOR-MAP.svg"><code>.svg</code></a> <a href="COLOR-MAP.png"><code>.png</code></a></td></tr>
+</table>
 
 <table>
 <tr><th>Lit bulb</th><th>Unlit bulb</th><th>Base</th><th>Face</th><th>Extras</th><th>Flag</th><th>HTB cube on white</th><th>HTB cube on blue</th></tr>
