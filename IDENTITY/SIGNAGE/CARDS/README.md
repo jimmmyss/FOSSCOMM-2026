@@ -2,9 +2,9 @@
 
 <table>
 <tr><th><code>ATTENDEE-FRONT</code></th><th><code>CONTRIBUTOR-FRONT</code></th><th><code>VOLUNTEER-FRONT</code></th><th><code>CURATOR-FRONT</code></th></tr>
-<tr><td valign="top" align="center"><img src="ATTENDEE-FRONT.png" width="250" alt="ATTENDEE-FRONT"><br>2126 x 1417 px</td><td valign="top" align="center"><img src="CONTRIBUTOR-FRONT.png" width="250" alt="CONTRIBUTOR-FRONT"><br>2126 x 1417 px</td><td valign="top" align="center"><img src="VOLUNTEER-FRONT.png" width="250" alt="VOLUNTEER-FRONT"><br>2126 x 1417 px</td><td valign="top" align="center"><img src="CURATOR-FRONT.png" width="250" alt="CURATOR-FRONT"><br>2126 x 1417 px</td></tr>
+<tr><td valign="top" align="center"><img src="ATTENDEE-FRONT.png" width="220" alt="ATTENDEE-FRONT"><br>2126 x 1417 px</td><td valign="top" align="center"><img src="CONTRIBUTOR-FRONT.png" width="220" alt="CONTRIBUTOR-FRONT"><br>2126 x 1417 px</td><td valign="top" align="center"><img src="VOLUNTEER-FRONT.png" width="220" alt="VOLUNTEER-FRONT"><br>2126 x 1417 px</td><td valign="top" align="center"><img src="CURATOR-FRONT.png" width="220" alt="CURATOR-FRONT"><br>2126 x 1417 px</td></tr>
 <tr><th><code>ATTENDEE-BACK</code></th><th><code>CONTRIBUTOR-BACK</code></th><th><code>VOLUNTEER-BACK</code></th><th><code>CURATOR-BACK</code></th></tr>
-<tr><td valign="top" align="center"><img src="ATTENDEE-BACK.png" width="250" alt="ATTENDEE-BACK"><br>2126 x 1417 px</td><td valign="top" align="center"><img src="CONTRIBUTOR-BACK.png" width="250" alt="CONTRIBUTOR-BACK"><br>2126 x 1417 px</td><td valign="top" align="center"><img src="VOLUNTEER-BACK.png" width="250" alt="VOLUNTEER-BACK"><br>2126 x 1417 px</td><td valign="top" align="center"><img src="CURATOR-BACK.png" width="250" alt="CURATOR-BACK"><br>2126 x 1417 px</td></tr>
+<tr><td valign="top" align="center"><img src="ATTENDEE-BACK.png" width="220" alt="ATTENDEE-BACK"><br>2126 x 1417 px</td><td valign="top" align="center"><img src="CONTRIBUTOR-BACK.png" width="220" alt="CONTRIBUTOR-BACK"><br>2126 x 1417 px</td><td valign="top" align="center"><img src="VOLUNTEER-BACK.png" width="220" alt="VOLUNTEER-BACK"><br>2126 x 1417 px</td><td valign="top" align="center"><img src="CURATOR-BACK.png" width="220" alt="CURATOR-BACK"><br>2126 x 1417 px</td></tr>
 </table>
 
 ## PRINT
