@@ -2,7 +2,7 @@
 
 <table>
 <tr><th><code>POSTER</code></th></tr>
-<tr><td valign="top" align="center"><img src="POSTER.png" width="360" alt="POSTER"><br>3508 x 4961 px</td></tr>
+<tr><td valign="top" align="center"><img src="POSTER.png" width="360" alt="POSTER"><br>3508 x 4961 px<br><a href="POSTER.png"><code>.png</code></a> <a href="POSTER.psd"><code>.psd</code></a><br><a href="POSTER-CMYK.pdf"><code>-CMYK.pdf</code></a> <a href="POSTER-CMYK.psd"><code>-CMYK.psd</code></a></td></tr>
 </table>
 
 ## PRINT
