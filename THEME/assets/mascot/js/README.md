@@ -1,0 +1,10 @@
+# js
+
+<table>
+<tr><th width="25%" nowrap><a href="admin.js"><code>admin.js</code></a></th><th width="25%" nowrap><a href="animator.js"><code>animator.js</code></a></th><th width="25%" nowrap><a href="boot.js"><code>boot.js</code></a></th><th width="25%" nowrap><a href="config.js"><code>config.js</code></a></th></tr>
+<tr><td valign="top" align="center">The dashboard's Mascot page, cutting sheets into frames and live previews.</td><td valign="top" align="center">Which frame of a clip to show at a given time.</td><td valign="top" align="center">Starts the mascot on the site.</td><td valign="top" align="center">Reads the mascot's settings from WordPress, even half-saved.</td></tr>
+<tr><th width="25%" nowrap><a href="input.js"><code>input.js</code></a></th><th width="25%" nowrap><a href="machine.js"><code>machine.js</code></a></th><th width="25%" nowrap><a href="main.js"><code>main.js</code></a></th><th width="25%" nowrap><a href="particles.js"><code>particles.js</code></a></th></tr>
+<tr><td valign="top" align="center">Turns pointer and keyboard into what the physics reads.</td><td valign="top" align="center">The state machine, which animation plays and what replaces it.</td><td valign="top" align="center">The mascot, assembled from the other modules.</td><td valign="top" align="center">Stars, z's and dust attached to an animation.</td></tr>
+<tr><th width="25%" nowrap><a href="physics.js"><code>physics.js</code></a></th><th width="25%" nowrap><a href="sections.js"><code>sections.js</code></a></th><th width="25%" nowrap><a href="sheet.js"><code>sheet.js</code></a></th><th width="25%" nowrap><a href="view.js"><code>view.js</code></a></th></tr>
+<tr><td valign="top" align="center">One body, four walls and a fixed timestep.</td><td valign="top" align="center">A one-off animation when a section scrolls in.</td><td valign="top" align="center">Loads a sprite sheet and builds a playable clip.</td><td valign="top" align="center">Everything that touches the page.</td></tr>
+</table>
