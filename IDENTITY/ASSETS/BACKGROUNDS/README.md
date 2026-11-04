@@ -7,7 +7,7 @@
 
 ## DOTS
 
-<img src="GRID.svg" alt="GRID">
+<img src="GRID.svg" alt="GRID"><br><a href="GRID.svg"><code>.svg</code></a>
 
 <table>
 <tr><th></th><th><code>SOCIAL</code></th><th><code>LANYARDS</code></th><th><code>CARDS</code></th><th><code>POSTER</code></th><th><code>ROLL-UP</code></th></tr>
