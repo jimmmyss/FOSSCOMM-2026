@@ -1,0 +1,17 @@
+# 930x20mm (LANYARDS)
+
+<table>
+<tr><th><code>BLACK</code></th></tr>
+<tr><td valign="top" align="center"><img src="BLACK.png" width="980" alt="BLACK"><br>10984 x 236 px</td></tr>
+<tr><th><code>WHITE</code></th></tr>
+<tr><td valign="top" align="center"><img src="WHITE.png" width="980" alt="WHITE"><br>10984 x 236 px</td></tr>
+<tr><th><code>YELLOW</code></th></tr>
+<tr><td valign="top" align="center"><img src="YELLOW.png" width="980" alt="YELLOW"><br>10984 x 236 px</td></tr>
+</table>
+
+## PRINT
+
+<table>
+<tr><th>Size</th><th>Bleed</th><th>Resolution</th><th>Dots</th><th>RGB<br><code>.png</code></th><th>CMYK<br><code>-CMYK.tif</code><br>Coated FOGRA39</th></tr>
+<tr><td valign="top">930 x 20 mm</td><td valign="top">none</td><td valign="top">300 dpi</td><td valign="top">1x</td><td valign="top"><img src="../../COLORS/0A0A0A.svg" width="32" height="32" align="middle" alt="#0A0A0A"><img src="../../COLORS/3F3F3E.svg" width="32" height="32" align="middle" alt="#3F3F3E"> <code>BLACK</code><br><img src="../../COLORS/FAFAF7.svg" width="32" height="32" align="middle" alt="#FAFAF7"><img src="../../COLORS/E2E2DF.svg" width="32" height="32" align="middle" alt="#E2E2DF"> <code>WHITE</code><br><img src="../../COLORS/F7BF03.svg" width="32" height="32" align="middle" alt="#F7BF03"><img src="../../COLORS/FFDB35.svg" width="32" height="32" align="middle" alt="#FFDB35"> <code>YELLOW</code></td><td valign="top"><img src="../../COLORS/C0-M0-Y0-K97.svg" width="32" height="32" align="middle" alt="C0-M0-Y0-K97"><img src="../../COLORS/C0-M0-Y0-K85.svg" width="32" height="32" align="middle" alt="C0-M0-Y0-K85"> <code>BLACK</code><br><img src="../../COLORS/C97-M73-Y0-K0.svg" width="32" height="32" align="middle" alt="C97-M73-Y0-K0"><img src="../../COLORS/C76-M57-Y0-K0.svg" width="32" height="32" align="middle" alt="C76-M57-Y0-K0"> <code>BLUE</code> ATTENDEE, CONTRIBUTOR<br><img src="../../COLORS/C90-M80-Y15-K95.svg" width="32" height="32" align="middle" alt="C90-M80-Y15-K95"><img src="../../COLORS/C66-M58-Y11-K69.svg" width="32" height="32" align="middle" alt="C66-M58-Y11-K69"> <code>NAVY-BLACK</code> BLUE fades into it<br><img src="../../COLORS/C0-M0-Y0-K0.svg" width="32" height="32" align="middle" alt="C0-M0-Y0-K0"><img src="../../COLORS/C0-M0-Y0-K15.svg" width="32" height="32" align="middle" alt="C0-M0-Y0-K15"> <code>WHITE</code><br><img src="../../COLORS/C0-M27-Y100-K0.svg" width="32" height="32" align="middle" alt="C0-M27-Y100-K0"><img src="../../COLORS/C0-M12-Y84-K0.svg" width="32" height="32" align="middle" alt="C0-M12-Y84-K0"> <code>YELLOW</code> VOLUNTEER<br><img src="../../COLORS/C40-M50-Y90-K100.svg" width="32" height="32" align="middle" alt="C40-M50-Y90-K100"><img src="../../COLORS/C34-M43-Y77-K86.svg" width="32" height="32" align="middle" alt="C34-M43-Y77-K86"> <code>WARM-BLACK</code> YELLOW fades into it</td></tr>
+</table>

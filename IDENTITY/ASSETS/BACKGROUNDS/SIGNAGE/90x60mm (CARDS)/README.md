@@ -1,0 +1,13 @@
+# 90x60mm (CARDS)
+
+<table>
+<tr><th><code>BLACK</code></th><th><code>BLUE</code></th><th><code>WHITE</code></th><th><code>YELLOW</code></th></tr>
+<tr><td valign="top" align="center"><img src="BLACK.png" width="220" alt="BLACK"><br>2126 x 1417 px</td><td valign="top" align="center"><img src="BLUE.png" width="220" alt="BLUE"><br>2126 x 1417 px</td><td valign="top" align="center"><img src="WHITE.png" width="220" alt="WHITE"><br>2126 x 1417 px</td><td valign="top" align="center"><img src="YELLOW.png" width="220" alt="YELLOW"><br>2126 x 1417 px</td></tr>
+</table>
+
+## PRINT
+
+<table>
+<tr><th>Size</th><th>Bleed</th><th>Resolution</th><th>Dots</th><th>RGB<br><code>.png</code></th><th>CMYK<br><code>-CMYK.tif</code><br>Coated FOGRA39</th></tr>
+<tr><td valign="top">85.6 x 54 mm</td><td valign="top">2.2 mm sides<br>3 mm top and bottom</td><td valign="top">600 dpi</td><td valign="top">2x</td><td valign="top"><img src="../../COLORS/0A0A0A.svg" width="32" height="32" align="middle" alt="#0A0A0A"><img src="../../COLORS/3F3F3E.svg" width="32" height="32" align="middle" alt="#3F3F3E"> <code>BLACK</code><br><img src="../../COLORS/0033FF.svg" width="32" height="32" align="middle" alt="#0033FF"><img src="../../COLORS/3860FF.svg" width="32" height="32" align="middle" alt="#3860FF"> <code>BLUE</code><br><img src="../../COLORS/FAFAF7.svg" width="32" height="32" align="middle" alt="#FAFAF7"><img src="../../COLORS/E2E2DF.svg" width="32" height="32" align="middle" alt="#E2E2DF"> <code>WHITE</code><br><img src="../../COLORS/F7BF03.svg" width="32" height="32" align="middle" alt="#F7BF03"><img src="../../COLORS/FFDB35.svg" width="32" height="32" align="middle" alt="#FFDB35"> <code>YELLOW</code></td><td valign="top"><img src="../../COLORS/C0-M0-Y0-K97.svg" width="32" height="32" align="middle" alt="C0-M0-Y0-K97"><img src="../../COLORS/C0-M0-Y0-K70.svg" width="32" height="32" align="middle" alt="C0-M0-Y0-K70"> <code>BLACK</code> ATTENDEE<br><img src="../../COLORS/C97-M73-Y0-K0.svg" width="32" height="32" align="middle" alt="C97-M73-Y0-K0"><img src="../../COLORS/C76-M57-Y0-K0.svg" width="32" height="32" align="middle" alt="C76-M57-Y0-K0"> <code>BLUE</code> CONTRIBUTOR<br><img src="../../COLORS/C0-M0-Y0-K0.svg" width="32" height="32" align="middle" alt="C0-M0-Y0-K0"><img src="../../COLORS/C0-M0-Y0-K22.svg" width="32" height="32" align="middle" alt="C0-M0-Y0-K22"> <code>WHITE</code> CURATOR<br><img src="../../COLORS/C0-M27-Y100-K0.svg" width="32" height="32" align="middle" alt="C0-M27-Y100-K0"><img src="../../COLORS/C0-M14-Y50-K0.svg" width="32" height="32" align="middle" alt="C0-M14-Y50-K0"> <code>YELLOW</code> VOLUNTEER</td></tr>
+</table>
