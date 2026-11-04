@@ -1,8 +1,10 @@
 # 870x2270mm (ROLL-UP)
 
 <table>
-<tr><th><code>BLACK</code></th><th><code>BLUE</code></th><th><code>WHITE</code></th></tr>
+<tr><th><a href="BLACK.png"><code>BLACK</code></a></th><th><a href="BLUE.png"><code>BLUE</code></a></th><th><a href="WHITE.png"><code>WHITE</code></a></th></tr>
 <tr><td valign="top" align="center"><img src="BLACK.png" width="200" alt="BLACK"><br>10440 x 27240 px</td><td valign="top" align="center"><img src="BLUE.png" width="200" alt="BLUE"><br>10440 x 27240 px</td><td valign="top" align="center"><img src="WHITE.png" width="200" alt="WHITE"><br>10440 x 27240 px</td></tr>
+<tr><th><a href="BLACK-CMYK.tif"><code>BLACK-CMYK</code></a></th><th><a href="BLUE-CMYK.tif"><code>BLUE-CMYK</code></a></th><th><a href="WHITE-CMYK.tif"><code>WHITE-CMYK</code></a></th></tr>
+<tr><td valign="top" align="center"><img src="../../COLORS/C0-M0-Y0-K97.svg" width="32" height="32" align="middle" alt="C0-M0-Y0-K97"><img src="../../COLORS/C0-M0-Y0-K85.svg" width="32" height="32" align="middle" alt="C0-M0-Y0-K85"><br>10440 x 27240 px</td><td valign="top" align="center"><img src="../../COLORS/C97-M73-Y0-K0.svg" width="32" height="32" align="middle" alt="C97-M73-Y0-K0"><img src="../../COLORS/C76-M57-Y0-K0.svg" width="32" height="32" align="middle" alt="C76-M57-Y0-K0"><br>10440 x 27240 px</td><td valign="top" align="center"><img src="../../COLORS/C0-M0-Y0-K0.svg" width="32" height="32" align="middle" alt="C0-M0-Y0-K0"><img src="../../COLORS/C0-M0-Y0-K15.svg" width="32" height="32" align="middle" alt="C0-M0-Y0-K15"><br>10440 x 27240 px</td></tr>
 </table>
 
 ## PRINT

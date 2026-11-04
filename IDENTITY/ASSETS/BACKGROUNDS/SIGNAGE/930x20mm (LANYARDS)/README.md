@@ -1,12 +1,14 @@
 # 930x20mm (LANYARDS)
 
 <table>
-<tr><th><code>BLACK</code></th></tr>
-<tr><td valign="top" align="center"><img src="BLACK.png" width="980" alt="BLACK"><br>10984 x 236 px</td></tr>
-<tr><th><code>WHITE</code></th></tr>
-<tr><td valign="top" align="center"><img src="WHITE.png" width="980" alt="WHITE"><br>10984 x 236 px</td></tr>
-<tr><th><code>YELLOW</code></th></tr>
-<tr><td valign="top" align="center"><img src="YELLOW.png" width="980" alt="YELLOW"><br>10984 x 236 px</td></tr>
+<tr><th colspan="6"><a href="BLACK.png"><code>BLACK</code></a></th></tr>
+<tr><td colspan="6" valign="top" align="center"><img src="BLACK.png" width="980" alt="BLACK"><br>10984 x 236 px</td></tr>
+<tr><th colspan="6"><a href="WHITE.png"><code>WHITE</code></a></th></tr>
+<tr><td colspan="6" valign="top" align="center"><img src="WHITE.png" width="980" alt="WHITE"><br>10984 x 236 px</td></tr>
+<tr><th colspan="6"><a href="YELLOW.png"><code>YELLOW</code></a></th></tr>
+<tr><td colspan="6" valign="top" align="center"><img src="YELLOW.png" width="980" alt="YELLOW"><br>10984 x 236 px</td></tr>
+<tr><th><a href="BLACK-CMYK.tif"><code>BLACK-CMYK</code></a></th><th><a href="BLUE-CMYK.tif"><code>BLUE-CMYK</code></a></th><th><a href="NAVY-BLACK-CMYK.tif"><code>NAVY-BLACK-CMYK</code></a></th><th><a href="WHITE-CMYK.tif"><code>WHITE-CMYK</code></a></th><th><a href="YELLOW-CMYK.tif"><code>YELLOW-CMYK</code></a></th><th><a href="WARM-BLACK-CMYK.tif"><code>WARM-BLACK-CMYK</code></a></th></tr>
+<tr><td valign="top" align="center"><img src="../../COLORS/C0-M0-Y0-K97.svg" width="32" height="32" align="middle" alt="C0-M0-Y0-K97"><img src="../../COLORS/C0-M0-Y0-K85.svg" width="32" height="32" align="middle" alt="C0-M0-Y0-K85"><br>10984 x 236 px</td><td valign="top" align="center"><img src="../../COLORS/C97-M73-Y0-K0.svg" width="32" height="32" align="middle" alt="C97-M73-Y0-K0"><img src="../../COLORS/C76-M57-Y0-K0.svg" width="32" height="32" align="middle" alt="C76-M57-Y0-K0"><br>10984 x 236 px</td><td valign="top" align="center"><img src="../../COLORS/C90-M80-Y15-K95.svg" width="32" height="32" align="middle" alt="C90-M80-Y15-K95"><img src="../../COLORS/C66-M58-Y11-K69.svg" width="32" height="32" align="middle" alt="C66-M58-Y11-K69"><br>10984 x 236 px</td><td valign="top" align="center"><img src="../../COLORS/C0-M0-Y0-K0.svg" width="32" height="32" align="middle" alt="C0-M0-Y0-K0"><img src="../../COLORS/C0-M0-Y0-K15.svg" width="32" height="32" align="middle" alt="C0-M0-Y0-K15"><br>10984 x 236 px</td><td valign="top" align="center"><img src="../../COLORS/C0-M27-Y100-K0.svg" width="32" height="32" align="middle" alt="C0-M27-Y100-K0"><img src="../../COLORS/C0-M12-Y84-K0.svg" width="32" height="32" align="middle" alt="C0-M12-Y84-K0"><br>10984 x 236 px</td><td valign="top" align="center"><img src="../../COLORS/C40-M50-Y90-K100.svg" width="32" height="32" align="middle" alt="C40-M50-Y90-K100"><img src="../../COLORS/C34-M43-Y77-K86.svg" width="32" height="32" align="middle" alt="C34-M43-Y77-K86"><br>10984 x 236 px</td></tr>
 </table>
 
 ## PRINT
