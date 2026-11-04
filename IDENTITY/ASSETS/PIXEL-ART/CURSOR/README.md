@@ -2,7 +2,7 @@
 
 <table>
 <tr><th><code>CURSOR-POINTING</code></th><th><code>CURSOR-POINTING_HIGHLIGHT</code></th><th><code>CURSOR-OPEN</code></th><th><code>CURSOR-CLOSED</code></th></tr>
-<tr><td valign="top" align="center"><img src="CURSOR-POINTING.svg" width="64" alt="CURSOR-POINTING"><br>16 x 18 px<br>Default</td><td valign="top" align="center"><img src="CURSOR-POINTING_HIGHLIGHT.svg" width="64" alt="CURSOR-POINTING_HIGHLIGHT"><br>16 x 18 px<br>Links and buttons</td><td valign="top" align="center"><img src="CURSOR-OPEN.svg" width="64" alt="CURSOR-OPEN"><br>16 x 18 px<br>Grab</td><td valign="top" align="center"><img src="CURSOR-CLOSED.svg" width="64" alt="CURSOR-CLOSED"><br>16 x 18 px<br>Grabbing</td></tr>
+<tr><td valign="top" align="center"><img src="CURSOR-POINTING.svg" width="64" alt="CURSOR-POINTING"><br>16 x 18 px<br>Default<br><a href="CURSOR-POINTING.svg"><code>.svg</code></a> <a href="CURSOR-POINTING.png"><code>.png</code></a></td><td valign="top" align="center"><img src="CURSOR-POINTING_HIGHLIGHT.svg" width="64" alt="CURSOR-POINTING_HIGHLIGHT"><br>16 x 18 px<br>Links and buttons<br><a href="CURSOR-POINTING_HIGHLIGHT.svg"><code>.svg</code></a> <a href="CURSOR-POINTING_HIGHLIGHT.png"><code>.png</code></a></td><td valign="top" align="center"><img src="CURSOR-OPEN.svg" width="64" alt="CURSOR-OPEN"><br>16 x 18 px<br>Grab<br><a href="CURSOR-OPEN.svg"><code>.svg</code></a> <a href="CURSOR-OPEN.png"><code>.png</code></a></td><td valign="top" align="center"><img src="CURSOR-CLOSED.svg" width="64" alt="CURSOR-CLOSED"><br>16 x 18 px<br>Grabbing<br><a href="CURSOR-CLOSED.svg"><code>.svg</code></a> <a href="CURSOR-CLOSED.png"><code>.png</code></a></td></tr>
 </table>
 
 ## COLORS

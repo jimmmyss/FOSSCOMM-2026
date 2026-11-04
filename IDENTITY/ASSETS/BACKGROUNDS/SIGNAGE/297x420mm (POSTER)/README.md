@@ -2,9 +2,9 @@
 
 <table>
 <tr><th><a href="BLACK.png"><code>BLACK</code></a></th><th><a href="BLUE.png"><code>BLUE</code></a></th><th><a href="WHITE.png"><code>WHITE</code></a></th></tr>
-<tr><td valign="top" align="center"><img src="BLACK.png" width="300" alt="BLACK"><br>3508 x 4961 px</td><td valign="top" align="center"><img src="BLUE.png" width="300" alt="BLUE"><br>3508 x 4961 px</td><td valign="top" align="center"><img src="WHITE.png" width="300" alt="WHITE"><br>3508 x 4961 px</td></tr>
+<tr><td valign="top" align="center"><img src="BLACK.png" width="300" alt="BLACK"><br>3508 x 4961 px<br><a href="BLACK.png"><code>.png</code></a></td><td valign="top" align="center"><img src="BLUE.png" width="300" alt="BLUE"><br>3508 x 4961 px<br><a href="BLUE.png"><code>.png</code></a></td><td valign="top" align="center"><img src="WHITE.png" width="300" alt="WHITE"><br>3508 x 4961 px<br><a href="WHITE.png"><code>.png</code></a></td></tr>
 <tr><th colspan="3"><a href="BLUE-CMYK.tif"><code>BLUE-CMYK</code></a></th></tr>
-<tr><td colspan="3" valign="top" align="center"><img src="../../COLORS/C97-M73-Y0-K0.svg" width="32" height="32" align="middle" alt="C97-M73-Y0-K0"><img src="../../COLORS/C76-M57-Y0-K0.svg" width="32" height="32" align="middle" alt="C76-M57-Y0-K0"><br>3508 x 4961 px</td></tr>
+<tr><td colspan="3" valign="top" align="center"><img src="../../COLORS/C97-M73-Y0-K0.svg" width="32" height="32" align="middle" alt="C97-M73-Y0-K0"><img src="../../COLORS/C76-M57-Y0-K0.svg" width="32" height="32" align="middle" alt="C76-M57-Y0-K0"><br>3508 x 4961 px<br><a href="BLUE-CMYK.tif"><code>.tif</code></a></td></tr>
 </table>
 
 ## PRINT
