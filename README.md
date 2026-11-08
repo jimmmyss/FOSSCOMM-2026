@@ -36,11 +36,11 @@ Bad time to be here, everyone is slacking.
 - Panagiotis Evangelou
 - Panagiotis Papatheodorou
 - Penny Mitsiou
-- Petros Stratis
+- [Petros Stratis](https://www.linkedin.com/in/petros-stratis-a080b935/)
 - Revekka Asvestopoulou
 - Valeria Diaconu
 - Xristos Ntounis
-- Zoi Ertsou
+- [Zoi Ertsou](https://www.linkedin.com/in/zoe-ertsou-877772382/)
 
 ## Sponsors:
 
