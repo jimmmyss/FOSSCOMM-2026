@@ -2,7 +2,7 @@
 
 <table>
 <tr><th><code>SPONSOR-BROCHURE</code></th><th><a href="LOGOS"><code>LOGOS</code></a></th></tr>
-<tr><td valign="top" align="center">7 pages<br>508 x 285.8 mm<br><a href="SPONSOR-BROCHURE.pdf"><code>.pdf</code></a></td><td valign="top" align="center"><img src="LOGOS/COLLABORA.png" width="120" alt="COLLABORA"> <img src="LOGOS/FEDORA.png" width="91" alt="FEDORA"><br><img src="LOGOS/SKROUTZ.png" width="93" alt="SKROUTZ"> <img src="LOGOS/ENARTIA.png" width="102" alt="ENARTIA"><br><img src="LOGOS/HTC.png" width="80" alt="HTC"> <img src="LOGOS/ONLYOFFICE.png" width="51" alt="ONLYOFFICE"><br>17 logos</td></tr>
+<tr><td valign="top" align="center">7 pages<br>508 x 285.8 mm<br><a href="SPONSOR-BROCHURE.pdf"><code>.pdf</code></a></td><td valign="top" align="center"><a href="LOGOS"><img src="LOGOS/COLLABORA.png" width="120" alt="COLLABORA"></a> <a href="LOGOS"><img src="LOGOS/FEDORA.png" width="91" alt="FEDORA"></a><br><a href="LOGOS"><img src="LOGOS/SKROUTZ.png" width="93" alt="SKROUTZ"></a> <a href="LOGOS"><img src="LOGOS/ENARTIA.png" width="102" alt="ENARTIA"></a><br><a href="LOGOS"><img src="LOGOS/HTC.png" width="80" alt="HTC"></a> <a href="LOGOS"><img src="LOGOS/ONLYOFFICE.png" width="51" alt="ONLYOFFICE"></a><br>17 logos</td></tr>
 </table>
 
 ## PAGES
